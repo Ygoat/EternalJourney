@@ -5,6 +5,8 @@ using Godot;
 #if DEBUG
 using System.Reflection;
 using Chickensoft.GoDotTest;
+using Godot.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 #endif
 
 // This entry-point file is responsible for determining if we should run tests.
@@ -12,7 +14,9 @@ using Chickensoft.GoDotTest;
 // If you want to edit your game's main entry-point, please see Game.tscn and
 // Game.cs instead.
 
-public partial class Main : Node2D
+
+
+public partial class Main : Node2D, IServicesConfigurator
 {
 #if DEBUG
     public TestEnvironment Environment = default!;
@@ -33,6 +37,16 @@ public partial class Main : Node2D
 
         // If we don't need to run tests, we can just switch to the game scene.
         CallDeferred("RunScene");
+    }
+
+    /// <summary>
+    /// サービス設定
+    /// </summary>
+    /// <param name="services"></param>
+    public void ConfigureServices(IServiceCollection services)
+    {
+        services.AddGodotServices();
+        services.AddSingleton<TestService>();
     }
 
 #if DEBUG
