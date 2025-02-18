@@ -4,8 +4,8 @@ using Godot;
 
 public class TestService
 {
-    public void Hey()
+    public void Hey(string word)
     {
-        GD.Print("HelloService");
+        GD.Print(word);
     }
 }
