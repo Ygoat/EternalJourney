@@ -18,7 +18,7 @@ public partial class Game : Control, IProvide<string>
 
     // サービスの注入
     [Inject]
-    private readonly TestService TestServie;
+    private readonly TestService TestServie = null!;
 
     public override void _Ready()
       => TestButton = GetNode<Button>("%TestButton");

@@ -1,3 +1,5 @@
+namespace EternalJourney;
+
 using System;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
@@ -15,7 +17,7 @@ public partial class DependTestNode : Node
     public string MyDependency => this.DependOn<string>();
 
     [Inject]
-    private readonly TestService TestService;
+    private readonly TestService TestService = null!;
 
     // 依存関係が解決された後に呼ばれるメソッド
     public void OnResolved()
