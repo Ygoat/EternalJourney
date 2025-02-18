@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
 
 namespace Godot.DependencyInjection.Services.Logger;
 
@@ -9,12 +10,13 @@ namespace Godot.DependencyInjection.Services.Logger;
 public class DebugLoggerProvider : ILoggerProvider
 {
     /// <inheritdoc />
-    public ILogger CreateLogger(string name)
+    public ILogger CreateLogger(string categoryName)
     {
-        return new GodotLogger(name);
+        return new GodotLogger(categoryName);
     }
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

@@ -34,7 +34,7 @@ internal readonly struct MemberMetadata : IMemberMetadata
         return $@"
             {{
                 ""type"": ""{_serviceType.FullName}"",
-                ""isRequired"": {_isRequired.ToString().ToLower()}
+                ""isRequired"": {_isRequired.ToString().ToLowerInvariant()}
             }}";
     }
 

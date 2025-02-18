@@ -62,7 +62,7 @@ namespace Godot.DependencyInjection.Services.Input
         public void AddJoyMapping(string mapping, bool updateExisting = false);
 
         /// <inheritdoc cref="Godot.Input.RemoveJoyMapping"/>
-        public void RemoveJoyMapping(string guid);
+        public void RemoveJoyMapping(string identifier);
 
         /// <inheritdoc cref="Godot.Input.IsJoyKnown"/>
         public bool IsJoyKnown(int device);

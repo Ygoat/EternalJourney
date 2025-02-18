@@ -30,7 +30,7 @@ internal readonly struct MethodParameterMetadata : IMethodParameterMetadata
         return $@"
                     {{
                         ""type"": ""{_parameterType.FullName}"",
-                        ""isRequired"": {_isRequired.ToString().ToLower()}
+                        ""isRequired"": {_isRequired.ToString().ToLowerInvariant()}
                     }}";
     }
     public string DebugDisplay()
