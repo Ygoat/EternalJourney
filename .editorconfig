@@ -459,3 +459,14 @@ dotnet_diagnostic.RCS1161.severity = none
 dotnet_diagnostic.RCS1165.severity = none
 # Allow keyword-based names so that parameter names like `@event` can be used.
 dotnet_diagnostic.CA1716.severity = none
+
+# 型の明示に関しての警告を表示しない
+dotnet_diagnostic.IDE0007.severity = none
+dotnet_diagnostic.IDE0008.severity = none
+
+# コレクション式の簡易表現の警告を表示しない
+dotnet_diagnostic.IDE0305.severity = none
+
+# メソッドに式本体を使用するの警告を表示しない
+dotnet_diagnostic.IDE0022.severity = none
+

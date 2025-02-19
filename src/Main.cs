@@ -7,12 +7,16 @@ using System.Reflection;
 using Chickensoft.GoDotTest;
 using Godot.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
+using EternalJourney.Cores.Repositories.Interfaces;
+using EternalJourney.Cores.Repositories;
 #endif
 
 // This entry-point file is responsible for determining if we should run tests.
 //
 // If you want to edit your game's main entry-point, please see Game.tscn and
 // Game.cs instead.
+
+
 
 
 
@@ -47,6 +51,7 @@ public partial class Main : Node2D, IServicesConfigurator
     {
         services.AddGodotServices();
         services.AddSingleton<TestService>();
+        services.AddSingleton<IClueRepository, ClueCsvRepository>();
     }
 
 #if DEBUG

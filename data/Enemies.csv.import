@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bf7aismfsw3cc"
+
+[deps]
+
+files=["res://data/Enemies.Speed.translation", "res://data/Enemies.Health.translation"]
+
+source_file="res://data/Enemies.csv"
+dest_files=["res://data/Enemies.Speed.translation", "res://data/Enemies.Health.translation"]
+
+[params]
+
+compress=true
+delimiter=0

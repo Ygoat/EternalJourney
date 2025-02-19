@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://cw6om37eubyq3"
+
+[deps]
+
+files=["res://data/Bullets.Speed.translation", "res://data/Bullets.Defense.translation"]
+
+source_file="res://data/Bullets.csv"
+dest_files=["res://data/Bullets.Speed.translation", "res://data/Bullets.Defense.translation"]
+
+[params]
+
+compress=true
+delimiter=0

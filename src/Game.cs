@@ -2,6 +2,7 @@ namespace EternalJourney;
 
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
+using EternalJourney.Cores.Repositories.Interfaces;
 using Godot;
 using Godot.DependencyInjection.Attributes;
 
@@ -20,6 +21,9 @@ public partial class Game : Control, IProvide<string>
     [Inject]
     private readonly TestService _testServie = null!;
 
+    [Inject]
+    private readonly IClueRepository _clueRepository = null!;
+
     public override void _Ready()
       => TestButton = GetNode<Button>("%TestButton");
 
@@ -34,5 +38,6 @@ public partial class Game : Control, IProvide<string>
     {
         GD.Print(ButtonPresses++);
         _testServie.Hey("Hello Service");
+        GD.Print(_clueRepository.GetClue(e => e.Id == 1).Name);
     }
 }
