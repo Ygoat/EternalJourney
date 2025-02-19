@@ -1,7 +1,7 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
+﻿namespace Godot.DependencyInjection.Services.Logger;
 
-namespace Godot.DependencyInjection.Services.Logger;
+using System;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// The provider for the <see cref="DebugLogger"/>.
@@ -12,11 +12,13 @@ public class DebugLoggerProvider : ILoggerProvider
     /// <inheritdoc />
     public ILogger CreateLogger(string categoryName)
     {
-        return new GodotLogger(categoryName);
+        ILogger iLogger = new GodotLogger(categoryName);
+        return iLogger;
     }
 
     public void Dispose()
     {
         GC.SuppressFinalize(this);
+        return;
     }
 }

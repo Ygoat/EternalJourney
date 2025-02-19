@@ -1,9 +1,7 @@
 namespace EternalJourney;
 
-using System;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using EternalJourney;
 using Godot;
 using Godot.DependencyInjection.Attributes;
 
@@ -17,13 +15,14 @@ public partial class DependTestNode : Node
     public string MyDependency => this.DependOn<string>();
 
     [Inject]
-    private readonly TestService TestService = null!;
+    private readonly TestService _testService = null!;
 
     // 依存関係が解決された後に呼ばれるメソッド
     public void OnResolved()
     {
         // 依存関係が解決されたので、値を利用して処理を行います。
-        TestService.Hey($"Resolved Dependency: {MyDependency}");
+        _testService.Hey($"Resolved Dependency: {MyDependency}");
+        return;
     }
 
     // Called when the node enters the scene tree for the first time.

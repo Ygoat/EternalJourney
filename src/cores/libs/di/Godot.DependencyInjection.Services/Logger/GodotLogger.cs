@@ -1,37 +1,33 @@
-using System;
-using System.Diagnostics;
-using System.Xml.Linq;
-using Microsoft.Extensions.Logging;
-
 namespace Godot.DependencyInjection.Services.Logger;
+
+using System;
+using Microsoft.Extensions.Logging;
 
 /// <summary>
 /// A logger that writes messages in the debug output window only when a debugger is attached.
 /// </summary>
-internal sealed class GodotLogger : ILogger
+/// <remarks>
+/// Initializes a new instance of the <see cref="GodotLogger"/> class.
+/// </remarks>
+/// <param name="name">The name of the logger.</param>
+internal sealed class GodotLogger(string name) : ILogger
 {
-    private readonly string _name;
+    private readonly string _name = name;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GodotLogger"/> class.
-    /// </summary>
-    /// <param name="name">The name of the logger.</param>
-    public GodotLogger(string name)
-    {
-        _name = name;
-    }
 
     /// <inheritdoc />
     public bool IsEnabled(LogLevel logLevel)
     {
         // If the filter is null, everything is enabled
-        return logLevel != LogLevel.None;
+        var isEnabled = logLevel != LogLevel.None;
+        return isEnabled;
     }
 
     /// <inheritdoc />
     public IDisposable BeginScope<TState>(TState state)
     {
-        return NullScope.Instance;
+        IDisposable iDisposable = NullScope.Instance;
+        return iDisposable;
     }
 
 
@@ -55,15 +51,20 @@ internal sealed class GodotLogger : ILogger
 
         if (exception != null)
         {
-            message += System.Environment.NewLine + System.Environment.NewLine + exception;
+            message += Environment.NewLine + Environment.NewLine + exception;
         }
         PrintMessage(logLevel, message);
     }
     private static void PrintMessage(LogLevel logLevel, string message)
     {
         if (logLevel is LogLevel.Error or LogLevel.Critical)
+        {
             GD.PrintErr(message);
+        }
         else
+        {
             GD.Print(message);
+        }
+
     }
 }

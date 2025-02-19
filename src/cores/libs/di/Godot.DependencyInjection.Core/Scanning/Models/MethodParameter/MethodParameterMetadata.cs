@@ -1,20 +1,17 @@
-﻿using System;
+﻿namespace Godot.DependencyInjection.Scanning.Models.MethodParameter;
+
+using System;
 using System.Diagnostics;
 using Godot.DependencyInjection.Scanning.Models.MethodParameterMetadata;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Godot.DependencyInjection.Scanning.Models.MethodParameter;
-
 [DebuggerDisplay("{DebugDisplay(),nq}")]
-internal readonly struct MethodParameterMetadata : IMethodParameterMetadata
+internal readonly struct MethodParameterMetadata(bool isRequired, Type parameterType) : IMethodParameterMetadata
 {
-    private readonly bool _isRequired;
-    private readonly Type _parameterType;
-    public MethodParameterMetadata(bool isRequired, Type parameterType)
-    {
-        this._isRequired = isRequired;
-        this._parameterType = parameterType;
-    }
+    private readonly bool _isRequired = isRequired;
+    private readonly Type _parameterType = parameterType;
+
+
     public object? GetService(IServiceProvider serviceProvider)
     {
         var service = _isRequired
@@ -27,14 +24,16 @@ internal readonly struct MethodParameterMetadata : IMethodParameterMetadata
 
     public override string ToString()
     {
-        return $@"
+        var toString = $@"
                     {{
                         ""type"": ""{_parameterType.FullName}"",
                         ""isRequired"": {_isRequired.ToString().ToLowerInvariant()}
                     }}";
+        return toString;
     }
     public string DebugDisplay()
     {
-        return $@"{_parameterType.FullName}({_isRequired})";
+        var toString = $@"{_parameterType.FullName}({_isRequired})";
+        return toString;
     }
 }

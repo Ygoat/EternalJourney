@@ -7,5 +7,6 @@ public class TestService
     public void Hey(string word)
     {
         GD.Print(word);
+        return;
     }
 }

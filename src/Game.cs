@@ -18,7 +18,7 @@ public partial class Game : Control, IProvide<string>
 
     // サービスの注入
     [Inject]
-    private readonly TestService TestServie = null!;
+    private readonly TestService _testServie = null!;
 
     public override void _Ready()
       => TestButton = GetNode<Button>("%TestButton");
@@ -27,11 +27,12 @@ public partial class Game : Control, IProvide<string>
     public void OnReady()
     {
         this.Provide(); // 依存関係の提供を通知
+        return;
     }
 
     public void OnTestButtonPressed()
     {
         GD.Print(ButtonPresses++);
-        TestServie.Hey("Hello Service");
+        _testServie.Hey("Hello Service");
     }
 }
