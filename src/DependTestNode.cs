@@ -2,6 +2,8 @@ namespace EternalJourney;
 
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
+using EternalJourney.Cores.Repositories;
+using EternalJourney.Cores.Repositories.Interfaces;
 using Godot;
 using Godot.DependencyInjection.Attributes;
 
@@ -15,13 +17,14 @@ public partial class DependTestNode : Node
     public string MyDependency => this.DependOn<string>();
 
     [Inject]
-    private readonly TestService _testService = null!;
+    private readonly IClueRepository clueRepository = null!;
 
     // 依存関係が解決された後に呼ばれるメソッド
     public void OnResolved()
     {
         // 依存関係が解決されたので、値を利用して処理を行います。
-        _testService.Hey($"Resolved Dependency: {MyDependency}");
+        GD.Print($"Resolved Dependency: {MyDependency}");
+        GD.Print(clueRepository.GetClue(e => e.Id == 1)!.Name);
         return;
     }
 

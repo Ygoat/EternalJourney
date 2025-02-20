@@ -17,12 +17,8 @@ public partial class Game : Control, IProvide<string>
     public Button TestButton { get; private set; } = default!;
     public int ButtonPresses { get; private set; }
 
-    // サービスの注入
     [Inject]
-    private readonly TestService _testServie = null!;
-
-    [Inject]
-    private readonly IClueRepository _clueRepository = null!;
+    private readonly IClueRepository clueRepository = null!;
 
     public override void _Ready()
       => TestButton = GetNode<Button>("%TestButton");
@@ -37,7 +33,7 @@ public partial class Game : Control, IProvide<string>
     public void OnTestButtonPressed()
     {
         GD.Print(ButtonPresses++);
-        _testServie.Hey("Hello Service");
-        GD.Print(_clueRepository.GetClue(e => e.Id == 1).Name);
+        GD.Print(clueRepository.GetClue(e => e.Id == 1).Name);
+        return;
     }
 }

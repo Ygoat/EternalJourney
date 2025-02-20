@@ -470,3 +470,5 @@ dotnet_diagnostic.IDE0305.severity = none
 # メソッドに式本体を使用するの警告を表示しない
 dotnet_diagnostic.IDE0022.severity = none
 
+# 名前付けルール違反: 存在しないプレフィックス: '_'の警告を表示しない
+dotnet_diagnostic.IDE1006.severity = none

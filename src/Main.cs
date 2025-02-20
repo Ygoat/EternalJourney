@@ -50,7 +50,6 @@ public partial class Main : Node2D, IServicesConfigurator
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddGodotServices();
-        services.AddSingleton<TestService>();
         services.AddSingleton<IClueRepository, ClueCsvRepository>();
     }
 
