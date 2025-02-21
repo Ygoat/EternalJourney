@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://cywpu6lxdjhuu"]
+[gd_scene load_steps=4 format=3 uid="uid://cywpu6lxdjhuu"]
 
 [ext_resource type="Script" path="res://src/Game.cs" id="1_17mmo"]
 [ext_resource type="Script" path="res://src/DependTestNode.cs" id="2_rss6t"]
+[ext_resource type="PackedScene" uid="uid://d2wpnvwpfgrla" path="res://src/AutoConnectTestNode.tscn" id="3_omsft"]
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -30,5 +31,8 @@ text = "Test Button"
 
 [node name="DependTestNode" type="Node" parent="."]
 script = ExtResource("2_rss6t")
+
+[node name="AutoConnectTestNode" parent="." instance=ExtResource("3_omsft")]
+unique_name_in_owner = true
 
 [connection signal="pressed" from="CenterContainer/VBoxContainer/TestButton" to="." method="OnTestButtonPressed"]

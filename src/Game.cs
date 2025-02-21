@@ -1,6 +1,7 @@
 namespace EternalJourney;
 
 using Chickensoft.AutoInject;
+using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Cores.Repositories.Interfaces;
 using Godot;
@@ -17,6 +18,9 @@ public partial class Game : Control, IProvide<string>
     public Button TestButton { get; private set; } = default!;
     public int ButtonPresses { get; private set; }
 
+    [Node]
+    public IAutoConnectTestNode AutoConnectTestNode { get; set; } = default!;
+
     [Inject]
     private readonly IClueRepository clueRepository = null!;
 
@@ -27,6 +31,7 @@ public partial class Game : Control, IProvide<string>
     public void OnReady()
     {
         this.Provide(); // 依存関係の提供を通知
+        AutoConnectTestNode.TestEmit += OnTestEmitConnect;
         return;
     }
 
@@ -35,5 +40,10 @@ public partial class Game : Control, IProvide<string>
         GD.Print(ButtonPresses++);
         GD.Print(clueRepository.GetClue(e => e.Id == 1).Name);
         return;
+    }
+
+    public void OnTestEmitConnect()
+    {
+        GD.Print("Pressed 10!");
     }
 }

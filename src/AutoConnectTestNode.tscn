@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://d2wpnvwpfgrla"]
+
+[ext_resource type="Script" path="res://src/AutoConnectTestNode.cs" id="1_i618c"]
+
+[node name="AutoConnectTestNode" type="Node"]
+script = ExtResource("1_i618c")
+
+[node name="AutoConnectTestButton" type="Button" parent="."]
+unique_name_in_owner = true
+text = "Test Button"
+metadata/_edit_use_anchors_ = true
