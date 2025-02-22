@@ -7,13 +7,13 @@ using EternalJourney.Cores.Consts;
 using Godot;
 
 /// <summary>
-/// Jsonヘルパー
+/// JSONヘルパー
 /// </summary>
 public static class JsonHelper
 {
 
     /// <summary>
-    /// Jsonからクラスにマッピングする
+    /// JSONからクラスにマッピングする
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="FilePath"></param>
@@ -27,7 +27,6 @@ public static class JsonHelper
 
         // ファイルクローズ
         file.Close();
-
         // Jsonパース
         T? parseModel = JsonSerializer.Deserialize<T>(jsonText);
 
