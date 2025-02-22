@@ -8,6 +8,9 @@ using Chickensoft.GoDotTest;
 using Godot.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using EternalJourney.Cores.Repositories;
+using EternalJourney.Cores.Helpers;
+using EternalJourney.Cores.Settings;
+using EternalJourney.Cores.Consts;
 #endif
 
 // This entry-point file is responsible for determining if we should run tests.
@@ -48,6 +51,8 @@ public partial class Main : Node2D, IServicesConfigurator
     /// <param name="services"></param>
     public void ConfigureServices(IServiceCollection services)
     {
+        AppSetting.LoadSettings();
+        GD.Print("out " + AppSetting.CsvFileBasePath);
         services.AddGodotServices();
         services.AddSingleton<ClueCsvRepository>();
     }
