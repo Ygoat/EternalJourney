@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://koa8d2kqtwda"
+
+[deps]
+
+files=["res://data/Ship.Speed.translation", "res://data/Ship.Defense.translation"]
+
+source_file="res://data/Ship.csv"
+dest_files=["res://data/Ship.Speed.translation", "res://data/Ship.Defense.translation"]
+
+[params]
+
+compress=true
+delimiter=0

@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://divangesnw0p2"
+
+[deps]
+
+files=["res://data/Weapon.Speed.translation", "res://data/Weapon.Defense.translation"]
+
+source_file="res://data/Weapon.csv"
+dest_files=["res://data/Weapon.Speed.translation", "res://data/Weapon.Defense.translation"]
+
+[params]
+
+compress=true
+delimiter=0

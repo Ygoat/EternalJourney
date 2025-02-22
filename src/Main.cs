@@ -7,7 +7,6 @@ using System.Reflection;
 using Chickensoft.GoDotTest;
 using Godot.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using EternalJourney.Cores.Repositories.Interfaces;
 using EternalJourney.Cores.Repositories;
 #endif
 
@@ -50,7 +49,7 @@ public partial class Main : Node2D, IServicesConfigurator
     public void ConfigureServices(IServiceCollection services)
     {
         services.AddGodotServices();
-        services.AddSingleton<IClueRepository, ClueCsvRepository>();
+        services.AddSingleton<ClueCsvRepository>();
     }
 
 #if DEBUG

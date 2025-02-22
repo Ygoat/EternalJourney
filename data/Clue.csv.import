@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://ccobqp3ogqr3o"
+
+[deps]
+
+files=["res://data/Clue.Name.translation", "res://data/Clue.Attack.translation", "res://data/Clue.Speed.translation", "res://data/Clue.Health.translation", "res://data/Clue.Type.translation"]
+
+source_file="res://data/Clue.csv"
+dest_files=["res://data/Clue.Name.translation", "res://data/Clue.Attack.translation", "res://data/Clue.Speed.translation", "res://data/Clue.Health.translation", "res://data/Clue.Type.translation"]
+
+[params]
+
+compress=true
+delimiter=0
