@@ -9,7 +9,7 @@ using Godot;
 /// <summary>
 /// JSONヘルパー
 /// </summary>
-public static class JsonHelper
+public static class GDJsonHelper
 {
 
     /// <summary>

@@ -32,7 +32,7 @@ public static class AppSetting
             return;
         }
         // 設定情報取得
-        AppSettingModel settings = JsonHelper.JsonMap<AppSettingModel>(Const.APP_SETTINGS_JSON_FILE_PATH);
+        AppSettingModel settings = GDJsonHelper.JsonMap<AppSettingModel>(Const.APP_SETTINGS_JSON_FILE_PATH);
         // インスタンスにセット
         Instance = settings;
         // ロード済みフラグをtrueにする
