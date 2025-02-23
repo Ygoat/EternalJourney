@@ -6,7 +6,7 @@ using System.Linq;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Helpers;
 using EternalJourney.Cores.Repositories.Base.Interfaces;
-using EternalJourney.Cores.Settings.Loader;
+using EternalJourney.Cores.Settings;
 using Godot;
 
 /// <summary>
@@ -21,8 +21,8 @@ public abstract class BaseRepository<T> : IRepository<T>
     /// <returns></returns>
     public List<T> GetMany()
     {
-        GD.Print($"{AppSetting.Instance.CsvFileBasePath}{typeof(T).Name}{Const.CSV_EXTENSION}");
-        return GDCsvHelper.CsvMap<T>($"{AppSetting.Instance.CsvFileBasePath}{typeof(T).Name}{Const.CSV_EXTENSION}");
+        GD.Print($"{AppSetting.CsvFileBasePath}{typeof(T).Name}{Const.CSV_EXTENSION}");
+        return GDCsvHelper.CsvMap<T>($"{AppSetting.CsvFileBasePath}{typeof(T).Name}{Const.CSV_EXTENSION}");
     }
 
     /// <summary>
