@@ -23,16 +23,14 @@ public static class GDCsvHelper
         Godot.FileAccess file = Godot.FileAccess.Open(filePath, Godot.FileAccess.ModeFlags.Read);
 
         // CSV読み込み
-
         using (var reader = new StreamReader(file.GetPathAbsolute()))
         {
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
                 // csv データが行毎にクラスに格納され、IEnumerable<T> として割り当て、List化
                 List<T> mappedClassList = csv.GetRecords<T>().ToList();
+                file.Close();
                 return mappedClassList;
-                //// records は IEnumerable なので、こんな使い方ができます。
-
             }
         }
     }

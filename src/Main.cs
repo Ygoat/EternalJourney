@@ -7,7 +7,6 @@ using System.Reflection;
 using Chickensoft.GoDotTest;
 using Godot.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using EternalJourney.Cores.Repositories.Interfaces;
 using EternalJourney.Cores.Repositories;
 #endif
 
@@ -15,9 +14,6 @@ using EternalJourney.Cores.Repositories;
 //
 // If you want to edit your game's main entry-point, please see Game.tscn and
 // Game.cs instead.
-
-
-
 
 
 public partial class Main : Node2D, IServicesConfigurator
@@ -49,8 +45,9 @@ public partial class Main : Node2D, IServicesConfigurator
     /// <param name="services"></param>
     public void ConfigureServices(IServiceCollection services)
     {
+        // サービス追加
         services.AddGodotServices();
-        services.AddSingleton<IClueRepository, ClueCsvRepository>();
+        services.AddSingleton<ClueCsvRepository>();
     }
 
 #if DEBUG

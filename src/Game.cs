@@ -3,7 +3,7 @@ namespace EternalJourney;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.AutoConnectTest;
-using EternalJourney.Cores.Repositories.Interfaces;
+using EternalJourney.Cores.Repositories;
 using Godot;
 using Godot.DependencyInjection.Attributes;
 
@@ -22,7 +22,7 @@ public partial class Game : Control, IProvide<string>
     public IAutoConnectTestNode AutoConnectTestNode { get; set; } = default!;
 
     [Inject]
-    private readonly IClueRepository clueRepository = null!;
+    private readonly ClueCsvRepository clueRepository = default!;
 
     public override void _Ready()
       => TestButton = GetNode<Button>("%TestButton");
@@ -38,7 +38,7 @@ public partial class Game : Control, IProvide<string>
     public void OnTestButtonPressed()
     {
         GD.Print(ButtonPresses++);
-        GD.Print(clueRepository.GetClue(e => e.Id == 1).Name);
+        GD.Print(clueRepository.Get(e => e.Id == 1).Name);
         return;
     }
 
