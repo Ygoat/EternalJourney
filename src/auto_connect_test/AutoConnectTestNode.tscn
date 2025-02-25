@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d2wpnvwpfgrla"]
 
-[ext_resource type="Script" path="res://src/AutoConnectTestNode.cs" id="1_i618c"]
+[ext_resource type="Script" path="res://src/auto_connect_test/AutoConnectTestNode.cs" id="1_i618c"]
 
 [node name="AutoConnectTestNode" type="Node"]
 script = ExtResource("1_i618c")

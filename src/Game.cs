@@ -1,8 +1,8 @@
 namespace EternalJourney;
 
 using Chickensoft.AutoInject;
-using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.AutoConnectTest;
 using EternalJourney.Cores.Repositories.Interfaces;
 using Godot;
 using Godot.DependencyInjection.Attributes;

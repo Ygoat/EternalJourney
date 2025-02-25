@@ -1,4 +1,4 @@
-namespace EternalJourney;
+namespace EternalJourney.AutoConnectTest;
 
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
