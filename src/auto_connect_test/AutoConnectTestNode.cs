@@ -3,6 +3,7 @@ namespace EternalJourney.AutoConnectTest;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.AutoConnectTest.State;
 using Godot;
 
 public interface IAutoConnectTestNode : INode
@@ -21,6 +22,8 @@ public partial class AutoConnectTestNode : Node, IAutoConnectTestNode
     [Signal]
     public delegate void TestEmitEventHandler();
 
+    private LightSwitchLogic lightSwitchLogic { get; set; }
+
     public int PressedCount { get; set; }
 
     // Called when the node enters the scene tree for the first time.
@@ -28,6 +31,8 @@ public partial class AutoConnectTestNode : Node, IAutoConnectTestNode
     public void OnReady()
     {
         AutoConnectTestButton.Pressed += OnAutoConnectPressed;
+
+        lightSwitchLogic = new LightSwitchLogic();
     }
 
 
@@ -42,7 +47,9 @@ public partial class AutoConnectTestNode : Node, IAutoConnectTestNode
         GD.Print(PressedCount);
         if (PressedCount == 10)
         {
+            lightSwitchLogic.Input(new LightSwitchLogic.Input.Toggle());
             EmitSignal(SignalName.TestEmit);
         }
+        GD.Print(lightSwitchLogic.Value);
     }
 }
