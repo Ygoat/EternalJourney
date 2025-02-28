@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://cbcshx5jiliyh"]
+
+[sub_resource type="ConvexPolygonShape2D" id="ConvexPolygonShape2D_630jn"]
+points = PackedVector2Array(0, 0, -40, 150, 40, 150)
+
+[node name="Radar" type="Node2D"]
+
+[node name="SearchArea" type="Area2D" parent="."]
+
+[node name="SearchShape" type="CollisionShape2D" parent="SearchArea"]
+shape = SubResource("ConvexPolygonShape2D_630jn")
