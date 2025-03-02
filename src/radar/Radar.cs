@@ -1,9 +1,9 @@
-namespace EternalJourney;
+namespace EternalJourney.Radar;
 
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using Chickensoft.LogicBlocks;
+using EternalJourney.Radar.State;
 using Godot;
 
 [Meta(typeof(IAutoNode))]
@@ -14,15 +14,28 @@ public partial class Radar : Node2D
     [Node("%SearchArea")]
     public IArea2D Area2D { get; set; } = default!;
 
+    public IRadarLogic RadarLogic { get; set; } = default!;
+
+    public RadarLogic.IBinding RadarLogicBinding { get; set; } = default!;
+
+    public void Setup()
+    {
+        RadarLogic = new RadarLogic();
+    }
+
     public void OnResolved()
     {
         Area2D.AreaEntered += OnAreaEntered;
+        RadarLogicBinding = RadarLogic.Bind();
         GD.Print("Ready!");
+
+        RadarLogicBinding.Handle((in RadarLogic.Output.StatusChanged output) => GD.Print("Changed"));
     }
 
     public void OnAreaEntered(Area2D area)
     {
         GD.Print("Entered!");
+        RadarLogic.Input(new RadarLogic.Input.EnemyEntered(area));
     }
 
     /// <summary>
