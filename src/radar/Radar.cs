@@ -30,6 +30,13 @@ public partial class Radar : Node2D
         GD.Print("Ready!");
 
         RadarLogicBinding.Handle((in RadarLogic.Output.StatusChanged output) => GD.Print("Changed"));
+        // Monitor an input:
+        RadarLogicBinding.Watch((in RadarLogic.Input.EnemyEntered input) => GD.Print("Entered"));
+        // Monitor a specific type of state:
+        RadarLogicBinding.When((RadarLogic.State.EnemySearched _) =>
+          GD.Print("Searched")
+        );
+
     }
 
     public void OnAreaEntered(Area2D area)
