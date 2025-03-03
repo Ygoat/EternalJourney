@@ -26,17 +26,18 @@ public partial class Radar : Node2D
 
     public void OnResolved()
     {
-        Area2D.AreaEntered += OnAreaEntered;
+        // Area2D.AreaEntered += OnAreaEntered;
+        // Area2D.AreaEntered -= OnAreaEntered;
         RadarLogicBinding = RadarLogic.Bind();
         GD.Print("Ready!");
-
         // Monitor an output:
         RadarLogicBinding.Handle((in RadarLogic.Output.StatusChanged output) => GD.Print("Changed"));
         // Monitor an input:
-        RadarLogicBinding.Watch((in RadarLogic.Input.PhysicProcess input) => GD.Print("Entered"));
+        // RadarLogicBinding.Watch((in RadarLogic.Input.PhysicProcess input) => GD.Print("Entered"));
 
         RadarLogicBinding.When((RadarLogic.State.Idle _) =>
         {
+            Area2D.AreaEntered += OnAreaEntered;
             // Idle状態の時はProcessが実行されない
             SetPhysicsProcess(false);
             GD.Print("Idle");
@@ -44,11 +45,12 @@ public partial class Radar : Node2D
         // Monitor a specific type of state:
         RadarLogicBinding.When((RadarLogic.State.EnemySearched _) =>
         {
-            // Idle状態の時はProcessが実行されない
+            Area2D.AreaEntered -= OnAreaEntered;
+            // Idle状態の時はProcessを実行する
             SetPhysicsProcess(true);
             GD.Print("Searched");
         });
-
+        RadarLogic.Start();
     }
 
     /// <summary>
