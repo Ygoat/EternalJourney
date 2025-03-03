@@ -1,5 +1,6 @@
 namespace EternalJourney.Radar.State;
 
+using System.Collections.Generic;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using Godot;
@@ -16,8 +17,8 @@ public partial class RadarLogic : LogicBlock<RadarLogic.State>, IRadarLogic
     // By convention, inputs are defined in a static nested class called Input.
     public static class Input
     {
-        public readonly record struct EnemyEntered(Area2D Enemy);
-        public readonly record struct EnemyLeft;
+        public readonly record struct WatchEnemy(Area2D Enemy);
+        public readonly record struct PhysicProcess(List<Node2D> Enemies);
     }
 
     // By convention, outputs are defined in a static nested class called Output.
@@ -38,7 +39,7 @@ public partial class RadarLogic : LogicBlock<RadarLogic.State>, IRadarLogic
         // organize the code.
 
         // On state.
-        public record Idle : State, IGet<Input.EnemyEntered>
+        public record Idle : State, IGet<Input.WatchEnemy>
         {
             public Idle()
             {
@@ -46,25 +47,32 @@ public partial class RadarLogic : LogicBlock<RadarLogic.State>, IRadarLogic
                 this.OnEnter(() => Output(new Output.StatusChanged(IsOn: true)));
             }
 
-            public Transition On(in Input.EnemyEntered input)
+            public Transition On(in Input.WatchEnemy input)
             {
-                var target = input.Enemy;
-                GD.Print(target.Name);
+                // var target = input.Enemies;
+                // GD.Print(target[0].Name);
                 return To<EnemySearched>();
             }
         }
 
         // Off state.
-        public record EnemySearched : State, IGet<Input.EnemyLeft>
+        public record EnemySearched : State, IGet<Input.PhysicProcess>
         {
             public EnemySearched()
             {
                 // Announce that we are now off.
                 this.OnEnter(() => Output(new Output.StatusChanged(IsOn: false)));
-
             }
 
-            public Transition On(in Input.EnemyLeft input) => To<Idle>();
+            public Transition On(in Input.PhysicProcess input)
+            {
+                if (input.Enemies.Count == 0)
+                {
+                    return To<Idle>();
+                }
+                // input.Enemies[0].QueueFree();
+                return ToSelf();
+            }
         }
     }
 }

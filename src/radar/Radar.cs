@@ -1,5 +1,6 @@
 namespace EternalJourney.Radar;
 
+using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
@@ -29,20 +30,46 @@ public partial class Radar : Node2D
         RadarLogicBinding = RadarLogic.Bind();
         GD.Print("Ready!");
 
+        // Monitor an output:
         RadarLogicBinding.Handle((in RadarLogic.Output.StatusChanged output) => GD.Print("Changed"));
         // Monitor an input:
-        RadarLogicBinding.Watch((in RadarLogic.Input.EnemyEntered input) => GD.Print("Entered"));
+        RadarLogicBinding.Watch((in RadarLogic.Input.PhysicProcess input) => GD.Print("Entered"));
+
+        RadarLogicBinding.When((RadarLogic.State.Idle _) =>
+        {
+            // Idle状態の時はProcessが実行されない
+            SetPhysicsProcess(false);
+            GD.Print("Idle");
+        });
         // Monitor a specific type of state:
         RadarLogicBinding.When((RadarLogic.State.EnemySearched _) =>
-          GD.Print("Searched")
-        );
+        {
+            // Idle状態の時はProcessが実行されない
+            SetPhysicsProcess(true);
+            GD.Print("Searched");
+        });
 
     }
 
+    /// <summary>
+    /// 物理更新処理
+    /// </summary>
+    /// <param name="delta"></param>
+    public void OnPhysicsProcess(double delta)
+    {
+        // ロジックブロックにオーバーラップしている敵のArea2Dノードリストを入力
+        RadarLogic.Input(new RadarLogic.Input.PhysicProcess(Area2D.GetOverlappingAreas().ToList<Node2D>()));
+    }
+
+    /// <summary>
+    /// サーチエリア進入時のイベント
+    /// </summary>
+    /// <param name="area"></param>
     public void OnAreaEntered(Area2D area)
     {
         GD.Print("Entered!");
-        RadarLogic.Input(new RadarLogic.Input.EnemyEntered(area));
+        // ロジックブロックに進入した敵のArea2Dノードを入力
+        RadarLogic.Input(new RadarLogic.Input.WatchEnemy(area));
     }
 
     /// <summary>
