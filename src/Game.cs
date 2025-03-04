@@ -1,14 +1,17 @@
 namespace EternalJourney;
 
 using Chickensoft.AutoInject;
+using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.AutoConnectTest;
 using EternalJourney.Cores.Repositories;
 using Godot;
 using Godot.DependencyInjection.Attributes;
 
+public interface IGame : IControl { }
+
 [Meta(typeof(IAutoNode))] // 子Nodeへ親Nodeの値をDIするために必要なミックスイン
-public partial class Game : Control, IProvide<string>
+public partial class Game : Control, IProvide<string>, IControl
 {
     // 子Nodeへ親Nodeの値をDIするために必要
     public override void _Notification(int what) => this.Notify(what);
