@@ -3,6 +3,7 @@ namespace EternalJourney;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.App.Domain;
 using Godot;
 
 public interface ISplash : IControl;

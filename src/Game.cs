@@ -8,10 +8,10 @@ using EternalJourney.Cores.Repositories;
 using Godot;
 using Godot.DependencyInjection.Attributes;
 
-public interface IGame : IControl { }
+public interface IGame : INode { }
 
 [Meta(typeof(IAutoNode))] // 子Nodeへ親Nodeの値をDIするために必要なミックスイン
-public partial class Game : Control, IProvide<string>, IControl
+public partial class Game : Node, IProvide<string>, IGame
 {
     // 子Nodeへ親Nodeの値をDIするために必要
     public override void _Notification(int what) => this.Notify(what);

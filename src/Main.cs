@@ -49,8 +49,8 @@ public partial class Main : Node2D, IServicesConfigurator
     {
         // サービス追加
         services.AddGodotServices();
-        services.AddSingleton<IAppRepo, AppRepo>();
-        services.AddSingleton<IInstantiator>(new Instantiator(GetTree()));
+        // services.AddSingleton<IAppRepo, AppRepo>();
+        // services.AddSingleton<IInstantiator>(new Instantiator(GetTree()));
         services.AddSingleton<ClueCsvRepository>();
     }
 
@@ -60,5 +60,5 @@ public partial class Main : Node2D, IServicesConfigurator
 #endif
 
     private void RunScene()
-      => GetTree().ChangeSceneToFile("res://src/Game.tscn");
+      => GetTree().ChangeSceneToFile("res://src/app/App.tscn");
 }

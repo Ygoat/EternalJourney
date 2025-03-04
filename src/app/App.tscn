@@ -1,6 +1,21 @@
-[gd_scene format=3 uid="uid://cdan1g0ou7pal"]
+[gd_scene load_steps=4 format=3 uid="uid://cdan1g0ou7pal"]
+
+[ext_resource type="PackedScene" uid="uid://cpx0n2a2oceg5" path="res://src/menu/Menu.tscn" id="1_myadh"]
+[ext_resource type="Script" path="res://src/app/App.cs" id="1_tus4s"]
+[ext_resource type="PackedScene" uid="uid://k85ur2in8jlo" path="res://src/splash/Splash.tscn" id="2_5ai0r"]
 
 [node name="App" type="CanvasLayer"]
+script = ExtResource("1_tus4s")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GameView" type="SubViewport" parent="SubViewportContainer"]
+unique_name_in_owner = true
 
 [node name="BlankScreenControl" type="Control" parent="."]
 layout_mode = 3
@@ -14,3 +29,11 @@ layout_mode = 0
 offset_right = 1152.0
 offset_bottom = 648.0
 color = Color(0, 0, 0, 1)
+
+[node name="Menu" parent="." instance=ExtResource("1_myadh")]
+unique_name_in_owner = true
+visible = false
+
+[node name="Splash" parent="." instance=ExtResource("2_5ai0r")]
+unique_name_in_owner = true
+visible = false
