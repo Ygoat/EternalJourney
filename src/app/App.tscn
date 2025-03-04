@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://cdan1g0ou7pal"]
+
+[node name="App" type="CanvasLayer"]
+
+[node name="BlankScreenControl" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+
+[node name="BlankScreen" type="ColorRect" parent="BlankScreenControl"]
+unique_name_in_owner = true
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+color = Color(0, 0, 0, 1)
