@@ -26,8 +26,6 @@ public partial class Radar : Node2D
 
     public void OnResolved()
     {
-        // Area2D.AreaEntered += OnAreaEntered;
-        // Area2D.AreaEntered -= OnAreaEntered;
         RadarLogicBinding = RadarLogic.Bind();
         GD.Print("Ready!");
         // Monitor an output:
