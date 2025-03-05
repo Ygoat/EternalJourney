@@ -16,6 +16,8 @@ grow_vertical = 2
 
 [node name="GameView" type="SubViewport" parent="SubViewportContainer"]
 unique_name_in_owner = true
+handle_input_locally = false
+render_target_update_mode = 4
 
 [node name="BlankScreenControl" type="Control" parent="."]
 layout_mode = 3

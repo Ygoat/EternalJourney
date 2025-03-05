@@ -10,10 +10,10 @@ public interface IAppLogic : ILogicBlock<AppLogic.State>;
 [Meta, LogicBlock(typeof(State), Diagram = true)]
 public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
 {
-    // Define your initial state here.
+    // 初期状態
     public override Transition GetInitialState() => To<State.SplashScreen>();
 
-    // By convention, inputs are defined in a static nested class called Input.
+    // 入力定義
     public static class Input
     {
         public readonly record struct SplashFinished;
@@ -22,7 +22,7 @@ public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
         public readonly record struct FadeOutFinished;
     }
 
-    // By convention, outputs are defined in a static nested class called Output.
+    // 出力定義
     public static class Output
     {
         public readonly record struct ShowSplashScreen;
@@ -33,28 +33,27 @@ public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
         public readonly record struct RemoveExistingGame;
     }
 
-    // To reduce unnecessary heap allocations, inputs and outputs should be
-    // readonly record structs.
+    // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
 
-    // By convention, the base state type is nested inside the logic block. This
-    // helps the logic block diagram generator know where to search for state
-    // types.
+    // 状態定義
     public abstract record State : StateLogic<State>
     {
-        // Substates are sometimes nested inside their parent states to help
-        // organize the code.
-
-        // On state.
+        // SplasScreen（スプラッシュ画面）状態
         public record SplashScreen : State, IGet<Input.SplashFinished>
         {
             public SplashScreen()
             {
+                // この状態に入る時の処理
+                // ShowSplashScreen（スプラッシュ画面表示）を出力
                 this.OnEnter(() => Output(new Output.ShowSplashScreen()));
 
+                // この状態がアクティブになった時の処理
                 OnAttach(
-                  () => Get<IAppRepo>().SplashScreenSkipped += OnSplashScreenSkipped
+                    //
+                    () => Get<IAppRepo>().SplashScreenSkipped += OnSplashScreenSkipped
                 );
 
+                // この状態が非アクティブになった時の処理
                 OnDetach(
                   () => Get<IAppRepo>().SplashScreenSkipped -= OnSplashScreenSkipped
                 );
