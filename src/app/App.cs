@@ -162,7 +162,7 @@ public partial class App : CanvasLayer, IApp
     /// </summary>
     public void OnStartGame()
     {
-        GD.Print("game start");
+        // StartGame（ゲームスタート）を入力
         AppLogic.Input(new AppLogic.Input.StartGame());
     }
 
