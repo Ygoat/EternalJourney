@@ -17,9 +17,11 @@ grow_vertical = 2
 [node name="GameView" type="SubViewport" parent="SubViewportContainer"]
 unique_name_in_owner = true
 handle_input_locally = false
+size = Vector2i(1152, 648)
 render_target_update_mode = 4
 
 [node name="BlankScreenControl" type="Control" parent="."]
+visible = false
 layout_mode = 3
 anchors_preset = 0
 offset_right = 1152.0
@@ -27,6 +29,7 @@ offset_bottom = 648.0
 
 [node name="BlankScreen" type="ColorRect" parent="BlankScreenControl"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 0
 offset_right = 1152.0
 offset_bottom = 648.0
