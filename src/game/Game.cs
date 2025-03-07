@@ -6,7 +6,6 @@ using Chickensoft.Introspection;
 using EternalJourney.AutoConnectTest;
 using EternalJourney.Cores.Repositories;
 using Godot;
-using Godot.DependencyInjection.Attributes;
 
 /// <summary>
 /// ゲームインターフェース

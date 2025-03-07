@@ -1,10 +1,14 @@
-[gd_scene load_steps=2 format=3 uid="uid://wwi3n7ap5dna"]
+[gd_scene load_steps=3 format=3 uid="uid://wwi3n7ap5dna"]
+
+[ext_resource type="Script" path="res://src/bullet/Bullet.cs" id="1_yxbom"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_hfwi0"]
 
 [node name="Bullet" type="Node2D"]
+script = ExtResource("1_yxbom")
 
 [node name="Area2D" type="Area2D" parent="."]
+unique_name_in_owner = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("CircleShape2D_hfwi0")
