@@ -2,7 +2,6 @@ namespace EternalJourney.App.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
-using EternalJourney.App.Domain;
 
 /// <summary>
 /// 弾丸ロジックインターフェース
