@@ -15,15 +15,15 @@ public partial class DependTestNode : Node
     [Dependency]
     public string MyDependency => this.DependOn<string>();
 
-    [Inject]
-    private readonly ClueCsvRepository clueRepository = null!;
+    [Dependency]
+    private ICrewCsvReader crewCsvReader => this.DependOn<ICrewCsvReader>();
 
     // 依存関係が解決された後に呼ばれるメソッド
     public void OnResolved()
     {
         // 依存関係が解決されたので、値を利用して処理を行います。
         GD.Print($"Resolved Dependency: {MyDependency}");
-        GD.Print(clueRepository.Get(e => e.Id == 1)!.Name);
+        GD.Print(crewCsvReader.Get(e => e.Id == 1)!.Name);
         return;
     }
 

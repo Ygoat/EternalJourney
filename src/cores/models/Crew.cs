@@ -3,7 +3,7 @@ namespace EternalJourney.Cores.Models;
 /// <summary>Id,Name,Attack,Speed,Health,Type
 /// クルーモデルクラス
 /// </summary>
-public class Clue
+public class Crew
 {
     /// <summary>
     /// ID

@@ -3,7 +3,7 @@ namespace EternalJourney.Cores.Repositories.Base.Interfaces;
 using System;
 using System.Collections.Generic;
 
-public interface IRepository<T>
+public interface ICsvReader<T>
 {
     public List<T> GetMany();
     public List<T> GetMany(Func<T, bool> predicate);

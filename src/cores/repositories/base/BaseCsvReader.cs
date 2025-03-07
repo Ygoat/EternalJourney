@@ -9,11 +9,13 @@ using EternalJourney.Cores.Repositories.Base.Interfaces;
 using EternalJourney.Cores.Settings;
 using Godot;
 
+public interface IBaseCsvReader<T> : ICsvReader<T>;
+
 /// <summary>
 /// ベースレポジトリ
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public abstract class BaseRepository<T> : IRepository<T>
+public abstract class BaseCsvReader<T> : IBaseCsvReader<T>
 {
     /// <summary>
     /// 全件取得

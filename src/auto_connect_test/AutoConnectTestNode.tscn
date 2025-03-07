@@ -7,5 +7,9 @@ script = ExtResource("1_i618c")
 
 [node name="AutoConnectTestButton" type="Button" parent="."]
 unique_name_in_owner = true
+offset_left = 192.0
+offset_top = 225.0
+offset_right = 290.0
+offset_bottom = 256.0
 text = "Test Button"
 metadata/_edit_use_anchors_ = true

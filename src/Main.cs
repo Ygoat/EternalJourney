@@ -47,10 +47,11 @@ public partial class Main : Node2D, IServicesConfigurator
     public void ConfigureServices(IServiceCollection services)
     {
         // サービス追加
-        services.AddGodotServices();
+        // 廃止予定
+        // services.AddGodotServices();
         // services.AddSingleton<IAppRepo, AppRepo>();
         // services.AddSingleton<IInstantiator>(new Instantiator(GetTree()));
-        services.AddSingleton<ClueCsvRepository>();
+        // services.AddSingleton<ClueCsvReader>();
     }
 
 #if DEBUG

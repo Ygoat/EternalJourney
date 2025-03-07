@@ -5,11 +5,12 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.App.Domain;
 using EternalJourney.App.State;
+using EternalJourney.Cores.Repositories;
 using EternalJourney.Cores.Utils;
 using EternalJourney.Game;
 using Godot;
 
-public interface IApp : ICanvasLayer, IProvide<IAppRepo>;
+public interface IApp : ICanvasLayer, IProvide<IAppRepo>, IProvide<ICrewCsvReader>;
 
 [Meta(typeof(IAutoNode))]
 public partial class App : CanvasLayer, IApp
@@ -29,6 +30,8 @@ public partial class App : CanvasLayer, IApp
     /// インスタンシエーター
     /// </summary>
     public IInstantiator Instantiator { get; set; } = default!;
+
+    public ICrewCsvReader CrewCsvReader { get; set; } = default!;
 
     /// <summary>
     /// メニュー画面
@@ -61,6 +64,12 @@ public partial class App : CanvasLayer, IApp
     IAppRepo IProvide<IAppRepo>.Value() => AppRepo;
 
     /// <summary>
+    /// クルーCSVリーダ
+    /// </summary>
+    /// <returns></returns>
+    ICrewCsvReader IProvide<ICrewCsvReader>.Value() => CrewCsvReader;
+
+    /// <summary>
     /// アプリケーションレポジトリ
     /// </summary>
     public IAppRepo AppRepo { get; set; } = default!;
@@ -83,6 +92,9 @@ public partial class App : CanvasLayer, IApp
     {
         // 共通部品インスタンス化
         Instantiator = new Instantiator(GetTree());
+
+        // クルーCSVリーダインスタンス化
+        CrewCsvReader = new CrewCsvReader();
 
         // メニュー：スタートゲームシグナル受信時のイベント設定
         Menu.StartGame += OnStartGame;

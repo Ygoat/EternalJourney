@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bsxpr4jqd82xt"
+
+[deps]
+
+files=["res://data/masters/Crew.Name.translation", "res://data/masters/Crew.Attack.translation", "res://data/masters/Crew.Speed.translation", "res://data/masters/Crew.Health.translation", "res://data/masters/Crew.Type.translation"]
+
+source_file="res://data/masters/Crew.csv"
+dest_files=["res://data/masters/Crew.Name.translation", "res://data/masters/Crew.Attack.translation", "res://data/masters/Crew.Speed.translation", "res://data/masters/Crew.Health.translation", "res://data/masters/Crew.Type.translation"]
+
+[params]
+
+compress=true
+delimiter=0

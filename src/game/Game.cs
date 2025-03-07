@@ -30,8 +30,8 @@ public partial class Game : Node, IProvide<string>, IGame
     [Node]
     public IAutoConnectTestNode AutoConnectTestNode { get; set; } = default!;
 
-    [Inject]
-    private readonly ClueCsvRepository clueRepository = default!;
+    [Dependency]
+    private ICrewCsvReader crewCsvReader => this.DependOn<ICrewCsvReader>();
 
     public override void _Ready()
       => TestButton = GetNode<Button>("%TestButton");
@@ -47,7 +47,7 @@ public partial class Game : Node, IProvide<string>, IGame
     public void OnTestButtonPressed()
     {
         GD.Print(ButtonPresses++);
-        GD.Print(clueRepository.Get(e => e.Id == 1).Name);
+        GD.Print(crewCsvReader.Get(e => e.Id == 1).Name);
         return;
     }
 
