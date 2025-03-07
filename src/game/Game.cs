@@ -8,8 +8,14 @@ using EternalJourney.Cores.Repositories;
 using Godot;
 using Godot.DependencyInjection.Attributes;
 
+/// <summary>
+/// ゲームインターフェース
+/// </summary>
 public interface IGame : INode { }
 
+/// <summary>
+/// ゲームクラス
+/// </summary>
 [Meta(typeof(IAutoNode))] // 子Nodeへ親Nodeの値をDIするために必要なミックスイン
 public partial class Game : Node, IProvide<string>, IGame
 {
