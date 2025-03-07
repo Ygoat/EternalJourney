@@ -19,6 +19,11 @@ config/icon="res://icon.png"
 
 DependencyInjectionNode="*res://src/di_manager/DependencyInjectionNode.cs"
 
+[display]
+
+window/size/viewport_width=720
+window/size/viewport_height=1280
+
 [dotnet]
 
 project/assembly_name="EternalJourney"
