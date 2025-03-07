@@ -1,11 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://blkbjroygfryx"]
+[gd_scene load_steps=4 format=3 uid="uid://cywpu6lxdjhuu"]
 
-[ext_resource type="Script" path="res://src/Game.cs" id="1_17mmo"]
+[ext_resource type="Script" path="res://src/game/Game.cs" id="1_u8fpt"]
 [ext_resource type="Script" path="res://src/DependTestNode.cs" id="2_rss6t"]
 [ext_resource type="PackedScene" uid="uid://d2wpnvwpfgrla" path="res://src/auto_connect_test/AutoConnectTestNode.tscn" id="3_vyjr7"]
 
 [node name="Game" type="Node"]
-script = ExtResource("1_17mmo")
+script = ExtResource("1_u8fpt")
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 anchors_preset = 15

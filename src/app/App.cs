@@ -6,6 +6,7 @@ using Chickensoft.Introspection;
 using EternalJourney.App.Domain;
 using EternalJourney.App.State;
 using EternalJourney.Cores.Utils;
+using EternalJourney.Game;
 using Godot;
 
 public interface IApp : ICanvasLayer, IProvide<IAppRepo>;
@@ -135,7 +136,7 @@ public partial class App : CanvasLayer, IApp
             .Handle((in AppLogic.Output.SetupGameScene _) =>
             {
                 // ゲームシーンをインスタンス化
-                Game = Instantiator.LoadAndInstantiate<Game>("res://src/Game.tscn");
+                Game = Instantiator.LoadAndInstantiate<Game>("res://src/game/Game.tscn");
             })
             // ShowGame（ゲームシーン表示）が出力された時の処理
             .Handle((in AppLogic.Output.ShowGame _) =>

@@ -1,4 +1,4 @@
-namespace EternalJourney;
+namespace EternalJourney.Game;
 
 using System.Threading.Tasks;
 using Chickensoft.GoDotTest;

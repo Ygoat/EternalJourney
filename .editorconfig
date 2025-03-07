@@ -478,3 +478,6 @@ dotnet_diagnostic.IDE0055.severity = none
 
 # ラムダに式本体を使用するの警告を表示しない
 dotnet_diagnostic.IDE0053.severity = none
+
+# プライマリコンストラクタ―の使用の警告を表示しない
+dotnet_diagnostic.IDE0290.severity = none

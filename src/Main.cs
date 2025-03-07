@@ -8,7 +8,6 @@ using Chickensoft.GoDotTest;
 using Godot.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using EternalJourney.Cores.Repositories;
-using EternalJourney.Cores.Utils;
 #endif
 
 // This entry-point file is responsible for determining if we should run tests.
