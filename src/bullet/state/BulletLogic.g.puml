@@ -1,0 +1,13 @@
+@startuml BulletLogic
+state "BulletLogic State" as EternalJourney_App_State_BulletLogic_State {
+  state "Loaded" as EternalJourney_App_State_BulletLogic_State_Loaded
+  state "InFlight" as EternalJourney_App_State_BulletLogic_State_InFlight
+  state "Destroy" as EternalJourney_App_State_BulletLogic_State_Destroy
+}
+
+EternalJourney_App_State_BulletLogic_State_Destroy --> EternalJourney_App_State_BulletLogic_State_Loaded : Reload
+EternalJourney_App_State_BulletLogic_State_InFlight --> EternalJourney_App_State_BulletLogic_State_Destroy : Hit
+EternalJourney_App_State_BulletLogic_State_InFlight --> EternalJourney_App_State_BulletLogic_State_Destroy : Miss
+EternalJourney_App_State_BulletLogic_State_Loaded --> EternalJourney_App_State_BulletLogic_State_InFlight : Fire
+[*] --> EternalJourney_App_State_BulletLogic_State_Loaded
+@enduml

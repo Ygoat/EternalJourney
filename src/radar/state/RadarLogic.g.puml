@@ -1,0 +1,15 @@
+@startuml RadarLogic
+state "RadarLogic State" as EternalJourney_Radar_State_RadarLogic_State {
+  state "Idle" as EternalJourney_Radar_State_RadarLogic_State_Idle
+  state "EnemySearched" as EternalJourney_Radar_State_RadarLogic_State_EnemySearched
+}
+
+EternalJourney_Radar_State_RadarLogic_State_EnemySearched --> EternalJourney_Radar_State_RadarLogic_State_EnemySearched : PhysicProcess
+EternalJourney_Radar_State_RadarLogic_State_EnemySearched --> EternalJourney_Radar_State_RadarLogic_State_Idle : PhysicProcess
+EternalJourney_Radar_State_RadarLogic_State_Idle --> EternalJourney_Radar_State_RadarLogic_State_EnemySearched : WatchEnemy
+
+EternalJourney_Radar_State_RadarLogic_State_EnemySearched : OnEnter → StatusChanged
+EternalJourney_Radar_State_RadarLogic_State_Idle : OnEnter → StatusChanged
+
+[*] --> EternalJourney_Radar_State_RadarLogic_State_Idle
+@enduml

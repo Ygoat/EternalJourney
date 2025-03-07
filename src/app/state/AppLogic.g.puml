@@ -1,0 +1,21 @@
+@startuml AppLogic
+state "AppLogic State" as EternalJourney_App_State_AppLogic_State {
+  state "SplashScreen" as EternalJourney_App_State_AppLogic_State_SplashScreen
+  state "MainMenu" as EternalJourney_App_State_AppLogic_State_MainMenu
+  state "InGame" as EternalJourney_App_State_AppLogic_State_InGame
+  state "LeavingGame" as EternalJourney_App_State_AppLogic_State_LeavingGame
+}
+
+EternalJourney_App_State_AppLogic_State_InGame --> EternalJourney_App_State_AppLogic_State_LeavingGame : EndGame
+EternalJourney_App_State_AppLogic_State_LeavingGame --> EternalJourney_App_State_AppLogic_State_InGame : FadeOutFinished
+EternalJourney_App_State_AppLogic_State_MainMenu --> EternalJourney_App_State_AppLogic_State_InGame : StartGame
+EternalJourney_App_State_AppLogic_State_SplashScreen --> EternalJourney_App_State_AppLogic_State_MainMenu : SplashFinished
+
+EternalJourney_App_State_AppLogic_State_InGame : OnEnter → ShowGame
+EternalJourney_App_State_AppLogic_State_LeavingGame : OnFadeOutFinished → RemoveExistingGame
+EternalJourney_App_State_AppLogic_State_MainMenu : OnEnter → SetupGameScene, ShowMainMenu
+EternalJourney_App_State_AppLogic_State_SplashScreen : OnEnter → ShowSplashScreen
+EternalJourney_App_State_AppLogic_State_SplashScreen : OnSplashScreenSkipped() → HideSplashScreen
+
+[*] --> EternalJourney_App_State_AppLogic_State_SplashScreen
+@enduml
