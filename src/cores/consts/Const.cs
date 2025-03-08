@@ -14,4 +14,9 @@ public static class Const
     /// CSV拡張子
     /// </summary>
     public const string CSV_EXTENSION = ".csv";
+
+    /// <summary>
+    /// ゲームシーンファイルパス
+    /// </summary>
+    public const string GameNodePath = "res://src/game/Game.tscn";
 }

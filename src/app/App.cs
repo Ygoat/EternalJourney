@@ -5,6 +5,7 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.App.Domain;
 using EternalJourney.App.State;
+using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Repositories;
 using EternalJourney.Cores.Utils;
 using EternalJourney.Game;
@@ -148,7 +149,7 @@ public partial class App : CanvasLayer, IApp
             .Handle((in AppLogic.Output.SetupGameScene _) =>
             {
                 // ゲームシーンをインスタンス化
-                Game = Instantiator.LoadAndInstantiate<Game>("res://src/game/Game.tscn");
+                Game = Instantiator.LoadAndInstantiate<Game>(Const.GameNodePath);
             })
             // ShowGame（ゲームシーン表示）が出力された時の処理
             .Handle((in AppLogic.Output.ShowGame _) =>
