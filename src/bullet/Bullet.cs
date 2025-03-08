@@ -68,11 +68,12 @@ public partial class Bullet : Node2D, IBullet
 
     public void OnPhysicsProcess(double delta)
     {
-        GlobalPosition += Direction * Speed;
+        GlobalPosition += Direction.Normalized() * Speed;
     }
 
     public void OnAreaEntered(Area2D area)
     {
+        BulletLogic.Input(new BulletLogic.Input.Hit());
         EmitSignal(SignalName.Hit);
     }
 
