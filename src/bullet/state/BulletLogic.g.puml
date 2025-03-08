@@ -14,6 +14,7 @@ EternalJourney_App_State_BulletLogic_State_Loaded --> EternalJourney_App_State_B
 
 EternalJourney_App_State_BulletLogic_State_Destroy : OnEnter → Disappear
 EternalJourney_App_State_BulletLogic_State_Hitting : OnEnter → Decay
+EternalJourney_App_State_BulletLogic_State_InFlight : OnEnter → Emitted
 
 [*] --> EternalJourney_App_State_BulletLogic_State_Loaded
 @enduml

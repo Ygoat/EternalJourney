@@ -49,6 +49,7 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
     /// </summary>
     public static class Output
     {
+        public readonly record struct Emitted;
         public readonly record struct Decay;
         public readonly record struct Disappear;
     }
@@ -84,6 +85,7 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
         {
             public InFlight()
             {
+                this.OnEnter(() => Output(new Output.Emitted()));
             }
 
             public Transition On(in Input.Hit input) => To<Hitting>();

@@ -17,8 +17,8 @@ public partial class Bullet : Node2D, IBullet
 {
     public override void _Notification(int what) => this.Notify(what);
 
-    public Vector2 Direction { get; set; } = new Vector2(0, 0);
-    public int Speed { get; set; }
+    public Vector2 Direction { get; set; } = new Vector2(0, 1);
+    public float Speed { get; set; } = 10;
 
     [Signal]
     public delegate void HitEventHandler();
@@ -39,15 +39,32 @@ public partial class Bullet : Node2D, IBullet
     public void OnReady()
     {
         BulletBinding
+            .Handle((in BulletLogic.Output.Emitted _) =>
+            {
+                SetPhysicsProcess(true);
+            })
+            .Handle((in BulletLogic.Output.Decay _) =>
+            {
+                // 弾丸の耐久値を減らす
+            })
             .Handle((in BulletLogic.Output.Disappear _) =>
             {
-                Remove();
+                SetPhysicsProcess(false);
+                // Remove();
             });
         Area2D.AreaEntered += OnAreaEntered;
         TreeEntered += Emit;
         BulletLogic.Start();
+        BulletLogic.Input(new BulletLogic.Input.Fire());
+        // BulletLogic.Input(new BulletLogic.Input.Hit());
+        // BulletLogic.Input(new BulletLogic.Input.Collapse());
+        // BulletLogic.Input(new BulletLogic.Input.Fire());
     }
 
+    public void OnPhysicsProcess(double delta)
+    {
+        GlobalPosition += Direction * Speed;
+    }
 
     public void OnAreaEntered(Area2D area)
     {
