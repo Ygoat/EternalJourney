@@ -4,6 +4,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.AutoConnectTest;
+using EternalJourney.Cores.Models;
 using EternalJourney.Cores.Repositories;
 using Godot;
 
@@ -46,7 +47,8 @@ public partial class Game : Node, IProvide<string>, IGame
     public void OnTestButtonPressed()
     {
         GD.Print(ButtonPresses++);
-        GD.Print(crewCsvReader.Get(e => e.Id == 1).Name);
+        Crew? crew = crewCsvReader.Get(e => e.Id == 1);
+        GD.Print(crew!.Name);
         return;
     }
 

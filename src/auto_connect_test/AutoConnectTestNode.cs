@@ -22,7 +22,7 @@ public partial class AutoConnectTestNode : Node, IAutoConnectTestNode
     [Signal]
     public delegate void TestEmitEventHandler();
 
-    private LightSwitchLogic lightSwitchLogic { get; set; }
+    private LightSwitchLogic lightSwitchLogic { get; set; } = default!;
 
     public int PressedCount { get; set; }
 
