@@ -36,15 +36,12 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
         public readonly record struct Hit;
 
         /// <summary>
-        /// ゲーム終了
-        /// </summary>
-        public readonly record struct Miss;
-
-        /// <summary>
         /// フェードアウト完了
         /// </summary>
-        public readonly record struct Destroy;
+        public readonly record struct Collapse;
         public readonly record struct Reload;
+
+        public readonly record struct Penetrate;
     }
 
     /// <summary>
@@ -52,6 +49,8 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
     /// </summary>
     public static class Output
     {
+        public readonly record struct Decay;
+        public readonly record struct Disappear;
     }
 
     // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
@@ -81,20 +80,32 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
         /// <summary>
         /// メインメニュー
         /// </summary>
-        public record InFlight : State, IGet<Input.Hit>, IGet<Input.Miss>//, IGet<Input.LoadGame>
+        public record InFlight : State, IGet<Input.Hit>//, IGet<Input.LoadGame>
         {
             public InFlight()
             {
             }
 
-            public Transition On(in Input.Hit input) => To<Destroy>();
-            public Transition On(in Input.Miss input) => To<Destroy>();
+            public Transition On(in Input.Hit input) => To<Hitting>();
+        }
+
+        public record Hitting : State, IGet<Input.Collapse>, IGet<Input.Penetrate>
+        {
+            public Hitting()
+            {
+                this.OnEnter(() => Output(new Output.Decay()));
+            }
+
+            public Transition On(in Input.Collapse input) => To<Destroy>();
+
+            public Transition On(in Input.Penetrate input) => To<InFlight>();
         }
 
         public record Destroy : State, IGet<Input.Reload>
         {
             public Destroy()
             {
+                this.OnEnter(() => Output(new Output.Disappear()));
             }
 
             public Transition On(in Input.Reload input) => To<Loaded>();
