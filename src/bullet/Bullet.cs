@@ -57,8 +57,8 @@ public partial class Bullet : Node2D, IBullet
                 SetPhysicsProcess(false);
             });
         Area2D.AreaEntered += OnAreaEntered;
-        TreeEntered += Emit;
-        VisibleOnScreenNotifier2D.ScreenExited += Remove;
+        TreeEntered += OnTreeentered;
+        VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         BulletLogic.Start();
         BulletLogic.Input(new BulletLogic.Input.Fire());
         // BulletLogic.Input(new BulletLogic.Input.Hit());
@@ -76,22 +76,22 @@ public partial class Bullet : Node2D, IBullet
         EmitSignal(SignalName.Hit);
     }
 
-    public void Remove()
+    public void OnScreenExited()
     {
         BulletLogic.Input(new BulletLogic.Input.Miss());
     }
 
-    public void Emit()
+    public void OnTreeentered()
     {
         BulletLogic.Input(new BulletLogic.Input.Fire());
     }
 
-    public void Initialize()
+    public void InitializeBullet()
     {
         GlobalPosition = new Vector2(0, 0);
     }
 
-    public void Thrust(Vector2 shotGPosition, Vector2 shotDirection)
+    public void ThrustBullet(Vector2 shotGPosition, Vector2 shotDirection)
     {
         GlobalPosition = shotGPosition;
         Direction = shotDirection;
