@@ -1,7 +1,5 @@
 namespace EternalJourney.Bullet;
 
-using System.ComponentModel;
-using System.Reflection.Metadata.Ecma335;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
@@ -32,16 +30,22 @@ public partial class Bullet : Node2D, IBullet
 
     public BulletLogic.IBinding BulletBinding { get; set; } = default!;
 
-    public void OnReady()
+    public void Setup()
     {
         BulletLogic = new BulletLogic();
         BulletBinding = BulletLogic.Bind();
-        BulletBinding.Handle((in BulletLogic.Output.Disappear _) =>
-        {
-            Remove();
-        });
+    }
+
+    public void OnReady()
+    {
+        BulletBinding
+            .Handle((in BulletLogic.Output.Disappear _) =>
+            {
+                Remove();
+            });
         Area2D.AreaEntered += OnAreaEntered;
         TreeEntered += Emit;
+        BulletLogic.Start();
     }
 
 

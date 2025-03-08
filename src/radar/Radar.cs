@@ -22,11 +22,11 @@ public partial class Radar : Node2D
     public void Setup()
     {
         RadarLogic = new RadarLogic();
+        RadarLogicBinding = RadarLogic.Bind();
     }
 
     public void OnResolved()
     {
-        RadarLogicBinding = RadarLogic.Bind();
         GD.Print("Ready!");
         // Monitor an output:
         RadarLogicBinding.Handle((in RadarLogic.Output.StatusChanged output) => GD.Print("Changed"));
