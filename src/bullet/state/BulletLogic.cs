@@ -42,6 +42,8 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
         public readonly record struct Reload;
 
         public readonly record struct Penetrate;
+
+        public readonly record struct Miss;
     }
 
     /// <summary>
@@ -81,7 +83,7 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
         /// <summary>
         /// メインメニュー
         /// </summary>
-        public record InFlight : State, IGet<Input.Hit>//, IGet<Input.LoadGame>
+        public record InFlight : State, IGet<Input.Hit>, IGet<Input.Miss>//, IGet<Input.LoadGame>
         {
             public InFlight()
             {
@@ -89,6 +91,8 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
             }
 
             public Transition On(in Input.Hit input) => To<Hitting>();
+
+            public Transition On(in Input.Miss input) => To<Destroy>();
         }
 
         public record Hitting : State, IGet<Input.Collapse>, IGet<Input.Penetrate>

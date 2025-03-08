@@ -26,6 +26,9 @@ public partial class Bullet : Node2D, IBullet
     [Node]
     public Area2D Area2D { get; set; } = default!;
 
+    [Node]
+    public VisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
+
     public BulletLogic BulletLogic { get; set; } = default!;
 
     public BulletLogic.IBinding BulletBinding { get; set; } = default!;
@@ -49,11 +52,13 @@ public partial class Bullet : Node2D, IBullet
             })
             .Handle((in BulletLogic.Output.Disappear _) =>
             {
+                GetParent().RemoveChild(this);
+                GD.Print("Removed!");
                 SetPhysicsProcess(false);
-                // Remove();
             });
         Area2D.AreaEntered += OnAreaEntered;
         TreeEntered += Emit;
+        VisibleOnScreenNotifier2D.ScreenExited += Remove;
         BulletLogic.Start();
         BulletLogic.Input(new BulletLogic.Input.Fire());
         // BulletLogic.Input(new BulletLogic.Input.Hit());
@@ -73,8 +78,7 @@ public partial class Bullet : Node2D, IBullet
 
     public void Remove()
     {
-        GetParent().RemoveChild(this);
-        BulletLogic.Input(new BulletLogic.Input.Reload());
+        BulletLogic.Input(new BulletLogic.Input.Miss());
     }
 
     public void Emit()
