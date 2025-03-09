@@ -11,7 +11,7 @@ using EternalJourney.Cores.Utils;
 using EternalJourney.Game;
 using Godot;
 
-public interface IApp : ICanvasLayer, IProvide<IAppRepo>, IProvide<ICrewCsvReader>;
+public interface IApp : ICanvasLayer, IProvide<IAppRepo>, IProvide<ICrewCsvReader>, IProvide<IInstantiator>;
 
 [Meta(typeof(IAutoNode))]
 public partial class App : CanvasLayer, IApp
@@ -69,6 +69,8 @@ public partial class App : CanvasLayer, IApp
     /// </summary>
     /// <returns></returns>
     ICrewCsvReader IProvide<ICrewCsvReader>.Value() => CrewCsvReader;
+
+    IInstantiator IProvide<IInstantiator>.Value() => Instantiator;
 
     /// <summary>
     /// アプリケーションレポジトリ

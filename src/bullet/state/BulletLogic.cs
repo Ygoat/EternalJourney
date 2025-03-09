@@ -26,23 +26,33 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
     public static class Input
     {
         /// <summary>
-        /// スプラッシュ終了
+        /// 射撃
         /// </summary>
         public readonly record struct Fire;
 
         /// <summary>
-        /// ゲームスタート
+        /// ヒット
         /// </summary>
         public readonly record struct Hit;
 
         /// <summary>
-        /// フェードアウト完了
+        /// 崩壊
         /// </summary>
         public readonly record struct Collapse;
+
+        /// <summary>
+        /// リロード
+        /// </summary>
         public readonly record struct Reload;
 
+        /// <summary>
+        /// 貫通
+        /// </summary>
         public readonly record struct Penetrate;
 
+        /// <summary>
+        /// ミス
+        /// </summary>
         public readonly record struct Miss;
     }
 
@@ -51,12 +61,21 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
     /// </summary>
     public static class Output
     {
+        /// <summary>
+        /// 射出
+        /// </summary>
         public readonly record struct Emitted;
+
+        /// <summary>
+        /// 劣化
+        /// </summary>
         public readonly record struct Decay;
+
+        /// <summary>
+        /// 消失
+        /// </summary>
         public readonly record struct Disappear;
     }
-
-    // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
 
     /// <summary>
     /// 状態定義
@@ -64,7 +83,7 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
     public abstract record State : StateLogic<State>
     {
         /// <summary>
-        /// ロード状態
+        /// ロード
         /// </summary>
         public record Loaded : State, IGet<Input.Fire>
         {
@@ -72,18 +91,13 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
             {
             }
 
-            /// <summary>
-            /// 状態の遷移を定義
-            /// </summary>
-            /// <param name="input"></param>
-            /// <returns></returns>
             public Transition On(in Input.Fire input) => To<InFlight>();
         }
 
         /// <summary>
-        /// メインメニュー
+        /// 飛翔
         /// </summary>
-        public record InFlight : State, IGet<Input.Hit>, IGet<Input.Miss>//, IGet<Input.LoadGame>
+        public record InFlight : State, IGet<Input.Hit>, IGet<Input.Miss>
         {
             public InFlight()
             {
@@ -95,6 +109,9 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
             public Transition On(in Input.Miss input) => To<Destroy>();
         }
 
+        /// <summary>
+        /// ヒット
+        /// </summary>
         public record Hitting : State, IGet<Input.Collapse>, IGet<Input.Penetrate>
         {
             public Hitting()
@@ -107,6 +124,9 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
             public Transition On(in Input.Penetrate input) => To<InFlight>();
         }
 
+        /// <summary>
+        /// 破壊
+        /// </summary>
         public record Destroy : State, IGet<Input.Reload>
         {
             public Destroy()

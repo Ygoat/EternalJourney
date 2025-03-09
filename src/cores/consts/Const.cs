@@ -19,4 +19,9 @@ public static class Const
     /// ゲームシーンファイルパス
     /// </summary>
     public const string GameNodePath = "res://src/game/Game.tscn";
+
+    /// <summary>
+    /// 弾丸シーンファイルパス
+    /// </summary>
+    public const string BulletNodePath = "res://src/bullet/Bullet.tscn";
 }

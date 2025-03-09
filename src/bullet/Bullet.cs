@@ -48,13 +48,13 @@ public partial class Bullet : Node2D, IBullet
     /// ヒット判定用エリア
     /// </summary>
     [Node]
-    public Area2D Area2D { get; set; } = default!;
+    public IArea2D Area2D { get; set; } = default!;
 
     /// <summary>
     /// 画面外検知用通知ノード
     /// </summary>
     [Node]
-    public VisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
+    public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
     #endregion Nodes
 
     #region Exports
