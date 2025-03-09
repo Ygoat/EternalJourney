@@ -40,3 +40,10 @@ Godot側の設定でエディタをVSCodeにしておくとよい
 #region Dependencies
 #endregion Dependencies
 ```
+
+# その他
+
+## VSCode再起動
+インテリセンス等が聞かなくなった場合、再起動する
+Ctrl + Shift + p
+でreload windowを実行する
