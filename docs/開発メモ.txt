@@ -13,3 +13,30 @@ Recommendのものを入れる
 
 ## Godot側のエディタ指定
 Godot側の設定でエディタをVSCodeにしておくとよい
+
+
+# 実装
+
+## 各シーンの実装について
+各シーンの動作はステートロジックのバインド部分に記述する
+
+シグナルイベントは状態の変更を行う
+
+## コーディング規約
+```
+#region Signals
+#endregion Signals
+#region State
+#endregion State
+#region Exports
+#endregion Exports
+#region PackedScenes
+#endregion PackedScenes
+#region Nodes
+#endregion Nodes
+
+#region Provisions
+#endregion Provisions
+#region Dependencies
+#endregion Dependencies
+```

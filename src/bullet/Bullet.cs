@@ -6,32 +6,73 @@ using Chickensoft.Introspection;
 using EternalJourney.App.State;
 using Godot;
 
+/// <summary>
+/// 弾丸インターフェース
+/// </summary>
 public interface IBullet : INode2D
 {
     public event Bullet.HitEventHandler Hit;
 
 }
 
+/// <summary>
+/// 弾丸クラス
+/// </summary>
 [Meta(typeof(IAutoNode))]
 public partial class Bullet : Node2D, IBullet
 {
     public override void _Notification(int what) => this.Notify(what);
 
-    public Vector2 Direction { get; set; } = new Vector2(0, 1);
-    public float Speed { get; set; } = 10;
-
+    #region Signals
+    /// <summary>
+    /// ヒットイベント
+    /// </summary>
     [Signal]
     public delegate void HitEventHandler();
+    #endregion Signals
 
+    #region State
+    /// <summary>
+    /// 弾丸ロジック
+    /// </summary>
+    public BulletLogic BulletLogic { get; set; } = default!;
+
+    /// <summary>
+    /// 弾丸ロジックバインド
+    /// </summary>
+    public BulletLogic.IBinding BulletBinding { get; set; } = default!;
+    #endregion State
+
+    #region Nodes
+    /// <summary>
+    /// ヒット判定用エリア
+    /// </summary>
     [Node]
     public Area2D Area2D { get; set; } = default!;
 
+    /// <summary>
+    /// 画面外検知用通知ノード
+    /// </summary>
     [Node]
     public VisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
+    #endregion Nodes
 
-    public BulletLogic BulletLogic { get; set; } = default!;
+    #region Exports
+    /// <summary>
+    /// 移動方向
+    /// </summary>
+    public Vector2 Direction { get; set; } = new Vector2(0, 1);
 
-    public BulletLogic.IBinding BulletBinding { get; set; } = default!;
+    /// <summary>
+    /// 速度
+    /// </summary>
+    public float Speed { get; set; } = 10;
+
+    /// <summary>
+    /// 耐久値
+    /// </summary>
+    public int Durability { get; set; } = 1;
+    #endregion Exports
 
     public void Setup()
     {
@@ -48,19 +89,28 @@ public partial class Bullet : Node2D, IBullet
             })
             .Handle((in BulletLogic.Output.Decay _) =>
             {
-                // 弾丸の耐久値を減らす
+                Durability -= 1;
+                if (Durability <= 0)
+                {
+                    BulletLogic.Input(new BulletLogic.Input.Collapse());
+                }
+                else
+                {
+                    BulletLogic.Input(new BulletLogic.Input.Penetrate());
+                }
             })
             .Handle((in BulletLogic.Output.Disappear _) =>
             {
-                GetParent().RemoveChild(this);
+                Hide();
+                InitializeBullet();
                 GD.Print("Removed!");
                 SetPhysicsProcess(false);
             });
+        Draw += OnDraw;
         Area2D.AreaEntered += OnAreaEntered;
-        TreeEntered += OnTreeentered;
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         BulletLogic.Start();
-        BulletLogic.Input(new BulletLogic.Input.Fire());
+        // BulletLogic.Input(new BulletLogic.Input.Fire());
         // BulletLogic.Input(new BulletLogic.Input.Hit());
         // BulletLogic.Input(new BulletLogic.Input.Collapse());
         // BulletLogic.Input(new BulletLogic.Input.Fire());
@@ -71,30 +121,67 @@ public partial class Bullet : Node2D, IBullet
         GlobalPosition += Direction.Normalized() * Speed;
     }
 
+    /// <summary>
+    /// 衝突時の処理
+    /// </summary>
+    /// <param name="area"></param>
     public void OnAreaEntered(Area2D area)
     {
+        // ヒットを入力
         BulletLogic.Input(new BulletLogic.Input.Hit());
+        // ヒットシグナルを出力
         EmitSignal(SignalName.Hit);
     }
 
+    /// <summary>
+    /// 画面外に出た時の処理
+    /// </summary>
     public void OnScreenExited()
     {
+        // ミスを入力
         BulletLogic.Input(new BulletLogic.Input.Miss());
     }
 
-    public void OnTreeentered()
+    /// <summary>
+    /// 表示時の処理
+    /// ※射出時に表示する
+    /// </summary>
+    public void OnDraw()
     {
+        GD.Print("Show");
         BulletLogic.Input(new BulletLogic.Input.Fire());
+        ThrustBullet(new Vector2(0, 0), new Vector2(0, 1));
     }
 
-    public void InitializeBullet()
-    {
-        GlobalPosition = new Vector2(0, 0);
-    }
-
+    /// <summary>
+    /// 弾丸射出
+    /// </summary>
+    /// <param name="shotGPosition">射出位置</param>
+    /// <param name="shotDirection">射出角度</param>
     public void ThrustBullet(Vector2 shotGPosition, Vector2 shotDirection)
     {
         GlobalPosition = shotGPosition;
         Direction = shotDirection;
     }
+
+    /// <summary>
+    /// 弾丸初期化
+    /// </summary>
+    public void InitializeBullet()
+    {
+        GlobalPosition = new Vector2(0, 0);
+    }
+
+    /// <summary>
+    /// ツリーからノードが消された時の処理
+    /// </summary>
+    public void OnExitTree()
+    {
+        Draw -= OnDraw;
+        Area2D.AreaEntered -= OnAreaEntered;
+        VisibleOnScreenNotifier2D.ScreenExited -= OnScreenExited;
+        BulletBinding.Dispose();
+        GD.Print("BulletDispose");
+    }
+
 }
