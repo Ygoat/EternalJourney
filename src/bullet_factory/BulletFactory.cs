@@ -11,39 +11,74 @@ using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Utils;
 using Godot;
 
-
+/// <summary>
+/// 弾丸ファクトリインターフェース
+/// </summary>
 public interface IBulletFactory : INode, IProvide<IBulletFactory>
 {
     public Queue<Bullet> BulletsQueue { get; set; }
 };
 
+/// <summary>
+/// 弾丸ファクトリ
+/// </summary>
 [Meta(typeof(IAutoNode))]
 public partial class BulletFactory : Node, IBulletFactory
 {
     public override void _Notification(int what) => this.Notify(what);
 
     #region State
+    /// <summary>
+    /// 弾丸ファクトリロジック
+    /// </summary>
     public BulletFactoryLogic BulletFactoryLogic { get; set; } = default!;
+
+    /// <summary>
+    /// 弾丸ファクトリバインド
+    /// </summary>
     public BulletFactoryLogic.IBinding BulletFactoryBinding { get; set; } = default!;
     #endregion State
 
     #region Exports
+    /// <summary>
+    /// 待機時間
+    /// </summary>
     public double WaitTime { get; set; } = 0.1;
-    public Bullet Bullet { get; set; } = default!;
-    public Bullet[] Bullets { get; set; } = new Bullet[100];
-    public Queue<Bullet> BulletsQueue { get; set; } = new Queue<Bullet>();
 
+    /// <summary>
+    ///　弾丸配列
+    /// </summary>
+    public Bullet[] Bullets { get; set; } = new Bullet[100];
+
+    /// <summary>
+    /// 弾丸キュー
+    /// </summary>
+    public Queue<Bullet> BulletsQueue { get; set; } = new Queue<Bullet>();
     #endregion Exports
 
     #region Nodes
+    /// <summary>
+    /// タイマーノード
+    /// </summary>
     [Node]
     public ITimer Timer { get; set; } = default!;
     #endregion Nodes
 
+    #region Provisions
+    /// <summary>
+    /// 弾丸ファクトリプロバイダー
+    /// </summary>
+    /// <returns></returns>
     IBulletFactory IProvide<IBulletFactory>.Value() => this;
+    #endregion Provisions
 
+    #region Dependencies
+    /// <summary>
+    /// インスタンス化部品
+    /// </summary>
     [Dependency]
     public IInstantiator Instantiator => this.DependOn<IInstantiator>(() => new Instantiator(GetTree()));
+    #endregion Dependencies
 
     public void Initialize()
     {
@@ -55,8 +90,6 @@ public partial class BulletFactory : Node, IBulletFactory
         BulletFactoryLogic = new BulletFactoryLogic();
         BulletFactoryBinding = BulletFactoryLogic.Bind();
 
-        // AddChild(Bullet);
-        // Bullet.Show();
         Bullets = Bullets.Select(e =>
         {
             e = Instantiator.LoadAndInstantiate<Bullet>(Const.BulletNodePath);
@@ -84,23 +117,32 @@ public partial class BulletFactory : Node, IBulletFactory
         BulletFactoryLogic.Start();
     }
 
+    public void OnPhysicsProcess(double delta)
+    {
+        // GD.Print("Shot");
+        // Shoot();
+    }
+
+    /// <summary>
+    /// タイムアウトイベント
+    /// </summary>
     public void OnTimeout()
     {
         BulletFactoryLogic.Input(new BulletFactoryLogic.Input.CoolDownComplete());
     }
 
-    public void OnPhysicsProcess(double delta)
-    {
-        GD.Print("Shot");
-        Shoot();
-    }
-
+    /// <summary>
+    /// タイマーセット
+    /// </summary>
     public void SetTimer()
     {
         GD.Print("SetTimer");
         Timer.Start();
     }
 
+    /// <summary>
+    /// 射撃
+    /// </summary>
     public void Shoot()
     {
         BulletFactoryLogic.Input(new BulletFactoryLogic.Input.Fire());

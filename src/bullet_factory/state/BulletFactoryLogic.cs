@@ -47,7 +47,7 @@ public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, 
         public readonly record struct StartCoolDown;
 
         /// <summary>
-        ///
+        /// 射出待機完了
         /// </summary>
         public readonly record struct ReadyComplete;
     }

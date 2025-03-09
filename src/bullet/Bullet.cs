@@ -112,14 +112,9 @@ public partial class Bullet : Node2D, IBullet
                 BulletFactory.BulletsQueue.Enqueue(this);
                 BulletLogic.Input(new BulletLogic.Input.Reload());
             });
-        // Draw += OnDraw;
         Area2D.AreaEntered += OnAreaEntered;
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         BulletLogic.Start();
-        // BulletLogic.Input(new BulletLogic.Input.Fire());
-        // BulletLogic.Input(new BulletLogic.Input.Hit());
-        // BulletLogic.Input(new BulletLogic.Input.Collapse());
-        // BulletLogic.Input(new BulletLogic.Input.Fire());
     }
 
     public void OnPhysicsProcess(double delta)
@@ -148,17 +143,6 @@ public partial class Bullet : Node2D, IBullet
         BulletLogic.Input(new BulletLogic.Input.Miss());
     }
 
-    // /// <summary>
-    // /// 表示時の処理
-    // /// ※射出時に表示する
-    // /// </summary>
-    // public void OnDraw()
-    // {
-    //     GD.Print("Show");
-    //     BulletLogic.Input(new BulletLogic.Input.Fire());
-    //     ThrustBullet(new Vector2(0, 0), new Vector2(0, 1));
-    // }
-
     /// <summary>
     /// 弾丸射出
     /// </summary>
@@ -179,17 +163,9 @@ public partial class Bullet : Node2D, IBullet
     }
 
     /// <summary>
-    /// ツリーからノードが消された時の処理
+    /// 射出
+    /// ※BulletFactoryから呼び出し
     /// </summary>
-    public void OnExitTree()
-    {
-        // Draw -= OnDraw;
-        // Area2D.AreaEntered -= OnAreaEntered;
-        // VisibleOnScreenNotifier2D.ScreenExited -= OnScreenExited;
-        // BulletBinding.Dispose();
-        // GD.Print("BulletDispose");
-    }
-
     public void Emit()
     {
         BulletLogic.Input(new BulletLogic.Input.Fire());
