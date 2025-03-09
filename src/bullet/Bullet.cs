@@ -101,7 +101,7 @@ public partial class Bullet : Node2D, IBullet
             })
             .Handle((in BulletLogic.Output.Disappear _) =>
             {
-                Hide();
+                GetParent().RemoveChild(this);
                 InitializeBullet();
                 GD.Print("Removed!");
                 SetPhysicsProcess(false);
