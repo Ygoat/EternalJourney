@@ -82,6 +82,10 @@ public partial class Bullet : Node2D, IBullet
     {
         BulletLogic = new BulletLogic();
         BulletBinding = BulletLogic.Bind();
+        // TODO:コリジョンレイヤーをEnumにする
+        Area2D.CollisionLayer = 0;
+        // TODO:コリジョンマスクをEnumにする
+        Area2D.CollisionMask = 1;
     }
 
     public void OnReady()

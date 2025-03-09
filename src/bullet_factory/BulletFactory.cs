@@ -119,8 +119,8 @@ public partial class BulletFactory : Node, IBulletFactory
 
     public void OnPhysicsProcess(double delta)
     {
-        // GD.Print("Shot");
-        // Shoot();
+        GD.Print("Shot");
+        Shoot();
     }
 
     /// <summary>
