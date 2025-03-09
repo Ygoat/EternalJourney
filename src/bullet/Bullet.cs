@@ -4,6 +4,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.App.State;
+using EternalJourney.BulletFactory;
 using Godot;
 
 /// <summary>
@@ -74,6 +75,9 @@ public partial class Bullet : Node2D, IBullet
     public int Durability { get; set; } = 1;
     #endregion Exports
 
+    [Dependency]
+    public IBulletFactory BulletFactory => this.DependOn<IBulletFactory>();
+
     public void Setup()
     {
         BulletLogic = new BulletLogic();
@@ -105,8 +109,10 @@ public partial class Bullet : Node2D, IBullet
                 InitializeBullet();
                 GD.Print("Removed!");
                 SetPhysicsProcess(false);
+                BulletFactory.BulletsQueue.Enqueue(this);
+                BulletLogic.Input(new BulletLogic.Input.Reload());
             });
-        Draw += OnDraw;
+        // Draw += OnDraw;
         Area2D.AreaEntered += OnAreaEntered;
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         BulletLogic.Start();
@@ -142,16 +148,16 @@ public partial class Bullet : Node2D, IBullet
         BulletLogic.Input(new BulletLogic.Input.Miss());
     }
 
-    /// <summary>
-    /// 表示時の処理
-    /// ※射出時に表示する
-    /// </summary>
-    public void OnDraw()
-    {
-        GD.Print("Show");
-        BulletLogic.Input(new BulletLogic.Input.Fire());
-        ThrustBullet(new Vector2(0, 0), new Vector2(0, 1));
-    }
+    // /// <summary>
+    // /// 表示時の処理
+    // /// ※射出時に表示する
+    // /// </summary>
+    // public void OnDraw()
+    // {
+    //     GD.Print("Show");
+    //     BulletLogic.Input(new BulletLogic.Input.Fire());
+    //     ThrustBullet(new Vector2(0, 0), new Vector2(0, 1));
+    // }
 
     /// <summary>
     /// 弾丸射出
@@ -177,11 +183,17 @@ public partial class Bullet : Node2D, IBullet
     /// </summary>
     public void OnExitTree()
     {
-        Draw -= OnDraw;
-        Area2D.AreaEntered -= OnAreaEntered;
-        VisibleOnScreenNotifier2D.ScreenExited -= OnScreenExited;
-        BulletBinding.Dispose();
-        GD.Print("BulletDispose");
+        // Draw -= OnDraw;
+        // Area2D.AreaEntered -= OnAreaEntered;
+        // VisibleOnScreenNotifier2D.ScreenExited -= OnScreenExited;
+        // BulletBinding.Dispose();
+        // GD.Print("BulletDispose");
+    }
+
+    public void Emit()
+    {
+        BulletLogic.Input(new BulletLogic.Input.Fire());
+        ThrustBullet(new Vector2(0, 0), new Vector2(0, 1));
     }
 
 }

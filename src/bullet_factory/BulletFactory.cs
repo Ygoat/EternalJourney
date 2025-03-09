@@ -1,5 +1,7 @@
 namespace EternalJourney.BulletFactory;
 
+using System.Collections.Generic;
+using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
@@ -10,7 +12,10 @@ using EternalJourney.Cores.Utils;
 using Godot;
 
 
-public interface IBulletFactory : INode;
+public interface IBulletFactory : INode, IProvide<IBulletFactory>
+{
+    public Queue<Bullet> BulletsQueue { get; set; }
+};
 
 [Meta(typeof(IAutoNode))]
 public partial class BulletFactory : Node, IBulletFactory
@@ -23,8 +28,11 @@ public partial class BulletFactory : Node, IBulletFactory
     #endregion State
 
     #region Exports
-    public int WaitTime { get; set; } = 1;
+    public double WaitTime { get; set; } = 0.1;
     public Bullet Bullet { get; set; } = default!;
+    public Bullet[] Bullets { get; set; } = new Bullet[100];
+    public Queue<Bullet> BulletsQueue { get; set; } = new Queue<Bullet>();
+
     #endregion Exports
 
     #region Nodes
@@ -32,14 +40,30 @@ public partial class BulletFactory : Node, IBulletFactory
     public ITimer Timer { get; set; } = default!;
     #endregion Nodes
 
-    [Dependency]
-    public IInstantiator Instantiator => this.DependOn<IInstantiator>();
+    IBulletFactory IProvide<IBulletFactory>.Value() => this;
 
+    [Dependency]
+    public IInstantiator Instantiator => this.DependOn<IInstantiator>(() => new Instantiator(GetTree()));
+
+    public void Initialize()
+    {
+        this.Provide();
+    }
 
     public void Setup()
     {
         BulletFactoryLogic = new BulletFactoryLogic();
         BulletFactoryBinding = BulletFactoryLogic.Bind();
+
+        // AddChild(Bullet);
+        // Bullet.Show();
+        Bullets = Bullets.Select(e =>
+        {
+            e = Instantiator.LoadAndInstantiate<Bullet>(Const.BulletNodePath);
+
+            BulletsQueue.Enqueue(e);
+            return e;
+        }).ToArray();
     }
 
     public void OnReady()
@@ -58,13 +82,6 @@ public partial class BulletFactory : Node, IBulletFactory
         Timer.SetWaitTime(WaitTime);
         Timer.Timeout += OnTimeout;
         BulletFactoryLogic.Start();
-    }
-
-    public void OnResolved()
-    {
-        // Instantiator.ToString();
-        Bullet = Instantiator.LoadAndInstantiate<Bullet>(Const.BulletNodePath);
-        Bullet.Show();
     }
 
     public void OnTimeout()
@@ -87,6 +104,11 @@ public partial class BulletFactory : Node, IBulletFactory
     public void Shoot()
     {
         BulletFactoryLogic.Input(new BulletFactoryLogic.Input.Fire());
+        Bullet bullet = BulletsQueue.Dequeue();
+        GD.Print(BulletsQueue.Count());
+        GD.Print("AddChild");
+        AddChild(bullet);
+        bullet.Emit();
     }
 
 }
