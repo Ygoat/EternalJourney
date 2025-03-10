@@ -5,6 +5,7 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.App.State;
 using EternalJourney.BulletFactory;
+using EternalJourney.Weapon;
 using Godot;
 
 /// <summary>
@@ -77,6 +78,8 @@ public partial class Bullet : Node2D, IBullet
 
     [Dependency]
     public IBulletFactory BulletFactory => this.DependOn<IBulletFactory>();
+    [Dependency]
+    public IWeapon Weapon => this.DependOn<IWeapon>();
 
     public void Setup()
     {
@@ -173,7 +176,7 @@ public partial class Bullet : Node2D, IBullet
     public void Emit()
     {
         BulletLogic.Input(new BulletLogic.Input.Fire());
-        ThrustBullet(new Vector2(0, 0), new Vector2(0, 1));
+        ThrustBullet(Weapon.Marker2D.GlobalPosition, new Vector2(0, 1));
     }
 
 }
