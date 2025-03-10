@@ -14,7 +14,7 @@ public interface IWeapon : INode2D, IProvide<IWeapon>
 };
 
 [Meta(typeof(IAutoNode))]
-public partial class Weapon : Node2D, IWeapon, IProvide<IWeapon>
+public partial class Weapon : Node2D, IWeapon
 {
     public override void _Notification(int what) => this.Notify(what);
 
