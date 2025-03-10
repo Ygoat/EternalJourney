@@ -5,6 +5,7 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.App.State;
 using EternalJourney.BulletFactory;
+using EternalJourney.Cores.Consts;
 using EternalJourney.Weapon;
 using Godot;
 
@@ -86,9 +87,9 @@ public partial class Bullet : Node2D, IBullet
         BulletLogic = new BulletLogic();
         BulletBinding = BulletLogic.Bind();
         // TODO:コリジョンレイヤーをEnumにする
-        Area2D.CollisionLayer = 0;
+        Area2D.CollisionLayer = CollisionEntity.Bullet;
         // TODO:コリジョンマスクをEnumにする
-        Area2D.CollisionMask = 1;
+        Area2D.CollisionMask = CollisionEntity.Enemy;
     }
 
     public void OnReady()
