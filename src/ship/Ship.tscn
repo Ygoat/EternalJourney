@@ -48,3 +48,6 @@ rotation = -2.40129
 [node name="Weapon4" parent="." instance=ExtResource("1_uatdr")]
 position = Vector2(-87, -155)
 rotation = -3.86527
+
+[node name="EnemyTargetMarker" type="Marker2D" parent="."]
+unique_name_in_owner = true
