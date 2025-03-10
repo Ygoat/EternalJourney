@@ -8,7 +8,6 @@ using EternalJourney.AutoConnectTest;
 using EternalJourney.Cores.Models;
 using EternalJourney.Cores.Repositories;
 using Godot;
-using Microsoft.VisualBasic;
 
 
 /// <summary>
@@ -30,20 +29,16 @@ public partial class Game : Node, IProvide<string>, IGame
     public Button TestButton { get; private set; } = default!;
     public int ButtonPresses { get; private set; }
 
-    [Node]
-    public IAutoConnectTestNode AutoConnectTestNode { get; set; } = default!;
-
     [Dependency]
     private ICrewCsvReader crewCsvReader => this.DependOn<ICrewCsvReader>(() => new CrewCsvReader());
 
-    public override void _Ready()
-      => TestButton = GetNode<Button>("%TestButton");
+    public override void _Ready() { }
 
     // OnReadyでProvide()を呼び出して依存関係を提供します。
     public void OnReady()
     {
         this.Provide(); // 依存関係の提供を通知
-        AutoConnectTestNode.TestEmit += OnTestEmitConnect;
+        // AutoConnectTestNode.TestEmit += OnTestEmitConnect;
         return;
     }
 
