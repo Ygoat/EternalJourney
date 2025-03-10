@@ -176,7 +176,7 @@ public partial class Bullet : Node2D, IBullet
     public void Emit()
     {
         BulletLogic.Input(new BulletLogic.Input.Fire());
-        ThrustBullet(Weapon.Marker2D.GlobalPosition, new Vector2(0, 1));
+        ThrustBullet(Weapon.Marker2D.GlobalPosition, new Vector2(0, 1).Rotated(Weapon.Rotation));
     }
 
 }

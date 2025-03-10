@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cywpu6lxdjhuu"]
+[gd_scene load_steps=5 format=3 uid="uid://cywpu6lxdjhuu"]
 
 [ext_resource type="Script" path="res://src/game/Game.cs" id="1_u8fpt"]
 [ext_resource type="Script" path="res://src/DependTestNode.cs" id="2_rss6t"]
 [ext_resource type="PackedScene" uid="uid://d2wpnvwpfgrla" path="res://src/auto_connect_test/AutoConnectTestNode.tscn" id="3_vyjr7"]
+[ext_resource type="PackedScene" uid="uid://brbkk7msm1p13" path="res://src/ship/Ship.tscn" id="4_evpir"]
 
 [node name="Game" type="Node"]
 script = ExtResource("1_u8fpt")
@@ -27,5 +28,8 @@ script = ExtResource("2_rss6t")
 
 [node name="AutoConnectTestNode" parent="." instance=ExtResource("3_vyjr7")]
 unique_name_in_owner = true
+
+[node name="Ship" parent="." instance=ExtResource("4_evpir")]
+position = Vector2(342, 437)
 
 [connection signal="pressed" from="CenterContainer/VBoxContainer/TestButton" to="." method="OnTestButtonPressed"]

@@ -16,7 +16,7 @@ public partial class DependTestNode : Node
     public string MyDependency => this.DependOn<string>();
 
     [Dependency]
-    private ICrewCsvReader crewCsvReader => this.DependOn<ICrewCsvReader>();
+    private ICrewCsvReader crewCsvReader => this.DependOn<ICrewCsvReader>(() => new CrewCsvReader());
 
     // 依存関係が解決された後に呼ばれるメソッド
     public void OnResolved()

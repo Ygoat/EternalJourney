@@ -1,5 +1,6 @@
 namespace EternalJourney.Game;
 
+using System.Reflection.Metadata;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
@@ -7,6 +8,8 @@ using EternalJourney.AutoConnectTest;
 using EternalJourney.Cores.Models;
 using EternalJourney.Cores.Repositories;
 using Godot;
+using Microsoft.VisualBasic;
+
 
 /// <summary>
 /// ゲームインターフェース
@@ -31,7 +34,7 @@ public partial class Game : Node, IProvide<string>, IGame
     public IAutoConnectTestNode AutoConnectTestNode { get; set; } = default!;
 
     [Dependency]
-    private ICrewCsvReader crewCsvReader => this.DependOn<ICrewCsvReader>();
+    private ICrewCsvReader crewCsvReader => this.DependOn<ICrewCsvReader>(() => new CrewCsvReader());
 
     public override void _Ready()
       => TestButton = GetNode<Button>("%TestButton");

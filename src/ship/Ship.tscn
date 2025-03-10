@@ -1,0 +1,50 @@
+[gd_scene load_steps=2 format=3 uid="uid://brbkk7msm1p13"]
+
+[ext_resource type="PackedScene" uid="uid://dl4iypn5nvd0q" path="res://src/weapon/Weapon.tscn" id="1_uatdr"]
+
+[node name="Ship" type="Node2D"]
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -110.0
+offset_top = -174.0
+offset_right = 110.0
+offset_bottom = 174.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.749496, 0.999764, 0.72598, 1)
+
+[node name="Weapon" parent="." instance=ExtResource("1_uatdr")]
+position = Vector2(-91, 150)
+rotation = 0.635046
+
+[node name="Weapon2" parent="." instance=ExtResource("1_uatdr")]
+position = Vector2(84, 149)
+rotation = -0.756117
+
+[node name="Weapon3" parent="." instance=ExtResource("1_uatdr")]
+position = Vector2(87, -155)
+rotation = -2.40129
+
+[node name="Weapon4" parent="." instance=ExtResource("1_uatdr")]
+position = Vector2(-87, -155)
+rotation = -3.86527

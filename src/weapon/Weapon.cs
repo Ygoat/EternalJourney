@@ -11,6 +11,7 @@ using Godot;
 public interface IWeapon : INode2D, IProvide<IWeapon>
 {
     public IMarker2D Marker2D { get; set; }
+    public IMarker2D CenterMarker { get; set; }
 };
 
 [Meta(typeof(IAutoNode))]
@@ -27,6 +28,9 @@ public partial class Weapon : Node2D, IWeapon
     #region Nodes
     [Node]
     public IMarker2D Marker2D { get; set; } = default!;
+
+    [Node]
+    public IMarker2D CenterMarker { get; set; } = default!;
     #endregion Nodes
 
     #region Provisions
