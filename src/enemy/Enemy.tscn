@@ -38,6 +38,7 @@ grow_vertical = 2
 color = Color(1, 0.18, 0.18, 1)
 
 [node name="Area2D" type="Area2D" parent="."]
+unique_name_in_owner = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectangleShape2D_aws60")

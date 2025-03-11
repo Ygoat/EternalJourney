@@ -117,6 +117,7 @@ public partial class App : CanvasLayer, IApp
 
     /// <summary>
     /// NodeがReady状態になった時の処理
+    /// <inheritdoc/>
     /// </summary>
     public void OnReady()
     {
