@@ -48,6 +48,16 @@ OnResolved
 OnReady
 OnPhysicsProcess
 シグナルイベントメソッド
+##
+処理順メモ
+Child:Initialize -> ChildLabel -> ParentLabel null
+Child:Ready -> ChildLabel -> ParentLabel null
+Parent:Initialize -> ParentLabel
+Child:Setup -> ChildLabel -> ParentLabel Initialize
+Child:Resolved -> ChildLabel -> ParentLabel Initialize
+Parent:Setup -> ParentLabel
+Parent:Resolved -> ParentLabel
+Parent:Ready -> ParentLabel
 
 # その他
 
