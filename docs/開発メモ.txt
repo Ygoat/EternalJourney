@@ -23,6 +23,8 @@ Godot側の設定でエディタをVSCodeにしておくとよい
 シグナルイベントは状態の変更を行う
 
 ## コーディング規約
+
+プロパティ宣言の順番
 ```
 #region Signals
 #endregion Signals
@@ -34,12 +36,18 @@ Godot側の設定でエディタをVSCodeにしておくとよい
 #endregion PackedScenes
 #region Nodes
 #endregion Nodes
-
 #region Provisions
 #endregion Provisions
 #region Dependencies
 #endregion Dependencies
 ```
+メソッド定義の順番
+Initialiez
+Setup
+OnResolved
+OnReady
+OnPhysicsProcess
+シグナルイベントメソッド
 
 # その他
 
