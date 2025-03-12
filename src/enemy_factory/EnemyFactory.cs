@@ -115,7 +115,7 @@ public partial class EnemyFactory : Node, IEnemyFactory
     public void OnPhysicsProcess(double delta)
     {
         GD.Print("Shot");
-        Shoot();
+        Spawn();
     }
 
     /// <summary>
@@ -138,7 +138,7 @@ public partial class EnemyFactory : Node, IEnemyFactory
     /// <summary>
     /// 射撃
     /// </summary>
-    public void Shoot()
+    public void Spawn()
     {
         EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.Spawn());
         Enemy enemy = EnemiesQueue.Dequeue();

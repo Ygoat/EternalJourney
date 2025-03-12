@@ -5,6 +5,7 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Cores.Consts;
 using EternalJourney.EnemyFactory;
+using EternalJourney.EnemySpawner;
 using Godot;
 
 /// <summary>
@@ -50,7 +51,14 @@ public partial class Enemy : Node2D, IEnemy
     #region Dependency
     [Dependency]
     public IEnemyFactory EnemyFactory => this.DependOn<IEnemyFactory>();
+
+    [Dependency]
+    public IEnemySpawner EnemySpawner => this.DependOn<IEnemySpawner>();
     #endregion Dependency
+
+    public void OnReady()
+    {
+    }
 
     public void Setup()
     {
@@ -69,7 +77,7 @@ public partial class Enemy : Node2D, IEnemy
             })
             .Handle((in EnemyLogic.Output.Damaged _) =>
             {
-                GetParent().RemoveChild(this);
+                CallDeferred("RemoveSelf");
                 SetPhysicsProcess(false);
                 EnemyFactory.EnemiesQueue.Enqueue(this);
                 EnemyLogic.Input(new EnemyLogic.Input.Removed());
@@ -98,6 +106,7 @@ public partial class Enemy : Node2D, IEnemy
     public void EnemySpawn()
     {
         EnemyLogic.Input(new EnemyLogic.Input.TargetDiscover());
+        GlobalPosition = EnemySpawner.PathFollow2D.GlobalPosition;
     }
 
     /// <summary>
@@ -107,5 +116,10 @@ public partial class Enemy : Node2D, IEnemy
     public void OnScreenExited()
     {
         EnemyLogic.Input(new EnemyLogic.Input.TakeDamage());
+    }
+
+    public void RemoveSelf()
+    {
+        GetParent().RemoveChild(this);
     }
 }

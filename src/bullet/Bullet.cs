@@ -113,7 +113,8 @@ public partial class Bullet : Node2D, IBullet
             })
             .Handle((in BulletLogic.Output.Disappear _) =>
             {
-                GetParent().RemoveChild(this);
+                CallDeferred("RemoveSelf");
+                // GetParent().RemoveChild(this);
                 InitializeBullet();
                 GD.Print("Removed!");
                 SetPhysicsProcess(false);
@@ -178,6 +179,11 @@ public partial class Bullet : Node2D, IBullet
     {
         BulletLogic.Input(new BulletLogic.Input.Fire());
         ThrustBullet(Weapon.Marker2D.GlobalPosition, new Vector2(0, 1).Rotated(Weapon.Rotation));
+    }
+
+    public void RemoveSelf()
+    {
+        GetParent().RemoveChild(this);
     }
 
 }
