@@ -6,7 +6,7 @@ state "EnemyLogic State" as EternalJourney_Enemy_EnemyLogic_State {
 }
 
 EternalJourney_Enemy_EnemyLogic_State_Closing --> EternalJourney_Enemy_EnemyLogic_State_Destroy : TakeDamage
-EternalJourney_Enemy_EnemyLogic_State_Destroy --> EternalJourney_Enemy_EnemyLogic_State_SpawnWaiting : TakeDamage
+EternalJourney_Enemy_EnemyLogic_State_Destroy --> EternalJourney_Enemy_EnemyLogic_State_SpawnWaiting : Removed
 EternalJourney_Enemy_EnemyLogic_State_SpawnWaiting --> EternalJourney_Enemy_EnemyLogic_State_Closing : TargetDiscover
 
 EternalJourney_Enemy_EnemyLogic_State_Closing : OnEnter → StartClose

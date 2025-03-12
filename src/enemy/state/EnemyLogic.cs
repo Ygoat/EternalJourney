@@ -33,7 +33,7 @@ public partial class EnemyLogic : LogicBlock<EnemyLogic.State>, IEnemyLogic
         /// <summary>
         /// スポーン
         /// </summary>
-        public readonly record struct Spawn;
+        public readonly record struct Removed;
 
         /// <summary>
         /// 被ダメージ
@@ -96,14 +96,14 @@ public partial class EnemyLogic : LogicBlock<EnemyLogic.State>, IEnemyLogic
         /// <summary>
         /// ロード
         /// </summary>
-        public record Destroy : State, IGet<Input.TakeDamage>
+        public record Destroy : State, IGet<Input.Removed>
         {
             public Destroy()
             {
                 this.OnEnter(() => Output(new Output.Damaged()));
             }
 
-            public Transition On(in Input.TakeDamage input) => To<SpawnWaiting>();
+            public Transition On(in Input.Removed input) => To<SpawnWaiting>();
         }
 
 
