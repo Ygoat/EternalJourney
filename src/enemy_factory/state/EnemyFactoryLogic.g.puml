@@ -1,0 +1,14 @@
+@startuml EnemyFactoryLogic
+state "EnemyFactoryLogic State" as EternalJourney_EnemyFactory_State_EnemyFactoryLogic_State {
+  state "ShootReady" as EternalJourney_EnemyFactory_State_EnemyFactoryLogic_State_ShootReady
+  state "CoolDown" as EternalJourney_EnemyFactory_State_EnemyFactoryLogic_State_CoolDown
+}
+
+EternalJourney_EnemyFactory_State_EnemyFactoryLogic_State_CoolDown --> EternalJourney_EnemyFactory_State_EnemyFactoryLogic_State_ShootReady : CoolDownComplete
+EternalJourney_EnemyFactory_State_EnemyFactoryLogic_State_ShootReady --> EternalJourney_EnemyFactory_State_EnemyFactoryLogic_State_CoolDown : Spawn
+
+EternalJourney_EnemyFactory_State_EnemyFactoryLogic_State_CoolDown : OnEnter → StartCoolDown
+EternalJourney_EnemyFactory_State_EnemyFactoryLogic_State_ShootReady : OnEnter → ReadyComplete
+
+[*] --> EternalJourney_EnemyFactory_State_EnemyFactoryLogic_State_ShootReady
+@enduml

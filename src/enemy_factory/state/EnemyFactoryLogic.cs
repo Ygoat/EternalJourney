@@ -1,4 +1,4 @@
-namespace EternalJourney.BulletFactory.State;
+namespace EternalJourney.EnemyFactory.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
@@ -6,13 +6,13 @@ using Chickensoft.LogicBlocks;
 /// <summary>
 /// 弾丸ロジックインターフェース
 /// </summary>
-public interface IBulletFactoryLogic : ILogicBlock<BulletFactoryLogic.State>;
+public interface IEnemyFactoryLogic : ILogicBlock<EnemyFactoryLogic.State>;
 
 /// <summary>
 /// 弾丸ロジック
 /// </summary>
 [Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, IBulletFactoryLogic
+public partial class EnemyFactoryLogic : LogicBlock<EnemyFactoryLogic.State>, IEnemyFactoryLogic
 {
     /// <summary>
     /// 初期状態
@@ -28,7 +28,7 @@ public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, 
         /// <summary>
         /// 射撃
         /// </summary>
-        public readonly record struct Fire;
+        public readonly record struct Spawn;
 
         /// <summary>
         /// クールダウン完了
@@ -62,14 +62,14 @@ public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, 
         /// <summary>
         /// 射撃可能
         /// </summary>
-        public record ShootReady : State, IGet<Input.Fire>
+        public record ShootReady : State, IGet<Input.Spawn>
         {
             public ShootReady()
             {
                 this.OnEnter(() => Output(new Output.ReadyComplete()));
             }
 
-            public Transition On(in Input.Fire input) => To<CoolDown>();
+            public Transition On(in Input.Spawn input) => To<CoolDown>();
         }
 
         /// <summary>

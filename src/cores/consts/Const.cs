@@ -24,4 +24,9 @@ public static class Const
     /// 弾丸シーンファイルパス
     /// </summary>
     public const string BulletNodePath = "res://src/bullet/Bullet.tscn";
+
+    /// <summary>
+    /// エネミーシーンファイルパス
+    /// </summary>
+    public const string EnemyNodePath = "res://src/enemy/Enemy.tscn";
 }

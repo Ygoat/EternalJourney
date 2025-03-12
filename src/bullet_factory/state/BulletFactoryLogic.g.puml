@@ -1,14 +1,14 @@
 @startuml BulletFactoryLogic
-state "BulletFactoryLogic State" as EternalJourney_App_State_BulletFactoryLogic_State {
-  state "ShootReady" as EternalJourney_App_State_BulletFactoryLogic_State_ShootReady
-  state "CoolDown" as EternalJourney_App_State_BulletFactoryLogic_State_CoolDown
+state "BulletFactoryLogic State" as EternalJourney_BulletFactory_State_BulletFactoryLogic_State {
+  state "ShootReady" as EternalJourney_BulletFactory_State_BulletFactoryLogic_State_ShootReady
+  state "CoolDown" as EternalJourney_BulletFactory_State_BulletFactoryLogic_State_CoolDown
 }
 
-EternalJourney_App_State_BulletFactoryLogic_State_CoolDown --> EternalJourney_App_State_BulletFactoryLogic_State_ShootReady : CoolDownComplete
-EternalJourney_App_State_BulletFactoryLogic_State_ShootReady --> EternalJourney_App_State_BulletFactoryLogic_State_CoolDown : Fire
+EternalJourney_BulletFactory_State_BulletFactoryLogic_State_CoolDown --> EternalJourney_BulletFactory_State_BulletFactoryLogic_State_ShootReady : CoolDownComplete
+EternalJourney_BulletFactory_State_BulletFactoryLogic_State_ShootReady --> EternalJourney_BulletFactory_State_BulletFactoryLogic_State_CoolDown : Fire
 
-EternalJourney_App_State_BulletFactoryLogic_State_CoolDown : OnEnter → StartCoolDown
-EternalJourney_App_State_BulletFactoryLogic_State_ShootReady : OnEnter → ReadyComplete
+EternalJourney_BulletFactory_State_BulletFactoryLogic_State_CoolDown : OnEnter → StartCoolDown
+EternalJourney_BulletFactory_State_BulletFactoryLogic_State_ShootReady : OnEnter → ReadyComplete
 
-[*] --> EternalJourney_App_State_BulletFactoryLogic_State_ShootReady
+[*] --> EternalJourney_BulletFactory_State_BulletFactoryLogic_State_ShootReady
 @enduml

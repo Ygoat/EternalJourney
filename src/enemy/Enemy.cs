@@ -4,6 +4,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Cores.Consts;
+using EternalJourney.EnemyFactory;
 using Godot;
 
 /// <summary>
@@ -23,7 +24,7 @@ public partial class Enemy : Node2D, IEnemy
     /// <summary>
     /// エネミーロジック
     /// </summary>
-    public IEnemyLogic EnemyLogic { get; set; } = default!;
+    public EnemyLogic EnemyLogic { get; set; } = default!;
 
     /// <summary>
     /// エネミーロジックバインド
@@ -41,7 +42,15 @@ public partial class Enemy : Node2D, IEnemy
     #region Nodes
     [Node]
     public IArea2D Area2D { get; set; } = default!;
+
+    [Node]
+    public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
     #endregion Nodes
+
+    #region Dependency
+    [Dependency]
+    public IEnemyFactory EnemyFactory => this.DependOn<IEnemyFactory>();
+    #endregion Dependency
 
     public void Setup()
     {
@@ -62,18 +71,19 @@ public partial class Enemy : Node2D, IEnemy
             {
                 GetParent().RemoveChild(this);
                 SetPhysicsProcess(false);
+                EnemyFactory.EnemiesQueue.Enqueue(this);
                 EnemyLogic.Input(new EnemyLogic.Input.Removed());
             })
             .Handle((in EnemyLogic.Output.SpawnEnable _) =>
             {
             });
         Area2D.AreaEntered += OnAreaEntered;
+        VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         EnemyLogic.Start();
     }
 
     public void OnPhysicsProcess(double delta)
     {
-        EnemyLogic.Input(new EnemyLogic.Input.TakeDamage());
         GlobalPosition += new Vector2(Speed, Speed);
     }
 
@@ -87,6 +97,15 @@ public partial class Enemy : Node2D, IEnemy
     /// </summary>
     public void EnemySpawn()
     {
-        EnemyLogic.Input(new EnemyLogic.Input.Removed());
+        EnemyLogic.Input(new EnemyLogic.Input.TargetDiscover());
+    }
+
+    /// <summary>
+    /// エリア外に出た時消す
+    /// TODO:それ用のstateを作成したい
+    /// </summary>
+    public void OnScreenExited()
+    {
+        EnemyLogic.Input(new EnemyLogic.Input.TakeDamage());
     }
 }
