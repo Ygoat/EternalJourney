@@ -2,6 +2,7 @@ namespace EternalJourney.Game;
 
 using System.Reflection.Metadata;
 using Chickensoft.AutoInject;
+using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.AutoConnectTest;
@@ -13,7 +14,7 @@ using Godot;
 /// <summary>
 /// ゲームインターフェース
 /// </summary>
-public interface IGame : INode { }
+public interface IGame : INode, IProvide<EntityTable<int>> { }
 
 /// <summary>
 /// ゲームクラス
@@ -29,17 +30,19 @@ public partial class Game : Node, IProvide<string>, IGame
     public Button TestButton { get; private set; } = default!;
     public int ButtonPresses { get; private set; }
 
+    public EntityTable<int> EntityTable { get; set; } = new EntityTable<int>();
+
     [Dependency]
     private ICrewCsvReader crewCsvReader => this.DependOn<ICrewCsvReader>(() => new CrewCsvReader());
 
+    EntityTable<int> IProvide<EntityTable<int>>.Value() => EntityTable;
+
     public override void _Ready() { }
 
-    // OnReadyでProvide()を呼び出して依存関係を提供します。
-    public void OnReady()
+    public void Setup()
     {
+        // Provide()を呼び出して依存関係を提供します。
         this.Provide(); // 依存関係の提供を通知
-        // AutoConnectTestNode.TestEmit += OnTestEmitConnect;
-        return;
     }
 
     public void OnTestButtonPressed()

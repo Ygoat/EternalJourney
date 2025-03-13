@@ -1,11 +1,13 @@
 namespace EternalJourney.Enemy;
 
 using Chickensoft.AutoInject;
+using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Cores.Consts;
 using EternalJourney.EnemyFactory;
 using EternalJourney.EnemySpawner;
+using EternalJourney.Ship;
 using Godot;
 
 /// <summary>
@@ -38,6 +40,16 @@ public partial class Enemy : Node2D, IEnemy
     /// 移動速度
     /// </summary>
     public int Speed { get; set; } = 3;
+
+    /// <summary>
+    /// 標的対象位置
+    /// </summary>
+    public Vector2 TargetPosition { get; set; } = default!;
+
+    /// <summary>
+    /// 進行方向
+    /// </summary>
+    public Vector2 Direction { get; set; } = default!;
     #endregion Exports
 
     #region Nodes
@@ -54,6 +66,9 @@ public partial class Enemy : Node2D, IEnemy
 
     [Dependency]
     public IEnemySpawner EnemySpawner => this.DependOn<IEnemySpawner>();
+
+    [Dependency]
+    public EntityTable<int> EntityTable => this.DependOn<EntityTable<int>>();
     #endregion Dependency
 
     public void OnReady()
@@ -66,6 +81,7 @@ public partial class Enemy : Node2D, IEnemy
         EnemyBinding = EnemyLogic.Bind();
         Area2D.CollisionLayer = CollisionEntity.Enemy;
         Area2D.CollisionMask = CollisionEntity.Ship | CollisionEntity.Bullet;
+        TargetPosition = EntityTable.Get<IShip>(0)!.EnemyTargetMarker.GlobalPosition;
     }
 
     public void OnResolved()
@@ -92,7 +108,8 @@ public partial class Enemy : Node2D, IEnemy
 
     public void OnPhysicsProcess(double delta)
     {
-        GlobalPosition += new Vector2(Speed, Speed);
+        Direction = TargetPosition - GlobalPosition;
+        GlobalPosition += Speed * Direction.Normalized();
     }
 
     public void OnAreaEntered(Area2D area)
