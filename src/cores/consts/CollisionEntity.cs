@@ -7,5 +7,5 @@ public static class CollisionEntity
     public const uint Enemy = 1u << 2;
     public const uint Weapon = 1u << 3;
     public const uint Bullet = 1u << 4;
-
+    public const uint Radar = 1u << 5;
 }

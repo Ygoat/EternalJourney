@@ -1,16 +1,26 @@
 namespace EternalJourney.Radar;
 
+using System.Collections.Generic;
 using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.Cores.Consts;
+using EternalJourney.Enemy;
 using EternalJourney.Radar.State;
 using Godot;
 
+public interface IRadar : INode2D
+{
+    public List<Area2D> OnAreaEnemies { get; set; }
+};
+
 [Meta(typeof(IAutoNode))]
-public partial class Radar : Node2D
+public partial class Radar : Node2D, IRadar
 {
     public override void _Notification(int what) => this.Notify(what);
+
+    public List<Area2D> OnAreaEnemies { get; set; } = new List<Area2D>();
 
     [Node("%SearchArea")]
     public IArea2D Area2D { get; set; } = default!;
@@ -23,6 +33,8 @@ public partial class Radar : Node2D
     {
         RadarLogic = new RadarLogic();
         RadarLogicBinding = RadarLogic.Bind();
+        Area2D.CollisionLayer = CollisionEntity.Radar;
+        Area2D.CollisionMask = CollisionEntity.Enemy;
     }
 
     public void OnResolved()
@@ -57,6 +69,10 @@ public partial class Radar : Node2D
     /// <param name="delta"></param>
     public void OnPhysicsProcess(double delta)
     {
+        OnAreaEnemies = Area2D.GetOverlappingAreas()
+            .Where(enemy => enemy.CollisionLayer == CollisionEntity.Enemy)
+            .OrderBy(enemy => GlobalPosition.DistanceTo(enemy.GlobalPosition))
+            .ToList();
         // ロジックブロックにオーバーラップしている敵のArea2Dノードリストを入力
         RadarLogic.Input(new RadarLogic.Input.PhysicProcess(Area2D.GetOverlappingAreas().ToList<Node2D>()));
     }
@@ -86,7 +102,7 @@ public partial class Radar : Node2D
 
             // CollisionShape2Dを作成
             CollisionShape2D collisionShape = new CollisionShape2D();
-            area.CollisionLayer = 1;
+            area.CollisionLayer = CollisionEntity.Enemy;
             area.CollisionMask = 0;
             area.AddChild(collisionShape);
 

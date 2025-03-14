@@ -10,4 +10,4 @@ unique_name_in_owner = true
 collision_mask = 255
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="SearchArea"]
-polygon = PackedVector2Array(0, 0, -60, 200, 60, 200)
+polygon = PackedVector2Array(-120, -120, -120, 120, 120, 120, 120, -120)

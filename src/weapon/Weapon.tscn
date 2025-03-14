@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://dl4iypn5nvd0q"]
+[gd_scene load_steps=4 format=3 uid="uid://dl4iypn5nvd0q"]
 
 [ext_resource type="Script" path="res://src/weapon/Weapon.cs" id="1_oaljl"]
 [ext_resource type="PackedScene" uid="uid://dhdmbvvv81you" path="res://src/bullet_factory/BulletFactory.tscn" id="2_ectgq"]
+[ext_resource type="PackedScene" uid="uid://cbcshx5jiliyh" path="res://src/radar/Radar.tscn" id="3_m5ak3"]
 
 [node name="Weapon" type="Node2D"]
 script = ExtResource("1_oaljl")
@@ -36,4 +37,7 @@ unique_name_in_owner = true
 position = Vector2(0, 60)
 
 [node name="CenterMarker" type="Marker2D" parent="."]
+unique_name_in_owner = true
+
+[node name="Radar" parent="." instance=ExtResource("3_m5ak3")]
 unique_name_in_owner = true
