@@ -17,6 +17,7 @@ using Godot;
 public interface IBulletFactory : INode, IProvide<IBulletFactory>
 {
     public Queue<Bullet> BulletsQueue { get; set; }
+    public void Shoot();
 };
 
 /// <summary>
@@ -104,11 +105,12 @@ public partial class BulletFactory : Node, IBulletFactory
         BulletFactoryBinding
             .Handle((in BulletFactoryLogic.Output.ReadyComplete _) =>
             {
-                SetPhysicsProcess(true);
+                // SetPhysicsProcess(true);
+                GenerateBullet();
             })
             .Handle((in BulletFactoryLogic.Output.StartCoolDown _) =>
             {
-                SetPhysicsProcess(false);
+                // SetPhysicsProcess(false);
                 SetTimer();
             });
         Timer.OneShot = true;
@@ -119,8 +121,8 @@ public partial class BulletFactory : Node, IBulletFactory
 
     public void OnPhysicsProcess(double delta)
     {
-        GD.Print("Shot");
-        Shoot();
+        // GD.Print("Shot");
+        // Shoot();
     }
 
     /// <summary>
@@ -146,9 +148,16 @@ public partial class BulletFactory : Node, IBulletFactory
     public void Shoot()
     {
         BulletFactoryLogic.Input(new BulletFactoryLogic.Input.Fire());
+    }
+
+    /// <summary>
+    /// 弾丸生成
+    /// </summary>
+    public void GenerateBullet()
+    {
         Bullet bullet = BulletsQueue.Dequeue();
-        GD.Print(BulletsQueue.Count());
-        GD.Print("AddChild");
+        // GD.Print(BulletsQueue.Count());
+        // GD.Print("AddChild");
         AddChild(bullet);
         bullet.Emit();
     }

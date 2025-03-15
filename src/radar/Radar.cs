@@ -13,6 +13,9 @@ using Godot;
 public interface IRadar : INode2D
 {
     public List<Area2D> OnAreaEnemies { get; set; }
+    public event Radar.SearchedEventHandler Searched;
+
+    public event Radar.NotSearchedEventHandler NotSearched;
 };
 
 [Meta(typeof(IAutoNode))]
@@ -24,6 +27,12 @@ public partial class Radar : Node2D, IRadar
 
     [Node("%SearchArea")]
     public IArea2D Area2D { get; set; } = default!;
+
+    [Signal]
+    public delegate void SearchedEventHandler();
+
+    [Signal]
+    public delegate void NotSearchedEventHandler();
 
     public IRadarLogic RadarLogic { get; set; } = default!;
 
@@ -48,6 +57,7 @@ public partial class Radar : Node2D, IRadar
         RadarLogicBinding.When((RadarLogic.State.Idle _) =>
         {
             Area2D.AreaEntered += OnAreaEntered;
+            EmitSignal(SignalName.NotSearched);
             // Idle状態の時はProcessが実行されない
             SetPhysicsProcess(false);
             GD.Print("Idle");
@@ -57,6 +67,7 @@ public partial class Radar : Node2D, IRadar
         {
             Area2D.AreaEntered -= OnAreaEntered;
             // Idle状態の時はProcessを実行する
+            EmitSignal(SignalName.Searched);
             SetPhysicsProcess(true);
             GD.Print("Searched");
         });

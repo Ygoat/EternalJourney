@@ -1,0 +1,14 @@
+@startuml WeaponLogic
+state "WeaponLogic State" as EternalJourney_Weapon_WeaponLogic_State {
+  state "Idle" as EternalJourney_Weapon_WeaponLogic_State_Idle
+  state "Attack" as EternalJourney_Weapon_WeaponLogic_State_Attack
+}
+
+EternalJourney_Weapon_WeaponLogic_State_Attack --> EternalJourney_Weapon_WeaponLogic_State_Idle : StartIdle
+EternalJourney_Weapon_WeaponLogic_State_Idle --> EternalJourney_Weapon_WeaponLogic_State_Attack : StartAttack
+
+EternalJourney_Weapon_WeaponLogic_State_Attack : OnEnter → Attacking
+EternalJourney_Weapon_WeaponLogic_State_Idle : OnEnter → Idling
+
+[*] --> EternalJourney_Weapon_WeaponLogic_State_Idle
+@enduml

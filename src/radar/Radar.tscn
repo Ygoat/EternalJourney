@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://cbcshx5jiliyh"]
+[gd_scene load_steps=3 format=3 uid="uid://cbcshx5jiliyh"]
 
 [ext_resource type="Script" path="res://src/radar/Radar.cs" id="1_nja1j"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_lqj0m"]
+radius = 263.008
 
 [node name="Radar" type="Node2D"]
 script = ExtResource("1_nja1j")
@@ -9,5 +12,5 @@ script = ExtResource("1_nja1j")
 unique_name_in_owner = true
 collision_mask = 255
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="SearchArea"]
-polygon = PackedVector2Array(-120, -120, -120, 120, 120, 120, 120, -120)
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SearchArea"]
+shape = SubResource("CircleShape2D_lqj0m")

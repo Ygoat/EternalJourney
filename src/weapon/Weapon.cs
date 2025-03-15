@@ -4,8 +4,11 @@ using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.BulletFactory;
 using EternalJourney.Radar;
 using Godot;
+using Shouldly;
+
 
 /// <summary>
 /// 武器インターフェース
@@ -22,6 +25,8 @@ public partial class Weapon : Node2D, IWeapon
     public override void _Notification(int what) => this.Notify(what);
 
     #region State
+    public WeaponLogic WeaponLogic { get; set; } = default!;
+    public WeaponLogic.IBinding WeaponBind { get; set; } = default!;
     #endregion State
     #region Exports
 
@@ -33,6 +38,9 @@ public partial class Weapon : Node2D, IWeapon
     #region PackedScenes
     #endregion PackedScenes
     #region Nodes
+    [Node]
+    public IBulletFactory BulletFactory { get; set; } = default!;
+
     [Node]
     public IMarker2D Marker2D { get; set; } = default!;
 
@@ -60,7 +68,24 @@ public partial class Weapon : Node2D, IWeapon
 
     public void Setup()
     {
-        SetPhysicsProcess(true);
+        WeaponLogic = new WeaponLogic();
+        WeaponBind = WeaponLogic.Bind();
+    }
+
+    public void OnResolved()
+    {
+        WeaponBind
+            .Handle((in WeaponLogic.Output.Idling _) =>
+            {
+                SetPhysicsProcess(false);
+            })
+            .Handle((in WeaponLogic.Output.Attacking _) =>
+            {
+                SetPhysicsProcess(true);
+            });
+        Radar.Searched += OnSearched;
+        Radar.NotSearched += OnNotSearched;
+        WeaponLogic.Start();
     }
 
     public void OnPhysicsProcess(double delta)
@@ -73,5 +98,16 @@ public partial class Weapon : Node2D, IWeapon
             float rotation = WeaponDirection.AngleTo(TargetDirection);
             Rotate(rotation);
         }
+        BulletFactory.Shoot();
+    }
+
+    public void OnSearched()
+    {
+        WeaponLogic.Input(new WeaponLogic.Input.StartAttack());
+    }
+
+    public void OnNotSearched()
+    {
+        WeaponLogic.Input(new WeaponLogic.Input.StartIdle());
     }
 }

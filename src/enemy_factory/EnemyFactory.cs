@@ -38,7 +38,7 @@ public partial class EnemyFactory : Node, IEnemyFactory
     /// <summary>
     /// 待機時間
     /// </summary>
-    public double WaitTime { get; set; } = 0.1;
+    public double WaitTime { get; set; } = 0.5;
 
     /// <summary>
     ///　弾丸配列
