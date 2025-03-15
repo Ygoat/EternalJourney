@@ -1,5 +1,6 @@
 namespace EternalJourney.Weapon;
 
+using System;
 using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
@@ -34,6 +35,8 @@ public partial class Weapon : Node2D, IWeapon
     public Vector2 TargetDirection { get; set; } = default!;
 
     public Vector2 WeaponDirection { get; set; } = default!;
+
+    public float RotationSpeed { get; set; } = 0.05f;
     #endregion Exports
     #region PackedScenes
     #endregion PackedScenes
@@ -95,7 +98,10 @@ public partial class Weapon : Node2D, IWeapon
         if (enemy != null)
         {
             TargetDirection = CenterMarker.GlobalPosition.DirectionTo(enemy.GlobalPosition);
-            float rotation = WeaponDirection.AngleTo(TargetDirection);
+            // float rotation = WeaponDirection.AngleTo(TargetDirection);
+            float AngleToTarget = Math.Abs(WeaponDirection.AngleTo(TargetDirection));
+            float Gaiseki = WeaponDirection.Cross(TargetDirection);
+            float rotation = Math.Sign(Gaiseki) * Math.Sign(AngleToTarget) * RotationSpeed * Sigmoid(1, AngleToTarget);
             Rotate(rotation);
         }
         BulletFactory.Shoot();
@@ -109,5 +115,10 @@ public partial class Weapon : Node2D, IWeapon
     public void OnNotSearched()
     {
         WeaponLogic.Input(new WeaponLogic.Input.StartIdle());
+    }
+
+    public float Sigmoid(double k, double x)
+    {
+        return (float)(2 * ((1 / (1 + Math.Pow(2.7, -k * x))) - (1 / 2)));
     }
 }

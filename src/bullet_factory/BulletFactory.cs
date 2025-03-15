@@ -94,7 +94,6 @@ public partial class BulletFactory : Node, IBulletFactory
         Bullets = Bullets.Select(e =>
         {
             e = Instantiator.LoadAndInstantiate<Bullet>(Const.BulletNodePath);
-
             BulletsQueue.Enqueue(e);
             return e;
         }).ToArray();
@@ -106,7 +105,8 @@ public partial class BulletFactory : Node, IBulletFactory
             .Handle((in BulletFactoryLogic.Output.ReadyComplete _) =>
             {
                 // SetPhysicsProcess(true);
-                GenerateBullet();
+                CallDeferred("GenerateBullet");
+                // GenerateBullet();
             })
             .Handle((in BulletFactoryLogic.Output.StartCoolDown _) =>
             {

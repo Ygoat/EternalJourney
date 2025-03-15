@@ -92,7 +92,7 @@ public partial class Bullet : Node2D, IBullet
         Area2D.CollisionMask = CollisionEntity.Enemy;
     }
 
-    public void OnReady()
+    public void OnResolved()
     {
         BulletBinding
             .Handle((in BulletLogic.Output.Emitted _) =>
@@ -115,7 +115,6 @@ public partial class Bullet : Node2D, IBullet
             {
                 CallDeferred("RemoveSelf");
                 // GetParent().RemoveChild(this);
-                InitializeBullet();
                 GD.Print("Removed!");
                 SetPhysicsProcess(false);
                 BulletFactory.BulletsQueue.Enqueue(this);
@@ -184,6 +183,6 @@ public partial class Bullet : Node2D, IBullet
     public void RemoveSelf()
     {
         GetParent().RemoveChild(this);
+        InitializeBullet();
     }
-
 }
