@@ -5,7 +5,6 @@ using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.App.State;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Utils;
 using EternalJourney.Enemy;
@@ -115,7 +114,7 @@ public partial class EnemyFactory : Node, IEnemyFactory
     public void OnPhysicsProcess(double delta)
     {
         GD.Print("Shot");
-        Spawn();
+        CallDeferred(nameof(GenerateEnemy));
     }
 
     /// <summary>
@@ -138,7 +137,7 @@ public partial class EnemyFactory : Node, IEnemyFactory
     /// <summary>
     /// 射撃
     /// </summary>
-    public void Spawn()
+    public void GenerateEnemy()
     {
         EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.Spawn());
         Enemy enemy = EnemiesQueue.Dequeue();
