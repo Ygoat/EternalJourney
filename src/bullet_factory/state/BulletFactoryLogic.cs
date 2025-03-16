@@ -4,12 +4,12 @@ using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 
 /// <summary>
-/// 弾丸ロジックインターフェース
+/// 弾丸ファクトリロジックインターフェース
 /// </summary>
 public interface IBulletFactoryLogic : ILogicBlock<BulletFactoryLogic.State>;
 
 /// <summary>
-/// 弾丸ロジック
+/// 弾丸ファクトリロジック
 /// </summary>
 [Meta, LogicBlock(typeof(State), Diagram = true)]
 public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, IBulletFactoryLogic
@@ -47,12 +47,12 @@ public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, 
     public static class Output
     {
         /// <summary>
-        /// クールダウン開始
+        /// クール中
         /// </summary>
         public readonly record struct Cooling;
 
         /// <summary>
-        /// 射出待機完了
+        /// 生成完了
         /// </summary>
         public readonly record struct Generated;
     }
@@ -76,6 +76,9 @@ public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, 
             public Transition On(in Input.Fire input) => To<Generate>();
         }
 
+        /// <summary>
+        /// 生成
+        /// </summary>
         public record Generate : State, IGet<Input.StartCoolDonw>
         {
             public Generate()

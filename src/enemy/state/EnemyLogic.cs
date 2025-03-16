@@ -4,12 +4,12 @@ using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 
 /// <summary>
-/// 弾丸ロジックインターフェース
+/// エネミーロジックインターフェース
 /// </summary>
 public interface IEnemyLogic : ILogicBlock<EnemyLogic.State>;
 
 /// <summary>
-/// 弾丸ロジック
+/// エネミーロジック
 /// </summary>
 [Meta, LogicBlock(typeof(State), Diagram = true)]
 public partial class EnemyLogic : LogicBlock<EnemyLogic.State>, IEnemyLogic
@@ -94,7 +94,7 @@ public partial class EnemyLogic : LogicBlock<EnemyLogic.State>, IEnemyLogic
         }
 
         /// <summary>
-        /// ロード
+        /// 破壊
         /// </summary>
         public record Destroy : State, IGet<Input.Removed>
         {

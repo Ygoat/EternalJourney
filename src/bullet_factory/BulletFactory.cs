@@ -16,7 +16,14 @@ using Godot;
 /// </summary>
 public interface IBulletFactory : INode, IProvide<IBulletFactory>
 {
+    /// <summary>
+    /// 弾丸キュー
+    /// </summary>
     public Queue<Bullet> BulletsQueue { get; set; }
+
+    /// <summary>
+    /// 射撃
+    /// </summary>
     public void Shoot();
 };
 
@@ -81,48 +88,62 @@ public partial class BulletFactory : Node, IBulletFactory
     public IInstantiator Instantiator => this.DependOn<IInstantiator>(() => new Instantiator(GetTree()));
     #endregion Dependencies
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void Initialize()
     {
+        // 依存性提供
         this.Provide();
     }
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void Setup()
     {
+        // 弾丸ロジックインスタンス化
         BulletFactoryLogic = new BulletFactoryLogic();
+        // 弾丸ロジックバインド
         BulletFactoryBinding = BulletFactoryLogic.Bind();
 
+        // 弾丸配列生成
         Bullets = Bullets.Select(e =>
         {
+            // 弾丸ノードインスタンス化&ロード
             e = Instantiator.LoadAndInstantiate<Bullet>(Const.BulletNodePath);
+            // キュー追加
             BulletsQueue.Enqueue(e);
             return e;
         }).ToArray();
     }
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void OnResolved()
     {
         BulletFactoryBinding
+            // Generated出力時
             .Handle((in BulletFactoryLogic.Output.Generated _) =>
             {
-                // SetPhysicsProcess(true);
+                // 弾丸生成
                 CallDeferred("GenerateBullet");
-                // GenerateBullet();
             })
+            // Cooling出力時
             .Handle((in BulletFactoryLogic.Output.Cooling _) =>
             {
-                // SetPhysicsProcess(false);
+                // タイマーセット
                 SetTimer();
             });
+        // タイマーワンショット設定
         Timer.OneShot = true;
+        // 待機時間設定
         Timer.SetWaitTime(WaitTime);
+        // タイムアウトイベント設定
         Timer.Timeout += OnTimeout;
+        // 弾丸ロジック初期状態セット
         BulletFactoryLogic.Start();
-    }
-
-    public void OnPhysicsProcess(double delta)
-    {
-        // GD.Print("Shot");
-        // Shoot();
     }
 
     /// <summary>
@@ -130,6 +151,7 @@ public partial class BulletFactory : Node, IBulletFactory
     /// </summary>
     public void OnTimeout()
     {
+        // CoolDownCompleteを入力
         BulletFactoryLogic.Input(new BulletFactoryLogic.Input.CoolDownComplete());
     }
 
@@ -138,7 +160,7 @@ public partial class BulletFactory : Node, IBulletFactory
     /// </summary>
     public void SetTimer()
     {
-        GD.Print("SetTimer");
+        // クールダウンタイマー開始
         Timer.Start();
     }
 
@@ -147,6 +169,7 @@ public partial class BulletFactory : Node, IBulletFactory
     /// </summary>
     public void Shoot()
     {
+        // Fire入力
         BulletFactoryLogic.Input(new BulletFactoryLogic.Input.Fire());
     }
 
@@ -155,11 +178,13 @@ public partial class BulletFactory : Node, IBulletFactory
     /// </summary>
     public void GenerateBullet()
     {
+        // 弾丸キュー取り出し
         Bullet bullet = BulletsQueue.Dequeue();
-        // GD.Print(BulletsQueue.Count());
-        GD.Print("GenerateBullet");
+        // 弾丸ノードをノードツリーに追加
         AddChild(bullet);
+        // 弾丸射出
         bullet.Emit();
+        // StartCoolDown入力
         BulletFactoryLogic.Input(new BulletFactoryLogic.Input.StartCoolDonw());
     }
 

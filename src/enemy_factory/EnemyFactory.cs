@@ -11,11 +11,17 @@ using EternalJourney.Enemy;
 using EternalJourney.EnemyFactory.State;
 using Godot;
 
+/// <summary>
+/// エネミーファクトリインターフェース
+/// </summary>
 public interface IEnemyFactory : INode, IProvide<IEnemyFactory>
 {
     public Queue<Enemy> EnemiesQueue { get; set; }
 };
 
+/// <summary>
+/// エネミーファクトリークラス
+/// </summary>
 [Meta(typeof(IAutoNode))]
 public partial class EnemyFactory : Node, IEnemyFactory
 {
@@ -74,46 +80,72 @@ public partial class EnemyFactory : Node, IEnemyFactory
     public IInstantiator Instantiator => this.DependOn<IInstantiator>(() => new Instantiator(GetTree()));
     #endregion Dependencies
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void Initialize()
     {
         this.Provide();
     }
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void Setup()
     {
+        // エネミーファクトリロジックインスタンス化
         EnemyFactoryLogic = new EnemyFactoryLogic();
+        // エネミーファクトリロジックバインド
         EnemyFactoryBinding = EnemyFactoryLogic.Bind();
 
+        // エネミー配列
         Enemies = Enemies.Select(e =>
         {
+            // エネミーインスタンス化
             e = Instantiator.LoadAndInstantiate<Enemy>(Const.EnemyNodePath);
-
+            // エネミーキュー追加
             EnemiesQueue.Enqueue(e);
             return e;
         }).ToArray();
     }
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void OnReady()
     {
         EnemyFactoryBinding
+            // ReadyComplete出力時
             .Handle((in EnemyFactoryLogic.Output.ReadyComplete _) =>
             {
+                // 物理処理有効化
                 SetPhysicsProcess(true);
             })
+            // StartCoolDown出力時
             .Handle((in EnemyFactoryLogic.Output.StartCoolDown _) =>
             {
+                // 物理処理無効化
                 SetPhysicsProcess(false);
+                // タイマーセット
                 SetTimer();
             });
+        // タイマーワンショット設定
         Timer.OneShot = true;
+        // タイマー待機時間設定
         Timer.SetWaitTime(WaitTime);
+        // タイマーイベント設定
         Timer.Timeout += OnTimeout;
+        // エネミーファクトリーロジック初期状態開始
         EnemyFactoryLogic.Start();
     }
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    /// <param name="delta"></param>
     public void OnPhysicsProcess(double delta)
     {
-        // GD.Print("Shot");
+        // エネミー生成
         CallDeferred(nameof(GenerateEnemy));
     }
 
@@ -122,6 +154,7 @@ public partial class EnemyFactory : Node, IEnemyFactory
     /// </summary>
     public void OnTimeout()
     {
+        // CoolDownComplete入力
         EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.CoolDownComplete());
     }
 
@@ -130,7 +163,7 @@ public partial class EnemyFactory : Node, IEnemyFactory
     /// </summary>
     public void SetTimer()
     {
-        GD.Print("SetTimer");
+        // タイマースタート
         Timer.Start();
     }
 
@@ -139,11 +172,13 @@ public partial class EnemyFactory : Node, IEnemyFactory
     /// </summary>
     public void GenerateEnemy()
     {
+        // Spawn入力
         EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.Spawn());
+        // エネミーキュー取り出し
         Enemy enemy = EnemiesQueue.Dequeue();
-        // GD.Print(EnemiesQueue.Count());
-        // GD.Print("AddChild");
+        // エネミー追加
         AddChild(enemy);
+        // エネミースポーン
         enemy.EnemySpawn();
     }
 }
