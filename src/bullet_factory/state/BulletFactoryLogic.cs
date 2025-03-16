@@ -34,6 +34,11 @@ public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, 
         /// クールダウン完了
         /// </summary>
         public readonly record struct CoolDownComplete;
+
+        /// <summary>
+        /// クールダウン開始
+        /// </summary>
+        public readonly record struct StartCoolDonw;
     }
 
     /// <summary>
@@ -44,12 +49,12 @@ public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, 
         /// <summary>
         /// クールダウン開始
         /// </summary>
-        public readonly record struct StartCoolDown;
+        public readonly record struct Cooling;
 
         /// <summary>
         /// 射出待機完了
         /// </summary>
-        public readonly record struct ReadyComplete;
+        public readonly record struct Generated;
     }
 
     // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
@@ -66,10 +71,19 @@ public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, 
         {
             public ShootReady()
             {
-                this.OnEnter(() => Output(new Output.ReadyComplete()));
             }
 
-            public Transition On(in Input.Fire input) => To<CoolDown>();
+            public Transition On(in Input.Fire input) => To<Generate>();
+        }
+
+        public record Generate : State, IGet<Input.StartCoolDonw>
+        {
+            public Generate()
+            {
+                this.OnEnter(() => Output(new Output.Generated()));
+            }
+
+            public Transition On(in Input.StartCoolDonw input) => To<CoolDown>();
         }
 
         /// <summary>
@@ -79,7 +93,7 @@ public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, 
         {
             public CoolDown()
             {
-                this.OnEnter(() => Output(new Output.StartCoolDown()));
+                this.OnEnter(() => Output(new Output.Cooling()));
             }
 
             public Transition On(in Input.CoolDownComplete input) => To<ShootReady>();

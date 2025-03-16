@@ -110,12 +110,16 @@ public partial class Bullet : Node2D, IBullet
     public void OnResolved()
     {
         BulletBinding
+            // Emittedが出力された場合
             .Handle((in BulletLogic.Output.Emitted _) =>
             {
+                // 物理処理有効化
                 SetPhysicsProcess(true);
             })
+            // Decayが出力された場合
             .Handle((in BulletLogic.Output.Decay _) =>
             {
+                // 弾丸の耐久値を減少
                 Durability -= 1;
                 if (Durability <= 0)
                 {

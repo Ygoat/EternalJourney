@@ -99,16 +99,16 @@ public partial class BulletFactory : Node, IBulletFactory
         }).ToArray();
     }
 
-    public void OnReady()
+    public void OnResolved()
     {
         BulletFactoryBinding
-            .Handle((in BulletFactoryLogic.Output.ReadyComplete _) =>
+            .Handle((in BulletFactoryLogic.Output.Generated _) =>
             {
                 // SetPhysicsProcess(true);
                 CallDeferred("GenerateBullet");
                 // GenerateBullet();
             })
-            .Handle((in BulletFactoryLogic.Output.StartCoolDown _) =>
+            .Handle((in BulletFactoryLogic.Output.Cooling _) =>
             {
                 // SetPhysicsProcess(false);
                 SetTimer();
@@ -157,9 +157,10 @@ public partial class BulletFactory : Node, IBulletFactory
     {
         Bullet bullet = BulletsQueue.Dequeue();
         // GD.Print(BulletsQueue.Count());
-        // GD.Print("AddChild");
+        GD.Print("GenerateBullet");
         AddChild(bullet);
         bullet.Emit();
+        BulletFactoryLogic.Input(new BulletFactoryLogic.Input.StartCoolDonw());
     }
 
 }

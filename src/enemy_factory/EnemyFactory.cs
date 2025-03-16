@@ -113,7 +113,7 @@ public partial class EnemyFactory : Node, IEnemyFactory
 
     public void OnPhysicsProcess(double delta)
     {
-        GD.Print("Shot");
+        // GD.Print("Shot");
         CallDeferred(nameof(GenerateEnemy));
     }
 
@@ -141,8 +141,8 @@ public partial class EnemyFactory : Node, IEnemyFactory
     {
         EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.Spawn());
         Enemy enemy = EnemiesQueue.Dequeue();
-        GD.Print(EnemiesQueue.Count());
-        GD.Print("AddChild");
+        // GD.Print(EnemiesQueue.Count());
+        // GD.Print("AddChild");
         AddChild(enemy);
         enemy.EnemySpawn();
     }
