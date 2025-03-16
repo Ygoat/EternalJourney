@@ -77,11 +77,23 @@ public partial class Bullet : Node2D, IBullet
     public int Durability { get; set; } = 1;
     #endregion Exports
 
+    #region Dependency
+    /// <summary>
+    /// 弾丸ファクトリー
+    /// </summary>
     [Dependency]
     public IBulletFactory BulletFactory => this.DependOn<IBulletFactory>();
+
+    /// <summary>
+    /// 武器
+    /// </summary>
     [Dependency]
     public IWeapon Weapon => this.DependOn<IWeapon>();
+    #endregion Dependency
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void Setup()
     {
         BulletLogic = new BulletLogic();
@@ -92,6 +104,9 @@ public partial class Bullet : Node2D, IBullet
         Area2D.CollisionMask = CollisionEntity.Enemy;
     }
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void OnResolved()
     {
         BulletBinding
@@ -114,7 +129,6 @@ public partial class Bullet : Node2D, IBullet
             .Handle((in BulletLogic.Output.Disappear _) =>
             {
                 CallDeferred("RemoveSelf");
-                // GetParent().RemoveChild(this);
                 GD.Print("Removed!");
                 SetPhysicsProcess(false);
                 BulletFactory.BulletsQueue.Enqueue(this);
@@ -125,8 +139,13 @@ public partial class Bullet : Node2D, IBullet
         BulletLogic.Start();
     }
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    /// <param name="delta"></param>
     public void OnPhysicsProcess(double delta)
     {
+        // グローバル位置の更新
         GlobalPosition += Direction.Normalized() * Speed;
     }
 
@@ -152,14 +171,40 @@ public partial class Bullet : Node2D, IBullet
     }
 
     /// <summary>
+    /// 射出
+    /// ※BulletFactoryから呼び出し
+    /// </summary>
+    public void Emit()
+    {
+        // Fireを入力
+        BulletLogic.Input(new BulletLogic.Input.Fire());
+        // 弾丸射出
+        ThrustBullet(Weapon.Marker2D.GlobalPosition, new Vector2(0, 1).Rotated(Weapon.Rotation));
+    }
+
+    /// <summary>
     /// 弾丸射出
     /// </summary>
     /// <param name="shotGPosition">射出位置</param>
     /// <param name="shotDirection">射出角度</param>
     public void ThrustBullet(Vector2 shotGPosition, Vector2 shotDirection)
     {
+        // 射出時の位置を設定(武器の発射口の位置)
         GlobalPosition = shotGPosition;
+        // 射出時の方向を設定(武器の向いている方向)
         Direction = shotDirection;
+    }
+
+    /// <summary>
+    /// 自インスタンスをツリーから一時的に取り除く
+    /// ※インスタンスは完全には削除されない
+    /// </summary>
+    public void RemoveSelf()
+    {
+        // 親ノードを取得してから、子である自ノードを削除する
+        GetParent().RemoveChild(this);
+        // 弾丸の初期化
+        InitializeBullet();
     }
 
     /// <summary>
@@ -167,22 +212,10 @@ public partial class Bullet : Node2D, IBullet
     /// </summary>
     public void InitializeBullet()
     {
+        // グローバル座標の初期化
         GlobalPosition = new Vector2(0, 0);
+        // 方向を初期化
+        Direction = new Vector2(0, 0);
     }
 
-    /// <summary>
-    /// 射出
-    /// ※BulletFactoryから呼び出し
-    /// </summary>
-    public void Emit()
-    {
-        BulletLogic.Input(new BulletLogic.Input.Fire());
-        ThrustBullet(Weapon.Marker2D.GlobalPosition, new Vector2(0, 1).Rotated(Weapon.Rotation));
-    }
-
-    public void RemoveSelf()
-    {
-        GetParent().RemoveChild(this);
-        InitializeBullet();
-    }
 }
