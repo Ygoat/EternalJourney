@@ -6,38 +6,78 @@ using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Cores.Consts;
-using EternalJourney.Enemy;
 using EternalJourney.Radar.State;
 using Godot;
 
+/// <summary>
+/// レーダーインターフェース
+/// </summary>
 public interface IRadar : INode2D
 {
+    /// <summary>
+    /// エリア内エネミー
+    /// </summary>
     public List<Area2D> OnAreaEnemies { get; set; }
+
+    /// <summary>
+    /// 敵発見イベント
+    /// </summary>
     public event Radar.SearchedEventHandler Searched;
 
+    /// <summary>
+    /// 敵未発見イベント
+    /// </summary>
     public event Radar.NotSearchedEventHandler NotSearched;
 };
 
+/// <summary>
+/// レーダークラス
+/// </summary>
 [Meta(typeof(IAutoNode))]
 public partial class Radar : Node2D, IRadar
 {
     public override void _Notification(int what) => this.Notify(what);
 
-    public List<Area2D> OnAreaEnemies { get; set; } = new List<Area2D>();
-
+    #region Nodes
+    /// <summary>
+    /// エリア2D
+    /// </summary>
     [Node("%SearchArea")]
     public IArea2D Area2D { get; set; } = default!;
+    #endregion Nodes
 
+    #region Signals
+    /// <summary>
+    /// 敵発見シグナル
+    /// </summary>
     [Signal]
     public delegate void SearchedEventHandler();
 
+    /// <summary>
+    /// 敵未発見シグナル
+    /// </summary>て
     [Signal]
     public delegate void NotSearchedEventHandler();
+    #endregion Signals
 
+    /// <summary>
+    /// レーダー内エネミー
+    /// </summary>
+    public List<Area2D> OnAreaEnemies { get; set; } = new List<Area2D>();
+
+    /// <summary>
+    /// レーダーロジック
+    /// </summary>
     public IRadarLogic RadarLogic { get; set; } = default!;
 
+    /// <summary>
+    /// レーダーロジックバインド
+    /// </summary>
     public RadarLogic.IBinding RadarLogicBinding { get; set; } = default!;
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void Setup()
     {
         RadarLogic = new RadarLogic();
@@ -46,6 +86,9 @@ public partial class Radar : Node2D, IRadar
         Area2D.CollisionMask = CollisionEntity.Enemy;
     }
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void OnResolved()
     {
         GD.Print("Ready!");
@@ -75,7 +118,7 @@ public partial class Radar : Node2D, IRadar
     }
 
     /// <summary>
-    /// 物理更新処理
+    /// <inheritdoc/>
     /// </summary>
     /// <param name="delta"></param>
     public void OnPhysicsProcess(double delta)
