@@ -6,19 +6,40 @@ using Chickensoft.Introspection;
 using EternalJourney.App.Domain;
 using Godot;
 
-public interface ISplash : IControl;
+/// <summary>
+/// スプラッシュインターフェース
+/// </summary>
+public interface ISplash : IControl
+{
+}
 
+/// <summary>
+/// スプラッシュクラス
+/// </summary>
 [Meta(typeof(IAutoNode))]
 public partial class Splash : Control, ISplash
 {
     public override void _Notification(int what) => this.Notify(what);
 
+    #region Nodes
+    /// <summary>
+    /// スプラッシュ表示時間
+    /// </summary>
     [Node]
     public ITimer SplashTimer { get; set; } = default!;
+    #endregion Nodes
 
+    #region Dependencies
+    /// <summary>
+    /// アプリケーションレポジトリ
+    /// </summary>
     [Dependency]
     public IAppRepo AppRepo => this.DependOn<IAppRepo>();
+    #endregion Dependencies
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void OnReady()
     {
         SplashTimer.Timeout += SplashTimeOut;
@@ -26,19 +47,12 @@ public partial class Splash : Control, ISplash
         SplashTimer.Start();
     }
 
+    /// <summary>
+    /// タイムアウトイベントファンクション
+    /// </summary>
     public void SplashTimeOut()
     {
         GD.Print("splash timeout");
         AppRepo.SkipSplashScreen();
     }
-
-    // // Called when the node enters the scene tree for the first time.
-    // public override void _Ready()
-    // {
-    // }
-
-    // // Called every frame. 'delta' is the elapsed time since the previous frame.
-    // public override void _Process(double delta)
-    // {
-    // }
 }

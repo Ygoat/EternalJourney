@@ -123,7 +123,7 @@ public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
             public Transition On(in Input.SplashFinished input) => To<MainMenu>();
 
             /// <summary>
-            /// スプラッシュスクリーンスキップイベントメソッド
+            /// スプラッシュスクリーンスキップイベントファンクション
             /// </summary>
             public void OnSplashScreenSkipped()
             {

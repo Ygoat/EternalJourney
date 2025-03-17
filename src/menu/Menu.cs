@@ -6,59 +6,55 @@ using Chickensoft.Introspection;
 using Godot;
 
 /// <summary>
-/// Menuのインターフェース
+/// メニューインターフェース
 /// </summary>
 public interface IMenu : IControl
 {
     /// <summary>
     /// スタートゲームイベント
     /// </summary>
-    event Menu.StartGameEventHandler StartGame;
+    public event Menu.StartGameEventHandler StartGame;
 }
 
+/// <summary>
+/// メニュークラス
+/// </summary>
 [Meta(typeof(IAutoNode))]
 public partial class Menu : Control, IMenu
 {
     public override void _Notification(int what) => this.Notify(what);
 
-    /// <summary>
-    /// スタートゲームボタン
-    /// </summary>
-    [Node]
-    public IButton StartGameButton { get; set; } = default!;
-
+    #region Signals
     /// <summary>
     /// スタートゲームイベントシグナル
     /// </summary>
     [Signal]
     public delegate void StartGameEventHandler();
+    #endregion Signals
+
+    #region Nodes
+    /// <summary>
+    /// スタートゲームボタン
+    /// </summary>
+    [Node]
+    public IButton StartGameButton { get; set; } = default!;
+    #endregion Nodes
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
     public void OnReady()
     {
-        // ボタン押下時の発火イベントを設定
+        // スタートボタン押下イベント
         StartGameButton.Pressed += OnStartGamePressed;
     }
 
     /// <summary>
-    /// スタートボタン押下時のイベントに設定するメソッド
+    /// スタートボタン押下イベントファンクション
     /// </summary>
     public void OnStartGamePressed()
     {
         // スタートゲームイベントシグナルを出力
-        GD.Print(SignalName.StartGame);
         EmitSignal(SignalName.StartGame);
     }
-
-    // // Called when the node enters the scene tree for the first time.
-    // public override void _Ready()
-    // {
-    // }
-
-    // // Called every frame. 'delta' is the elapsed time since the previous frame.
-    // public override void _Process(double delta)
-    // {
-    // }
 }

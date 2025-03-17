@@ -23,18 +23,18 @@ public interface IAppRepo : IDisposable
     event Action? MainMenuEntered;
 
     /// <summary>
-    /// スプラッシュ画面スキップイベントメソッド
+    /// スプラッシュ画面スキップイベントファンクション
     /// </summary>
 
     void SkipSplashScreen();
 
     /// <summary>
-    /// ゲーム開始イベントメソッド
+    /// ゲーム開始イベントファンクション
     /// </summary>
     void OnEnterGame();
 
     /// <summary>
-    /// メインメニュー開始イベントメソッド
+    /// メインメニュー開始イベントファンクション
     /// </summary>
     void OnMainMenuEntered();
 }

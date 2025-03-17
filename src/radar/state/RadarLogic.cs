@@ -5,62 +5,84 @@ using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using Godot;
 
-
+/// <summary>
+/// レーダーロジックインターフェース
+/// </summary>
 public interface IRadarLogic : ILogicBlock<RadarLogic.State>;
 
+/// <summary>
+/// レーダーロジッククラス
+/// </summary>
 [Meta, LogicBlock(typeof(State), Diagram = true)]
 public partial class RadarLogic : LogicBlock<RadarLogic.State>, IRadarLogic
 {
-    // Define your initial state here.
+    /// <summary>
+    /// 初期状態
+    /// </summary>
+    /// <returns></returns>
     public override Transition GetInitialState() => To<State.Idle>();
 
-    // By convention, inputs are defined in a static nested class called Input.
+    /// <summary>
+    /// 入力
+    /// </summary>
     public static class Input
     {
+        /// <summary>
+        /// 敵発見
+        /// TODO:変える
+        /// </summary>
+        /// <param name="Enemy"></param>
         public readonly record struct WatchEnemy(Area2D Enemy);
+
+        /// <summary>
+        /// 物理処理
+        /// TODO:変える
+        /// </summary>
+        /// <param name="Enemies"></param>
         public readonly record struct PhysicProcess(List<Node2D> Enemies);
     }
 
-    // By convention, outputs are defined in a static nested class called Output.
+    /// <summary>
+    /// 出力
+    /// </summary>
     public static class Output
     {
+        /// <summary>
+        /// ステータス変更
+        /// TODO:変える
+        /// </summary>
+        /// <param name="IsOn"></param>
         public readonly record struct StatusChanged(bool IsOn);
     }
 
-    // To reduce unnecessary heap allocations, inputs and outputs should be
-    // readonly record structs.
-
-    // By convention, the base state type is nested inside the logic block. This
-    // helps the logic block diagram generator know where to search for state
-    // types.
+    /// <summary>
+    /// 状態
+    /// </summary>
     public abstract record State : StateLogic<State>
     {
-        // Substates are sometimes nested inside their parent states to help
-        // organize the code.
-
-        // On state.
+        /// <summary>
+        /// アイドル
+        /// </summary>
         public record Idle : State, IGet<Input.WatchEnemy>
         {
             public Idle()
             {
-                // Announce that we are now on.
                 this.OnEnter(() => Output(new Output.StatusChanged(IsOn: true)));
             }
 
             public Transition On(in Input.WatchEnemy input)
             {
-                // var target = input.Enemies;
-                // GD.Print(target[0].Name);
                 return To<EnemySearched>();
             }
         }
 
-        // Off state.
+        /// <summary>
+        /// 敵発見
+        /// </summary>
         public record EnemySearched : State, IGet<Input.PhysicProcess>
         {
             public EnemySearched()
             {
-                // Announce that we are now off.
                 this.OnEnter(() => Output(new Output.StatusChanged(IsOn: false)));
             }
 
@@ -70,7 +92,6 @@ public partial class RadarLogic : LogicBlock<RadarLogic.State>, IRadarLogic
                 {
                     return To<Idle>();
                 }
-                // input.Enemies[0].QueueFree();
                 return ToSelf();
             }
         }

@@ -47,7 +47,7 @@ Setup
 OnResolved
 OnReady
 OnPhysicsProcess
-シグナルイベントメソッド
+シグナルイベントファンクション
 ## 処理順について
 
 Initialize()
