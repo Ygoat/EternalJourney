@@ -7,37 +7,40 @@
 [node name="Weapon" type="Node2D"]
 script = ExtResource("1_oaljl")
 
-[node name="BulletFactory" parent="." instance=ExtResource("2_ectgq")]
-unique_name_in_owner = true
-
-[node name="Control" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="ColorRect1" type="ColorRect" parent="Control"]
-layout_mode = 0
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-color = Color(0.913415, 0.667081, 0.713285, 1)
-
-[node name="ColorRect2" type="ColorRect" parent="Control"]
-layout_mode = 0
-offset_left = -4.0
-offset_top = 20.0
-offset_right = 4.0
-offset_bottom = 60.0
-color = Color(0.913415, 0.667081, 0.713285, 1)
-
 [node name="Marker2D" type="Marker2D" parent="."]
 unique_name_in_owner = true
-position = Vector2(0, 60)
+position = Vector2(60, 0)
 
 [node name="CenterMarker" type="Marker2D" parent="."]
 unique_name_in_owner = true
 
 [node name="Radar" parent="." instance=ExtResource("3_m5ak3")]
+unique_name_in_owner = true
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+
+[node name="ColorRect1" type="ColorRect" parent="Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.913415, 0.667081, 0.713285, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="Control"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 15.0
+offset_right = 80.0
+offset_bottom = 25.0
+color = Color(0.913415, 0.667081, 0.713285, 1)
+
+[node name="BulletFactory" parent="." instance=ExtResource("2_ectgq")]
 unique_name_in_owner = true

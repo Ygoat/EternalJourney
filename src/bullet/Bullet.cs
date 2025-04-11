@@ -64,7 +64,7 @@ public partial class Bullet : Node2D, IBullet
     /// <summary>
     /// 移動方向
     /// </summary>
-    public Vector2 Direction { get; set; } = new Vector2(0, 1);
+    public Vector2 Direction { get; set; } = new Vector2(1, 0);
 
     /// <summary>
     /// 速度
@@ -141,6 +141,8 @@ public partial class Bullet : Node2D, IBullet
         Area2D.AreaEntered += OnAreaEntered;
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         BulletLogic.Start();
+        // トップレベルオブジェクトとして扱う（親ノードのRotationの影響を受けないようにするため）
+        TopLevel = true;
     }
 
     /// <summary>
@@ -183,7 +185,7 @@ public partial class Bullet : Node2D, IBullet
         // Fireを入力
         BulletLogic.Input(new BulletLogic.Input.Fire());
         // 弾丸射出
-        ThrustBullet(Weapon.Marker2D.GlobalPosition, new Vector2(0, 1).Rotated(Weapon.Rotation));
+        ThrustBullet(Weapon.Marker2D.GlobalPosition, new Vector2(1, 0).Rotated(Weapon.Rotation));
     }
 
     /// <summary>
@@ -197,6 +199,8 @@ public partial class Bullet : Node2D, IBullet
         GlobalPosition = shotGPosition;
         // 射出時の方向を設定(武器の向いている方向)
         Direction = shotDirection;
+        // 弾丸の向きを設定（武器の向いている方向）
+        Rotation = shotDirection.Angle();
     }
 
     /// <summary>

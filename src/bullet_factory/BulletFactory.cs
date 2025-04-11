@@ -14,7 +14,7 @@ using Godot;
 /// <summary>
 /// 弾丸ファクトリインターフェース
 /// </summary>
-public interface IBulletFactory : INode, IProvide<IBulletFactory>
+public interface IBulletFactory : INode2D, IProvide<IBulletFactory>
 {
     /// <summary>
     /// 弾丸キュー
@@ -31,7 +31,7 @@ public interface IBulletFactory : INode, IProvide<IBulletFactory>
 /// 弾丸ファクトリ
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class BulletFactory : Node, IBulletFactory
+public partial class BulletFactory : Node2D, IBulletFactory
 {
     public override void _Notification(int what) => this.Notify(what);
 
