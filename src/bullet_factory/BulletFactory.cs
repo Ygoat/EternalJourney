@@ -112,6 +112,8 @@ public partial class BulletFactory : Node2D, IBulletFactory
         {
             // 弾丸ノードインスタンス化&ロード
             e = Instantiator.LoadAndInstantiate<Bullet>(Const.BulletNodePath);
+            // イベントファンクション付与
+            e.Collapsed += OnCollapsed;
             // キュー追加
             BulletsQueue.Enqueue(e);
             return e;
@@ -183,9 +185,19 @@ public partial class BulletFactory : Node2D, IBulletFactory
         // 弾丸ノードをノードツリーに追加
         AddChild(bullet);
         // 弾丸射出
-        bullet.Emit();
+        bullet.Emit(GlobalPosition, GlobalRotation);
         // StartCoolDown入力
         BulletFactoryLogic.Input(new BulletFactoryLogic.Input.StartCoolDonw());
+    }
+
+    /// <summary>
+    /// Collapsedイベントファンクション
+    /// </summary>
+    /// <param name="bullet"></param>
+    public void OnCollapsed(Bullet bullet)
+    {
+        // キューに追加
+        BulletsQueue.Enqueue(bullet);
     }
 
 }

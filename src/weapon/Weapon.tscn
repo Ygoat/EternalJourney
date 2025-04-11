@@ -44,3 +44,4 @@ color = Color(0.913415, 0.667081, 0.713285, 1)
 
 [node name="BulletFactory" parent="." instance=ExtResource("2_ectgq")]
 unique_name_in_owner = true
+position = Vector2(60, 0)
