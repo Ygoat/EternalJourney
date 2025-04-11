@@ -1,9 +1,11 @@
-[gd_scene load_steps=2 format=3 uid="uid://dhdmbvvv81you"]
+[gd_scene load_steps=3 format=3 uid="uid://dhdmbvvv81you"]
 
 [ext_resource type="Script" path="res://src/bullet_factory/BulletFactory.cs" id="1_fdlge"]
+[ext_resource type="PackedScene" uid="uid://wwi3n7ap5dna" path="res://src/bullet/Bullet.tscn" id="2_lh6cl"]
 
 [node name="BulletFactory" type="Node2D"]
 script = ExtResource("1_fdlge")
+BulletScene = ExtResource("2_lh6cl")
 
 [node name="Timer" type="Timer" parent="."]
 unique_name_in_owner = true

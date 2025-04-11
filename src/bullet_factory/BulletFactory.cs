@@ -19,7 +19,7 @@ public interface IBulletFactory : INode2D, IProvide<IBulletFactory>
     /// <summary>
     /// 弾丸キュー
     /// </summary>
-    public Queue<Bullet> BulletsQueue { get; set; }
+    public Queue<Node2D> BulletsQueue { get; set; }
 
     /// <summary>
     /// 射撃
@@ -49,6 +49,12 @@ public partial class BulletFactory : Node2D, IBulletFactory
 
     #region Exports
     /// <summary>
+    /// 弾丸シーンリソース
+    /// </summary>
+    [Export]
+    public Resource BulletScene { get; set; } = default!;
+
+    /// <summary>
     /// 待機時間
     /// </summary>
     public double WaitTime { get; set; } = 0.1;
@@ -56,12 +62,12 @@ public partial class BulletFactory : Node2D, IBulletFactory
     /// <summary>
     ///　弾丸配列
     /// </summary>
-    public Bullet[] Bullets { get; set; } = new Bullet[100];
+    public Node2D[] Bullets { get; set; } = new Node2D[100];
 
     /// <summary>
     /// 弾丸キュー
     /// </summary>
-    public Queue<Bullet> BulletsQueue { get; set; } = new Queue<Bullet>();
+    public Queue<Node2D> BulletsQueue { get; set; } = new Queue<Node2D>();
     #endregion Exports
 
     #region Nodes
@@ -111,9 +117,12 @@ public partial class BulletFactory : Node2D, IBulletFactory
         Bullets = Bullets.Select(e =>
         {
             // 弾丸ノードインスタンス化&ロード
-            e = Instantiator.LoadAndInstantiate<Bullet>(Const.BulletNodePath);
+            e = Instantiator.LoadAndInstantiate<Node2D>(BulletScene.ResourcePath);
             // イベントファンクション付与
-            e.Collapsed += OnCollapsed;
+            if (e is IBullet iBullet)
+            {
+                iBullet.Collapsed += OnCollapsed;
+            }
             // キュー追加
             BulletsQueue.Enqueue(e);
             return e;
@@ -181,11 +190,14 @@ public partial class BulletFactory : Node2D, IBulletFactory
     public void GenerateBullet()
     {
         // 弾丸キュー取り出し
-        Bullet bullet = BulletsQueue.Dequeue();
+        Node2D bullet = BulletsQueue.Dequeue();
         // 弾丸ノードをノードツリーに追加
         AddChild(bullet);
         // 弾丸射出
-        bullet.Emit(GlobalPosition, GlobalRotation);
+        if (bullet is IBullet iBullet)
+        {
+            iBullet.Emit(GlobalPosition, GlobalRotation);
+        }
         // StartCoolDown入力
         BulletFactoryLogic.Input(new BulletFactoryLogic.Input.StartCoolDonw());
     }
