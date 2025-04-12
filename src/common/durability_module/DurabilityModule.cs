@@ -1,7 +1,5 @@
 namespace EternalJourney.Common.DurabilityModule;
 
-using System;
-using System.ComponentModel.DataAnnotations;
 using Chickensoft.AutoInject;
 using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
@@ -83,17 +81,15 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// 最大耐久値
     /// </summary>
     [ExportGroup("Durability Setting")]
-    [Export(PropertyHint.Range, "-10000,10000,0.1")]
-    [Range(-10000, 10000)]
-    private double _maxValue { get; set; }
+    [Export(PropertyHint.Range, "0.1,10000,0.1")]
+    private double _maxValue { get; set; } = 10;
 
     /// <summary>
     /// 最大値からの現在耐久比
     /// </summary>
     [ExportGroup("Durability Setting")]
     [Export(PropertyHint.Range, "0,1,0.01")]
-    [Range(0, 1)]
-    private double _currentRatio { get; set; }
+    private double _currentRatio { get; set; } = 1;
 
     /// <summary>
     /// 耐久値のAutoProp
@@ -131,6 +127,11 @@ public partial class DurabilityModule : Node, IDurabilityModule
     {
         // 耐久値減少
         double nextDurability = _durability.Value - damageValue;
+        // 減少後の耐久値が0以下の時
+        if (nextDurability <= 0)
+        {
+            nextDurability = 0;
+        }
         // 耐久値をセット
         _durability.OnNext(nextDurability);
         // 現在耐久値比を計算
@@ -190,19 +191,19 @@ public partial class DurabilityModule : Node, IDurabilityModule
         // 耐久値が0以下の時
         if (value <= 0)
         {
-            OnDurabilityUnderZero(value);
+            OnDurabilityUnderZero();
         }
         // 耐久値が最大値以上の時
         else if (value >= _maxValue)
         {
-            OnDurabilityFulled(value);
+            OnDurabilityFulled();
         }
     }
 
     /// <summary>
     /// 耐久値ゼロ以下イベントファンクション
     /// </summary>
-    private void OnDurabilityUnderZero(double value)
+    private void OnDurabilityUnderZero()
     {
         EmitSignal(SignalName.ZeroDurability);
     }
@@ -210,7 +211,7 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// <summary>
     /// 耐久値最大イベントファンクション
     /// </summary>
-    private void OnDurabilityFulled(double value)
+    private void OnDurabilityFulled()
     {
         EmitSignal(SignalName.MaxDurability);
     }
