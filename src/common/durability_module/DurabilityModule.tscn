@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://n5g5fcebtn4n"]
+
+[ext_resource type="Script" path="res://src/common/durability_module/DurabilityModule.cs" id="1_jn52o"]
+
+[node name="DurabilityModule" type="Node"]
+script = ExtResource("1_jn52o")
