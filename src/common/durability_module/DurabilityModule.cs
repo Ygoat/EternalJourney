@@ -17,6 +17,11 @@ public interface IDurabilityModule : INode
     public event DurabilityModule.MaxDurabilityEventHandler MaxDurability;
 
     /// <summary>
+    /// 耐久値残存シグナル
+    /// </summary>
+    public event DurabilityModule.DurabilityLeftEventHandler DurabilityLeft;
+
+    /// <summary>
     /// 耐久値ゼロシグナル
     /// </summary>
     public event DurabilityModule.ZeroDurabilityEventHandler ZeroDurability;
@@ -51,6 +56,11 @@ public interface IDurabilityModule : INode
     /// </summary>
     /// <returns></returns>
     public double GetCurrentRatio();
+
+    /// <summary>
+    /// 耐久値を最大値にする
+    /// </summary>
+    public void MaximizeDurability();
 }
 
 /// <summary>
@@ -63,16 +73,22 @@ public partial class DurabilityModule : Node, IDurabilityModule
 
     #region Signals
     /// <summary>
-    /// <inheritdoc/>
+    /// 耐久値最大シグナル
     /// </summary>
     [Signal]
     public delegate void MaxDurabilityEventHandler();
 
     /// <summary>
-    /// <inheritdoc/>
+    /// 耐久値ゼロシグナル
     /// </summary>
     [Signal]
     public delegate void ZeroDurabilityEventHandler();
+
+    /// <summary>
+    /// 耐久値残存シグナル
+    /// </summary>
+    [Signal]
+    public delegate void DurabilityLeftEventHandler();
     #endregion Signals
 
     #region Exports
@@ -176,6 +192,15 @@ public partial class DurabilityModule : Node, IDurabilityModule
     }
 
     /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    /// <returns></returns>
+    public void MaximizeDurability()
+    {
+        _durability.OnNext(_maxValue);
+    }
+
+    /// <summary>
     /// 現在耐久値比を計算
     /// </summary>
     private void CalcCurrentRatio()
@@ -198,6 +223,10 @@ public partial class DurabilityModule : Node, IDurabilityModule
         {
             OnDurabilityFulled();
         }
+        else
+        {
+            OnDurabilityLeft();
+        }
     }
 
     /// <summary>
@@ -214,5 +243,13 @@ public partial class DurabilityModule : Node, IDurabilityModule
     private void OnDurabilityFulled()
     {
         EmitSignal(SignalName.MaxDurability);
+    }
+
+    /// <summary>
+    /// 耐久値残存イベントファンクション
+    /// </summary>
+    private void OnDurabilityLeft()
+    {
+        EmitSignal(SignalName.DurabilityLeft);
     }
 }
