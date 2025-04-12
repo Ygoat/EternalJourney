@@ -40,6 +40,10 @@ Godot側の設定でエディタをVSCodeにしておくとよい
 #endregion Provisions
 #region Dependencies
 #endregion Dependencies
+public void Initialize(){}
+public void OnReady(){}
+public void Setup(){}
+public void OnResolved(){}
 ```
 メソッド定義の順番
 Initialiez
@@ -100,6 +104,7 @@ Parent:Resolved -> ParentLabel
 Parent:Ready -> ParentLabel
 
 # その他
+Initialize() -> OnReady() -> Setup() -> OnResolved()
 
 ## VSCode再起動
 インテリセンス等が聞かなくなった場合、再起動する
