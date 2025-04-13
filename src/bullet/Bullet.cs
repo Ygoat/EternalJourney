@@ -4,6 +4,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.App.State;
+using EternalJourney.Common.DurabilityModule;
 using EternalJourney.Cores.Consts;
 using Godot;
 
@@ -12,8 +13,21 @@ using Godot;
 /// </summary>
 public interface IBullet : INode2D
 {
+    /// <summary>
+    /// ヒットシグナル
+    /// </summary>
     public event Bullet.HitEventHandler Hit;
+
+    /// <summary>
+    /// 崩壊シグナル
+    /// </summary>
     public event Bullet.CollapsedEventHandler Collapsed;
+
+    /// <summary>
+    /// 弾丸射出
+    /// </summary>
+    /// <param name="shotGlobalPosition"></param>
+    /// <param name="shotGlobalAngle"></param>
     public void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle);
 }
 
@@ -63,6 +77,12 @@ public partial class Bullet : Node2D, IBullet
     /// </summary>
     [Node]
     public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
+
+    /// <summary>
+    /// 耐久値モジュール
+    /// </summary>
+    [Node]
+    public IDurabilityModule DurabilityModule { get; set; } = default!;
     #endregion Nodes
 
     #region Exports
@@ -79,7 +99,7 @@ public partial class Bullet : Node2D, IBullet
     /// <summary>
     /// 耐久値
     /// </summary>
-    public int Durability { get; set; } = 1;
+    public double Durability { get; set; } = 0.1;
     #endregion Exports
 
     /// <summary>
@@ -93,6 +113,12 @@ public partial class Bullet : Node2D, IBullet
         Area2D.CollisionLayer = CollisionEntity.Bullet;
         // コリジョンマスクをエネミー
         Area2D.CollisionMask = CollisionEntity.Enemy;
+        // 耐久値セット
+        DurabilityModule.SetDurability(Durability);
+        // 耐久値ゼロイベント設定
+        DurabilityModule.ZeroDurability += OnZeroDurability;
+        // 耐久値残存イベント設定
+        DurabilityModule.DurabilityLeft += OnDurabilityLeft;
     }
 
     /// <summary>
@@ -111,15 +137,7 @@ public partial class Bullet : Node2D, IBullet
             .Handle((in BulletLogic.Output.Decay _) =>
             {
                 // 弾丸の耐久値を減少
-                Durability -= 1;
-                if (Durability <= 0)
-                {
-                    BulletLogic.Input(new BulletLogic.Input.Collapse());
-                }
-                else
-                {
-                    BulletLogic.Input(new BulletLogic.Input.Penetrate());
-                }
+                DurabilityModule.TakeDamage(1.0);
             })
             // Disappearが出力された場合
             .Handle((in BulletLogic.Output.Disappear _) =>
@@ -133,9 +151,11 @@ public partial class Bullet : Node2D, IBullet
                 // Reload入力
                 BulletLogic.Input(new BulletLogic.Input.Reload());
             });
-        //
+        // コリジョンイベント設定
         Area2D.AreaEntered += OnAreaEntered;
+        // 画面外イベント
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
+        // ロジック初期化
         BulletLogic.Start();
         // トップレベルオブジェクトとして扱う（親ノードのRotationの影響を受けないようにするため）
         TopLevel = true;
@@ -210,6 +230,23 @@ public partial class Bullet : Node2D, IBullet
         GlobalPosition = new Vector2(0, 0);
         // 方向を初期化
         Direction = new Vector2(0, 0);
+        // 耐久値を回復
+        DurabilityModule.FullRepir();
     }
 
+    /// <summary>
+    /// 耐久値ゼロイベントファンクション
+    /// </summary>
+    private void OnZeroDurability()
+    {
+        BulletLogic.Input(new BulletLogic.Input.Collapse());
+    }
+
+    /// <summary>
+    /// 耐久値残存イベントファンクション
+    /// </summary>
+    private void OnDurabilityLeft()
+    {
+        BulletLogic.Input(new BulletLogic.Input.Penetrate());
+    }
 }

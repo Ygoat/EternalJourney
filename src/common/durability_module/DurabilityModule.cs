@@ -31,7 +31,7 @@ public interface IDurabilityModule : INode
     /// </summary>
     /// <param name="maxValue">最大値</param>
     /// <param name="currentRatio">最大値からの現在体力比</param>
-    public void SetDurability(double maxValue, double currentRatio);
+    public void SetDurability(double maxValue, double currentRatio = 1);
 
     /// <summary>
     /// 耐久値減少
@@ -44,6 +44,11 @@ public interface IDurabilityModule : INode
     /// </summary>
     /// <param name="repairValue"></param>
     public void Repair(double repairValue);
+
+    /// <summary>
+    /// 耐久値全回復
+    /// </summary>
+    public void FullRepir();
 
     /// <summary>
     /// 現在耐久値を取得する
@@ -171,6 +176,14 @@ public partial class DurabilityModule : Node, IDurabilityModule
         _durability.OnNext(nextDurability);
         // 現在耐久値比を計算
         CalcCurrentRatio();
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void FullRepir()
+    {
+        Repair(_maxValue);
     }
 
     /// <summary>
