@@ -70,6 +70,10 @@ public partial class App : CanvasLayer, IApp
     /// <returns></returns>
     ICrewCsvReader IProvide<ICrewCsvReader>.Value() => CrewCsvReader;
 
+    /// <summary>
+    /// シーンインスタンス化部品
+    /// </summary>
+    /// <returns></returns>
     IInstantiator IProvide<IInstantiator>.Value() => Instantiator;
 
     /// <summary>

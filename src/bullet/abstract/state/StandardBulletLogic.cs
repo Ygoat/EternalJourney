@@ -1,4 +1,4 @@
-namespace EternalJourney.App.State;
+namespace EternalJourney.Bullet.Abstract.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
@@ -6,13 +6,13 @@ using Chickensoft.LogicBlocks;
 /// <summary>
 /// 弾丸ロジックインターフェース
 /// </summary>
-public interface IBulletLogic : ILogicBlock<BulletLogic.State>;
+public interface IStandardBulletLogic : ILogicBlock<StandardBulletLogic.State>;
 
 /// <summary>
 /// 弾丸ロジック
 /// </summary>
 [Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
+public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>, IStandardBulletLogic
 {
     /// <summary>
     /// 初期状態

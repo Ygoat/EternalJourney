@@ -40,19 +40,19 @@ color = Color(0.749496, 0.999764, 0.72598, 1)
 
 [node name="Weapon" parent="." instance=ExtResource("1_uatdr")]
 position = Vector2(-91, 150)
-rotation = 0.635046
+rotation = 2.36866
 
 [node name="Weapon2" parent="." instance=ExtResource("1_uatdr")]
 position = Vector2(84, 149)
-rotation = -0.756117
+rotation = 0.824625
 
 [node name="Weapon3" parent="." instance=ExtResource("1_uatdr")]
 position = Vector2(87, -155)
-rotation = -2.40129
+rotation = -0.761574
 
 [node name="Weapon4" parent="." instance=ExtResource("1_uatdr")]
 position = Vector2(-87, -155)
-rotation = -3.86527
+rotation = -2.23114
 
 [node name="EnemyTargetMarker" type="Marker2D" parent="."]
 unique_name_in_owner = true

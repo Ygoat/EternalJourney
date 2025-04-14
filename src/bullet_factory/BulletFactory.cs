@@ -5,21 +5,20 @@ using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.Bullet;
+using EternalJourney.Bullet.Abstract;
 using EternalJourney.BulletFactory.State;
-using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Utils;
 using Godot;
 
 /// <summary>
 /// 弾丸ファクトリインターフェース
 /// </summary>
-public interface IBulletFactory : INode, IProvide<IBulletFactory>
+public interface IBulletFactory : INode2D, IProvide<IBulletFactory>
 {
     /// <summary>
     /// 弾丸キュー
     /// </summary>
-    public Queue<Bullet> BulletsQueue { get; set; }
+    public Queue<Node2D> BulletsQueue { get; set; }
 
     /// <summary>
     /// 射撃
@@ -31,7 +30,7 @@ public interface IBulletFactory : INode, IProvide<IBulletFactory>
 /// 弾丸ファクトリ
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class BulletFactory : Node, IBulletFactory
+public partial class BulletFactory : Node2D, IBulletFactory
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -49,6 +48,12 @@ public partial class BulletFactory : Node, IBulletFactory
 
     #region Exports
     /// <summary>
+    /// 弾丸シーンリソース
+    /// </summary>
+    [Export]
+    public Resource BulletScene { get; set; } = default!;
+
+    /// <summary>
     /// 待機時間
     /// </summary>
     public double WaitTime { get; set; } = 0.1;
@@ -56,12 +61,12 @@ public partial class BulletFactory : Node, IBulletFactory
     /// <summary>
     ///　弾丸配列
     /// </summary>
-    public Bullet[] Bullets { get; set; } = new Bullet[100];
+    public Node2D[] Bullets { get; set; } = new Node2D[100];
 
     /// <summary>
     /// 弾丸キュー
     /// </summary>
-    public Queue<Bullet> BulletsQueue { get; set; } = new Queue<Bullet>();
+    public Queue<Node2D> BulletsQueue { get; set; } = new Queue<Node2D>();
     #endregion Exports
 
     #region Nodes
@@ -111,7 +116,12 @@ public partial class BulletFactory : Node, IBulletFactory
         Bullets = Bullets.Select(e =>
         {
             // 弾丸ノードインスタンス化&ロード
-            e = Instantiator.LoadAndInstantiate<Bullet>(Const.BulletNodePath);
+            e = Instantiator.LoadAndInstantiate<Node2D>(BulletScene.ResourcePath);
+            // イベントファンクション付与
+            if (e is IStandardBullet iBullet)
+            {
+                iBullet.Collapsed += OnCollapsed;
+            }
             // キュー追加
             BulletsQueue.Enqueue(e);
             return e;
@@ -179,13 +189,26 @@ public partial class BulletFactory : Node, IBulletFactory
     public void GenerateBullet()
     {
         // 弾丸キュー取り出し
-        Bullet bullet = BulletsQueue.Dequeue();
+        Node2D bullet = BulletsQueue.Dequeue();
         // 弾丸ノードをノードツリーに追加
         AddChild(bullet);
         // 弾丸射出
-        bullet.Emit();
+        if (bullet is IStandardBullet iBullet)
+        {
+            iBullet.Emit(GlobalPosition, GlobalRotation);
+        }
         // StartCoolDown入力
         BulletFactoryLogic.Input(new BulletFactoryLogic.Input.StartCoolDonw());
+    }
+
+    /// <summary>
+    /// Collapsedイベントファンクション
+    /// </summary>
+    /// <param name="bullet"></param>
+    public void OnCollapsed(StandardBullet bullet)
+    {
+        // キューに追加
+        BulletsQueue.Enqueue(bullet);
     }
 
 }
