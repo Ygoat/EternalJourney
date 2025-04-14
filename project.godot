@@ -15,10 +15,6 @@ run/main_scene="res://src/Main.tscn"
 config/features=PackedStringArray("4.3", "C#", "Mobile")
 config/icon="res://icon.png"
 
-[autoload]
-
-DependencyInjectionNode="*res://src/di_manager/DependencyInjectionNode.cs"
-
 [display]
 
 window/size/viewport_width=720
