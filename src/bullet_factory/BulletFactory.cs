@@ -5,9 +5,8 @@ using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.Bullet;
+using EternalJourney.Bullet.Abstract;
 using EternalJourney.BulletFactory.State;
-using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Utils;
 using Godot;
 
@@ -119,7 +118,7 @@ public partial class BulletFactory : Node2D, IBulletFactory
             // 弾丸ノードインスタンス化&ロード
             e = Instantiator.LoadAndInstantiate<Node2D>(BulletScene.ResourcePath);
             // イベントファンクション付与
-            if (e is IBullet iBullet)
+            if (e is IStandardBullet iBullet)
             {
                 iBullet.Collapsed += OnCollapsed;
             }
@@ -194,7 +193,7 @@ public partial class BulletFactory : Node2D, IBulletFactory
         // 弾丸ノードをノードツリーに追加
         AddChild(bullet);
         // 弾丸射出
-        if (bullet is IBullet iBullet)
+        if (bullet is IStandardBullet iBullet)
         {
             iBullet.Emit(GlobalPosition, GlobalRotation);
         }
@@ -206,7 +205,7 @@ public partial class BulletFactory : Node2D, IBulletFactory
     /// Collapsedイベントファンクション
     /// </summary>
     /// <param name="bullet"></param>
-    public void OnCollapsed(Bullet bullet)
+    public void OnCollapsed(StandardBullet bullet)
     {
         // キューに追加
         BulletsQueue.Enqueue(bullet);

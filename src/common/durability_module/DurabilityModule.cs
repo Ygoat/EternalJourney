@@ -31,19 +31,19 @@ public interface IDurabilityModule : INode
     /// </summary>
     /// <param name="maxValue">最大値</param>
     /// <param name="currentRatio">最大値からの現在体力比</param>
-    public void SetDurability(double maxValue, double currentRatio = 1);
+    public void SetDurability(float maxValue, float currentRatio = 1);
 
     /// <summary>
     /// 耐久値減少
     /// </summary>
     /// <param name="damageValue"></param>
-    public void TakeDamage(double damageValue);
+    public void TakeDamage(float damageValue);
 
     /// <summary>
     /// 耐久値回復
     /// </summary>
     /// <param name="repairValue"></param>
-    public void Repair(double repairValue);
+    public void Repair(float repairValue);
 
     /// <summary>
     /// 耐久値全回復
@@ -54,13 +54,13 @@ public interface IDurabilityModule : INode
     /// 現在耐久値を取得する
     /// </summary>
     /// <returns></returns>
-    public double GetCurrentDurability();
+    public float GetCurrentDurability();
 
     /// <summary>
     /// 最大値からの現在耐久比を取得する
     /// </summary>
     /// <returns></returns>
-    public double GetCurrentRatio();
+    public float GetCurrentRatio();
 
     /// <summary>
     /// 耐久値を最大値にする
@@ -103,19 +103,19 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// </summary>
     [ExportGroup("Durability Setting")]
     [Export(PropertyHint.Range, "0.1,10000,0.1")]
-    private double _maxValue { get; set; } = 10;
+    private float _maxValue { get; set; } = 10;
 
     /// <summary>
     /// 最大値からの現在耐久比
     /// </summary>
     [ExportGroup("Durability Setting")]
     [Export(PropertyHint.Range, "0,1,0.01")]
-    private double _currentRatio { get; set; } = 1;
+    private float _currentRatio { get; set; } = 1;
 
     /// <summary>
     /// 耐久値のAutoProp
     /// </summary>
-    private AutoProp<double> _durability { get; set; } = default!;
+    private AutoProp<float> _durability { get; set; } = default!;
     #endregion Exports
 
     /// <summary>
@@ -132,11 +132,11 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// </summary>
     /// <param name="maxValue"></param>
     /// <param name="currentRatio"></param>
-    public void SetDurability(double maxValue, double currentRatio = 1)
+    public void SetDurability(float maxValue, float currentRatio = 1)
     {
         _maxValue = maxValue;
         _currentRatio = currentRatio;
-        _durability = new AutoProp<double>(maxValue * currentRatio);
+        _durability = new AutoProp<float>(maxValue * currentRatio);
         _durability.Sync += OnDurabilityChanged;
     }
 
@@ -144,10 +144,10 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// <inheritdoc/>
     /// </summary>
     /// <param name="damageValue"></param>
-    public void TakeDamage(double damageValue)
+    public void TakeDamage(float damageValue)
     {
         // 耐久値減少
-        double nextDurability = _durability.Value - damageValue;
+        float nextDurability = _durability.Value - damageValue;
         // 減少後の耐久値が0以下の時
         if (nextDurability <= 0)
         {
@@ -163,10 +163,10 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// <inheritdoc/>
     /// </summary>
     /// <param name="repairValue"></param>
-    public void Repair(double repairValue)
+    public void Repair(float repairValue)
     {
         // 耐久値回復
-        double nextDurability = _durability.Value + repairValue;
+        float nextDurability = _durability.Value + repairValue;
         // 回復後の耐久値が最大値以上の時
         if (nextDurability >= _maxValue)
         {
@@ -190,7 +190,7 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// <inheritdoc/>
     /// </summary>
     /// <returns></returns>
-    public double GetCurrentDurability()
+    public float GetCurrentDurability()
     {
         return _durability.Value;
     }
@@ -199,7 +199,7 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// <inheritdoc/>
     /// </summary>
     /// <returns></returns>
-    public double GetCurrentRatio()
+    public float GetCurrentRatio()
     {
         return _currentRatio;
     }
@@ -224,7 +224,7 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// <summary>
     /// 耐久値変更イベントファンクション
     /// </summary>
-    private void OnDurabilityChanged(double value)
+    private void OnDurabilityChanged(float value)
     {
         // 耐久値が0以下の時
         if (value <= 0)

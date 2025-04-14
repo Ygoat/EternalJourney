@@ -1,69 +1,81 @@
-namespace EternalJourney.Bullet;
+namespace EternalJourney.Bullet.Abstract;
 
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.App.State;
+using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Common.DurabilityModule;
+using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
 using Godot;
 
 /// <summary>
-/// 弾丸インターフェース
+/// スタンダード弾丸インターフェース
 /// </summary>
-public interface IBullet : INode2D
+public interface IStandardBullet : IBaseBullet, IDestructible, IMovable, IResizable
 {
-    /// <summary>
-    /// ヒットシグナル
-    /// </summary>
-    public event Bullet.HitEventHandler Hit;
-
     /// <summary>
     /// 崩壊シグナル
     /// </summary>
-    public event Bullet.CollapsedEventHandler Collapsed;
-
-    /// <summary>
-    /// 弾丸射出
-    /// </summary>
-    /// <param name="shotGlobalPosition"></param>
-    /// <param name="shotGlobalAngle"></param>
-    public void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle);
+    public event StandardBullet.CollapsedEventHandler Collapsed;
 }
 
 /// <summary>
-/// 弾丸クラス
+/// スタンダード弾丸クラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class Bullet : Node2D, IBullet
+public partial class StandardBullet : BaseBullet, IStandardBullet
 {
     public override void _Notification(int what) => this.Notify(what);
 
     #region Signals
     /// <summary>
-    /// ヒットシグナル
-    /// </summary>
-    [Signal]
-    public delegate void HitEventHandler();
-
-    /// <summary>
     /// 崩壊シグナル
     /// </summary>
+    /// <param name="standardBullet"></param>
     [Signal]
-    public delegate void CollapsedEventHandler(Bullet bullet);
+    public delegate void CollapsedEventHandler(StandardBullet standardBullet);
     #endregion Signals
 
     #region State
     /// <summary>
-    /// 弾丸ロジック
+    /// スタンダード弾丸ロジック
     /// </summary>
-    public BulletLogic BulletLogic { get; set; } = default!;
+    public StandardBulletLogic StandardBulletLogic { get; set; } = default!;
 
     /// <summary>
-    /// 弾丸ロジックバインド
+    /// スタンダード弾丸ロジックバインド
     /// </summary>
-    public BulletLogic.IBinding BulletBinding { get; set; } = default!;
+    public StandardBulletLogic.IBinding StandardBulletBinding { get; set; } = default!;
     #endregion State
+
+    #region Exports
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public float Def { get; set; }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public float MaxDurability { get; set; } = 0.1f;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public float Speed { get; set; } = 10.0f;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public float Size { get; set; } = 1.0f;
+
+    /// <summary>
+    /// 移動方向
+    /// </summary>
+    public Vector2 Direction { get; set; } = new Vector2(1, 0);
+    #endregion Exports
 
     #region Nodes
     /// <summary>
@@ -79,42 +91,22 @@ public partial class Bullet : Node2D, IBullet
     public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
 
     /// <summary>
-    /// 耐久値モジュール
+    /// <inheritdoc/>
     /// </summary>
     [Node]
     public IDurabilityModule DurabilityModule { get; set; } = default!;
     #endregion Nodes
 
-    #region Exports
-    /// <summary>
-    /// 移動方向
-    /// </summary>
-    public Vector2 Direction { get; set; } = new Vector2(1, 0);
-
-    /// <summary>
-    /// 速度
-    /// </summary>
-    public float Speed { get; set; } = 10;
-
-    /// <summary>
-    /// 耐久値
-    /// </summary>
-    public float Durability { get; set; } = 0.1f;
-    #endregion Exports
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
     public void Setup()
     {
-        BulletLogic = new BulletLogic();
-        BulletBinding = BulletLogic.Bind();
+        StandardBulletLogic = new StandardBulletLogic();
+        StandardBulletBinding = StandardBulletLogic.Bind();
         // コリジョンレイヤーを弾丸
         Area2D.CollisionLayer = CollisionEntity.Bullet;
         // コリジョンマスクをエネミー
         Area2D.CollisionMask = CollisionEntity.Enemy;
         // 耐久値セット
-        DurabilityModule.SetDurability(Durability);
+        DurabilityModule.SetDurability(MaxDurability);
         // 耐久値ゼロイベント設定
         DurabilityModule.ZeroDurability += OnZeroDurability;
         // 耐久値残存イベント設定
@@ -126,21 +118,21 @@ public partial class Bullet : Node2D, IBullet
     /// </summary>
     public void OnResolved()
     {
-        BulletBinding
+        StandardBulletBinding
             // Emittedが出力された場合
-            .Handle((in BulletLogic.Output.Emitted _) =>
+            .Handle((in StandardBulletLogic.Output.Emitted _) =>
             {
                 // 物理処理有効化
                 SetPhysicsProcess(true);
             })
             // Decayが出力された場合
-            .Handle((in BulletLogic.Output.Decay _) =>
+            .Handle((in StandardBulletLogic.Output.Decay _) =>
             {
                 // 弾丸の耐久値を減少
                 DurabilityModule.TakeDamage(1.0f);
             })
             // Disappearが出力された場合
-            .Handle((in BulletLogic.Output.Disappear _) =>
+            .Handle((in StandardBulletLogic.Output.Disappear _) =>
             {
                 // フレーム終わりにRemoveSelf()呼び出し
                 CallDeferred("RemoveSelf");
@@ -149,14 +141,14 @@ public partial class Bullet : Node2D, IBullet
                 // OnCollapsedシグナル出力
                 EmitSignal(SignalName.Collapsed, this);
                 // Reload入力
-                BulletLogic.Input(new BulletLogic.Input.Reload());
+                StandardBulletLogic.Input(new StandardBulletLogic.Input.Reload());
             });
         // コリジョンイベント設定
         Area2D.AreaEntered += OnAreaEntered;
         // 画面外イベント
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // ロジック初期化
-        BulletLogic.Start();
+        StandardBulletLogic.Start();
         // トップレベルオブジェクトとして扱う（親ノードのRotationの影響を受けないようにするため）
         TopLevel = true;
     }
@@ -168,6 +160,27 @@ public partial class Bullet : Node2D, IBullet
     public void OnPhysicsProcess(double delta)
     {
         // グローバル位置の更新
+        Move();
+    }
+
+    /// <summary>
+    /// 自インスタンスをツリーから一時的に取り除く
+    /// ※インスタンスは完全には削除されない
+    /// </summary>
+    public virtual void RemoveSelf()
+    {
+        // 親ノードを取得してから、子である自ノードを削除する
+        GetParent().RemoveChild(this);
+        // 弾丸の初期化
+        InitializeBullet();
+    }
+
+    /// <summary>
+    /// 弾丸位置移動
+    /// </summary>
+    public virtual void Move()
+    {
+        GD.Print("move");
         GlobalPosition += Direction.Normalized() * Speed;
     }
 
@@ -178,9 +191,9 @@ public partial class Bullet : Node2D, IBullet
     public void OnAreaEntered(Area2D area)
     {
         // ヒットを入力
-        BulletLogic.Input(new BulletLogic.Input.Hit());
+        StandardBulletLogic.Input(new StandardBulletLogic.Input.Hit());
         // ヒットシグナルを出力
-        EmitSignal(SignalName.Hit);
+        EmitSignal(BaseBullet.SignalName.Hit);
     }
 
     /// <summary>
@@ -189,7 +202,7 @@ public partial class Bullet : Node2D, IBullet
     public void OnScreenExited()
     {
         // ミスを入力
-        BulletLogic.Input(new BulletLogic.Input.Miss());
+        StandardBulletLogic.Input(new StandardBulletLogic.Input.Miss());
     }
 
     /// <summary>
@@ -200,25 +213,13 @@ public partial class Bullet : Node2D, IBullet
     public void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle)
     {
         // Fireを入力
-        BulletLogic.Input(new BulletLogic.Input.Fire());
+        StandardBulletLogic.Input(new StandardBulletLogic.Input.Fire());
         // 射出時の位置を設定(武器の発射口の位置)
         GlobalPosition = shotGlobalPosition;
         // 射出時の方向を設定(武器の向いている方向)
         Direction = new Vector2(1, 0).Rotated(shotGlobalAngle);
         // 弾丸の向きを設定（武器の向いている方向）
         Rotation = shotGlobalAngle;
-    }
-
-    /// <summary>
-    /// 自インスタンスをツリーから一時的に取り除く
-    /// ※インスタンスは完全には削除されない
-    /// </summary>
-    public void RemoveSelf()
-    {
-        // 親ノードを取得してから、子である自ノードを削除する
-        GetParent().RemoveChild(this);
-        // 弾丸の初期化
-        InitializeBullet();
     }
 
     /// <summary>
@@ -239,7 +240,7 @@ public partial class Bullet : Node2D, IBullet
     /// </summary>
     private void OnZeroDurability()
     {
-        BulletLogic.Input(new BulletLogic.Input.Collapse());
+        StandardBulletLogic.Input(new StandardBulletLogic.Input.Collapse());
     }
 
     /// <summary>
@@ -247,6 +248,6 @@ public partial class Bullet : Node2D, IBullet
     /// </summary>
     private void OnDurabilityLeft()
     {
-        BulletLogic.Input(new BulletLogic.Input.Penetrate());
+        StandardBulletLogic.Input(new StandardBulletLogic.Input.Penetrate());
     }
 }

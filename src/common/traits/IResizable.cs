@@ -1,6 +1,12 @@
 namespace EternalJourney.Common.Traits;
 
+/// <summary>
+/// リサイズ可能インターフェース
+/// </summary>
 public interface IResizable
 {
-    public double Size { get; set; }
+    /// <summary>
+    /// サイズ
+    /// </summary>
+    public float Size { get; set; }
 }
