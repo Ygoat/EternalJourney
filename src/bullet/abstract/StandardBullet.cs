@@ -211,7 +211,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// </summary>
     /// <param name="shotGlobalPosition"></param>
     /// <param name="shotGlobalAngle"></param>
-    public void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle)
+    public override void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle)
     {
         // Fireを入力
         StandardBulletLogic.Input(new StandardBulletLogic.Input.Fire());
