@@ -59,11 +59,13 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    [Export]
     public float MaxDurability { get; set; } = 0.1f;
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    [Export]
     public float Speed { get; set; } = 10.0f;
 
     /// <summary>
@@ -135,7 +137,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
             .Handle((in StandardBulletLogic.Output.Disappear _) =>
             {
                 // フレーム終わりにRemoveSelf()呼び出し
-                CallDeferred("RemoveSelf");
+                CallDeferred(nameof(RemoveSelf));
                 // 物理処理無効化
                 SetPhysicsProcess(false);
                 // OnCollapsedシグナル出力

@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://moj0xo0e2b7a"]
+
+[ext_resource type="PackedScene" uid="uid://2s531ojpmkia" path="res://src/bullet/abstract/StandardBullet.tscn" id="1_4tikl"]
+
+[node name="01_NormalBullet" instance=ExtResource("1_4tikl")]
+MaxDurability = 0.1
+Speed = 7.0
