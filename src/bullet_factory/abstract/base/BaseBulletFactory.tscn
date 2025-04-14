@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3 uid="uid://bdtaqvekb7sdc"]
+
+[ext_resource type="PackedScene" uid="uid://hce48dum5bam" path="res://src/common/base_entity/BaseEntity.tscn" id="1_wsjvs"]
+[ext_resource type="Script" path="res://src/bullet_factory/abstract/base/BaseBulletFactory.cs" id="2_t2878"]
+
+[node name="BaseBulletFactory" instance=ExtResource("1_wsjvs")]
+script = ExtResource("2_t2878")

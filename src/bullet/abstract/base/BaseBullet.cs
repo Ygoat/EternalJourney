@@ -30,6 +30,8 @@ public interface IBaseBullet : INode2D
 [Meta(typeof(IAutoNode))]
 public partial class BaseBullet : BaseEntity, IBaseBullet
 {
+    public override void _Notification(int what) => this.Notify(what);
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
