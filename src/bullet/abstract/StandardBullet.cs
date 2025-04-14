@@ -180,7 +180,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// </summary>
     public virtual void Move()
     {
-        GD.Print("move");
         GlobalPosition += Direction.Normalized() * Speed;
     }
 
