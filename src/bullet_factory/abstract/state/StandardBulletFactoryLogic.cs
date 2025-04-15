@@ -6,13 +6,13 @@ using Chickensoft.LogicBlocks;
 /// <summary>
 /// 弾丸ファクトリロジックインターフェース
 /// </summary>
-public interface IBulletFactoryLogic : ILogicBlock<BulletFactoryLogic.State>;
+public interface IStandardBulletFactoryLogic : ILogicBlock<StandardBulletFactoryLogic.State>;
 
 /// <summary>
 /// 弾丸ファクトリロジック
 /// </summary>
 [Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class BulletFactoryLogic : LogicBlock<BulletFactoryLogic.State>, IBulletFactoryLogic
+public partial class StandardBulletFactoryLogic : LogicBlock<StandardBulletFactoryLogic.State>, IStandardBulletFactoryLogic
 {
     /// <summary>
     /// 初期状態

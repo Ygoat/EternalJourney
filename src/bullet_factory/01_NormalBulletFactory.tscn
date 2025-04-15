@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3 uid="uid://dywjjflkf7066"]
+
+[ext_resource type="PackedScene" uid="uid://bgqyfnvsb26i2" path="res://src/bullet_factory/abstract/StandardBulletFactory.tscn" id="1_cttye"]
+[ext_resource type="PackedScene" uid="uid://moj0xo0e2b7a" path="res://src/bullet/01_NormalBullet.tscn" id="2_iyvcl"]
+
+[node name="StandardBulletFactory" instance=ExtResource("1_cttye")]
+BulletScene = ExtResource("2_iyvcl")

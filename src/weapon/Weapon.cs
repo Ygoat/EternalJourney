@@ -5,6 +5,7 @@ using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.BulletFactory;
 using EternalJourney.Radar;
 using Godot;
@@ -13,7 +14,7 @@ using Godot;
 /// <summary>
 /// 武器インターフェース
 /// </summary>
-public interface IWeapon : INode2D, IProvide<IWeapon>
+public interface IWeapon : INode2D
 {
     /// <summary>
     /// 発射口マーカー
@@ -68,7 +69,7 @@ public partial class Weapon : Node2D, IWeapon
     /// 弾丸ファクトリ
     /// </summary>
     [Node]
-    public IBulletFactory BulletFactory { get; set; } = default!;
+    public IBaseBulletFactory StandardBulletFactory { get; set; } = default!;
 
     /// <summary>
     /// <inheritdoc/>
@@ -88,14 +89,6 @@ public partial class Weapon : Node2D, IWeapon
     [Node]
     public IRadar Radar { get; set; } = default!;
     #endregion Nodes
-
-    #region Provisions
-    /// <summary>
-    /// 武器プロバイダー
-    /// </summary>
-    /// <returns></returns>
-    IWeapon IProvide<IWeapon>.Value() => this;
-    #endregion Provisions
 
     /// <summary>
     /// <inheritdoc/>
@@ -170,7 +163,7 @@ public partial class Weapon : Node2D, IWeapon
             Rotate(rotation);
         }
         // 射撃を行う
-        BulletFactory.Shoot();
+        StandardBulletFactory.GenerateBullet();
     }
 
     /// <summary>

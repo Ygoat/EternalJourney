@@ -1,0 +1,45 @@
+[gd_scene load_steps=5 format=3 uid="uid://bgqyfnvsb26i2"]
+
+[ext_resource type="PackedScene" uid="uid://bdtaqvekb7sdc" path="res://src/bullet_factory/abstract/base/BaseBulletFactory.tscn" id="1_17ipi"]
+[ext_resource type="Script" path="res://src/bullet_factory/abstract/StandardBulletFactory.cs" id="2_ftv4s"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="3_1xw74"]
+
+[sub_resource type="Resource" id="Resource_id1wt"]
+script = ExtResource("3_1xw74")
+MaxDur = 0.0
+Atk = 0.0
+Spd = 0.0
+Def = 0.0
+
+[node name="StandardBulletFactory" instance=ExtResource("1_17ipi")]
+script = ExtResource("2_ftv4s")
+BulletScene = null
+Status = SubResource("Resource_id1wt")
+
+[node name="Timer" type="Timer" parent="." index="1"]
+unique_name_in_owner = true
+
+[node name="Control" type="Control" parent="." index="2"]
+layout_mode = 3
+anchors_preset = 0
+offset_top = -1.0
+offset_right = 10.0
+offset_bottom = 1.0
+
+[node name="ColorRect" type="ColorRect" parent="Control" index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect2" type="ColorRect" parent="Control" index="1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 9.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 0, 0, 1)

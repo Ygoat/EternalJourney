@@ -1,36 +1,31 @@
-namespace EternalJourney.BulletFactory;
+namespace EternalJourney.Bullet.Abstract;
 
 using System.Collections.Generic;
 using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.Bullet.Abstract;
+using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.BulletFactory.State;
 using EternalJourney.Cores.Utils;
 using Godot;
 
 /// <summary>
-/// 弾丸ファクトリインターフェース
+/// スタンダード弾丸ファクトリインターフェース
 /// </summary>
-public interface IBulletFactory : INode2D, IProvide<IBulletFactory>
+public interface IStandardBulletFactory : IBaseBulletFactory
 {
     /// <summary>
     /// 弾丸キュー
     /// </summary>
     public Queue<Node2D> BulletsQueue { get; set; }
-
-    /// <summary>
-    /// 射撃
-    /// </summary>
-    public void Shoot();
-};
+}
 
 /// <summary>
-/// 弾丸ファクトリ
+/// スタンダード弾丸ファクトリクラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class BulletFactory : Node2D, IBulletFactory
+public partial class StandardBulletFactory : BaseBulletFactory, IStandardBulletFactory
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -38,12 +33,12 @@ public partial class BulletFactory : Node2D, IBulletFactory
     /// <summary>
     /// 弾丸ファクトリロジック
     /// </summary>
-    public BulletFactoryLogic BulletFactoryLogic { get; set; } = default!;
+    public StandardBulletFactoryLogic StandardBulletFactoryLogic { get; set; } = default!;
 
     /// <summary>
     /// 弾丸ファクトリバインド
     /// </summary>
-    public BulletFactoryLogic.IBinding BulletFactoryBinding { get; set; } = default!;
+    public StandardBulletFactoryLogic.IBinding BulletFactoryBinding { get; set; } = default!;
     #endregion State
 
     #region Exports
@@ -77,14 +72,6 @@ public partial class BulletFactory : Node2D, IBulletFactory
     public ITimer Timer { get; set; } = default!;
     #endregion Nodes
 
-    #region Provisions
-    /// <summary>
-    /// 弾丸ファクトリプロバイダー
-    /// </summary>
-    /// <returns></returns>
-    IBulletFactory IProvide<IBulletFactory>.Value() => this;
-    #endregion Provisions
-
     #region Dependencies
     /// <summary>
     /// インスタンス化部品
@@ -108,9 +95,9 @@ public partial class BulletFactory : Node2D, IBulletFactory
     public void Setup()
     {
         // 弾丸ロジックインスタンス化
-        BulletFactoryLogic = new BulletFactoryLogic();
+        StandardBulletFactoryLogic = new StandardBulletFactoryLogic();
         // 弾丸ロジックバインド
-        BulletFactoryBinding = BulletFactoryLogic.Bind();
+        BulletFactoryBinding = StandardBulletFactoryLogic.Bind();
 
         // 弾丸配列生成
         Bullets = Bullets.Select(e =>
@@ -135,13 +122,13 @@ public partial class BulletFactory : Node2D, IBulletFactory
     {
         BulletFactoryBinding
             // Generated出力時
-            .Handle((in BulletFactoryLogic.Output.Generated _) =>
+            .Handle((in StandardBulletFactoryLogic.Output.Generated _) =>
             {
                 // 弾丸生成
-                CallDeferred("GenerateBullet");
+                CallDeferred("BulletEmit");
             })
             // Cooling出力時
-            .Handle((in BulletFactoryLogic.Output.Cooling _) =>
+            .Handle((in StandardBulletFactoryLogic.Output.Cooling _) =>
             {
                 // タイマーセット
                 SetTimer();
@@ -153,7 +140,7 @@ public partial class BulletFactory : Node2D, IBulletFactory
         // タイムアウトイベント設定
         Timer.Timeout += OnTimeout;
         // 弾丸ロジック初期状態セット
-        BulletFactoryLogic.Start();
+        StandardBulletFactoryLogic.Start();
     }
 
     /// <summary>
@@ -162,7 +149,7 @@ public partial class BulletFactory : Node2D, IBulletFactory
     public void OnTimeout()
     {
         // CoolDownCompleteを入力
-        BulletFactoryLogic.Input(new BulletFactoryLogic.Input.CoolDownComplete());
+        StandardBulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.CoolDownComplete());
     }
 
     /// <summary>
@@ -175,18 +162,18 @@ public partial class BulletFactory : Node2D, IBulletFactory
     }
 
     /// <summary>
-    /// 射撃
+    /// 弾丸生成
     /// </summary>
-    public void Shoot()
+    public override void GenerateBullet()
     {
         // Fire入力
-        BulletFactoryLogic.Input(new BulletFactoryLogic.Input.Fire());
+        StandardBulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.Fire());
     }
 
     /// <summary>
-    /// 弾丸生成
+    /// 弾丸射出
     /// </summary>
-    public void GenerateBullet()
+    public void BulletEmit()
     {
         // 弾丸キュー取り出し
         Node2D bullet = BulletsQueue.Dequeue();
@@ -198,7 +185,7 @@ public partial class BulletFactory : Node2D, IBulletFactory
             iBullet.Emit(GlobalPosition, GlobalRotation);
         }
         // StartCoolDown入力
-        BulletFactoryLogic.Input(new BulletFactoryLogic.Input.StartCoolDonw());
+        StandardBulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.StartCoolDonw());
     }
 
     /// <summary>
@@ -210,5 +197,4 @@ public partial class BulletFactory : Node2D, IBulletFactory
         // キューに追加
         BulletsQueue.Enqueue(bullet);
     }
-
 }
