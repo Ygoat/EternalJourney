@@ -4,12 +4,13 @@ using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseEntity;
+using EternalJourney.Common.Traits;
 using Godot;
 
 /// <summary>
 /// ベース弾丸インターフェース
 /// </summary>
-public interface IBaseBullet : INode2D
+public interface IBaseBullet : INode2D, IDestructible
 {
     /// <summary>
     /// ヒットシグナル
@@ -27,11 +28,6 @@ public interface IBaseBullet : INode2D
     /// <param name="shotGlobalPosition"></param>
     /// <param name="shotGlobalAngle"></param>
     public void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle);
-
-    /// <summary>
-    /// 自ノード除去
-    /// </summary>
-    public void RemoveSelf();
 }
 
 /// <summary>

@@ -6,11 +6,6 @@ namespace EternalJourney.Common.Traits;
 public interface IAttackable
 {
     /// <summary>
-    /// 攻撃力
-    /// </summary>
-    public float Atk { get; set; }
-
-    /// <summary>
     /// 攻撃可能フラグ
     /// </summary>
     public bool CanAttack { get; set; }

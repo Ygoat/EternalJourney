@@ -1,6 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://hce48dum5bam"]
+[gd_scene load_steps=3 format=3 uid="uid://hce48dum5bam"]
 
 [ext_resource type="Script" path="res://src/common/base_entity/BaseEntity.cs" id="1_yt12g"]
+[ext_resource type="PackedScene" uid="uid://n5g5fcebtn4n" path="res://src/common/durability_module/DurabilityModule.tscn" id="2_1347l"]
 
 [node name="BaseEntity" type="Node2D"]
 script = ExtResource("1_yt12g")
+
+[node name="DurabilityModule" parent="." instance=ExtResource("2_1347l")]
+unique_name_in_owner = true

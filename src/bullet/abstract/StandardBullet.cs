@@ -5,17 +5,16 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
-using EternalJourney.Common.DurabilityModule;
 using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
 using Godot;
 
+
 /// <summary>
 /// スタンダード弾丸インターフェース
 /// </summary>
-public interface IStandardBullet : IBaseBullet, IDestructible, IMovable, IResizable
+public interface IStandardBullet : IBaseBullet, IMovable, IResizable
 {
-
 }
 
 /// <summary>
@@ -42,19 +41,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public float Def { get; set; }
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    [Export]
-    public float MaxDurability { get; set; } = 0.1f;
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    [Export]
-    public float Speed { get; set; } = 10.0f;
+    public bool CanMove { get; set; } = true;
 
     /// <summary>
     /// <inheritdoc/>
@@ -79,12 +66,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// </summary>
     [Node]
     public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    [Node]
-    public IDurabilityModule DurabilityModule { get; set; } = default!;
     #endregion Nodes
 
     public void Setup()
@@ -95,8 +76,8 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         Area2D.CollisionLayer = CollisionEntity.Bullet;
         // コリジョンマスクをエネミー
         Area2D.CollisionMask = CollisionEntity.Enemy;
-        // 耐久値セット
-        DurabilityModule.SetDurability(MaxDurability);
+        // ステータスセット
+        SetStatus(new Status { Spd = 5.0f, MaxDur = 0.1f });
         // 耐久値ゼロイベント設定
         DurabilityModule.ZeroDurability += OnZeroDurability;
         // 耐久値残存イベント設定
@@ -170,7 +151,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// </summary>
     public virtual void Move()
     {
-        GlobalPosition += Direction.Normalized() * Speed;
+        GlobalPosition += Direction.Normalized() * Status.Spd;
     }
 
     /// <summary>
@@ -212,6 +193,18 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     }
 
     /// <summary>
+    /// 射出（弾丸攻撃力設定）
+    /// </summary>
+    /// <param name="shotGlobalPosition"></param>
+    /// <param name="shotGlobalAngle"></param>
+    /// <param name="atk"></param>
+    public void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle, float atk)
+    {
+        SetBulletAtk(atk);
+        Emit(shotGlobalPosition, shotGlobalAngle);
+    }
+
+    /// <summary>
     /// 弾丸初期化
     /// </summary>
     public void InitializeBullet()
@@ -222,6 +215,15 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         Direction = new Vector2(0, 0);
         // 耐久値を回復
         DurabilityModule.FullRepir();
+    }
+
+    /// <summary>
+    /// 弾丸攻撃力設定
+    /// </summary>
+    /// <param name="atk"></param>
+    private void SetBulletAtk(float atk)
+    {
+        Status.Atk = atk;
     }
 
     /// <summary>

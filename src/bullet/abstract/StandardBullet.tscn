@@ -1,13 +1,21 @@
-[gd_scene load_steps=5 format=3 uid="uid://2s531ojpmkia"]
+[gd_scene load_steps=6 format=3 uid="uid://2s531ojpmkia"]
 
 [ext_resource type="PackedScene" uid="uid://cj5278x1kfrxx" path="res://src/bullet/abstract/base/BaseBullet.tscn" id="1_04t2q"]
 [ext_resource type="Script" path="res://src/bullet/abstract/StandardBullet.cs" id="2_c4dpx"]
-[ext_resource type="PackedScene" uid="uid://n5g5fcebtn4n" path="res://src/common/durability_module/DurabilityModule.tscn" id="3_jrba5"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="3_txeo2"]
+
+[sub_resource type="Resource" id="Resource_id1wt"]
+script = ExtResource("3_txeo2")
+MaxDur = 0.0
+Atk = 0.0
+Spd = 0.0
+Def = 0.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_60sgv"]
 
 [node name="StandardBullet" instance=ExtResource("1_04t2q")]
 script = ExtResource("2_c4dpx")
+Status = SubResource("Resource_id1wt")
 
 [node name="Area2D" type="Area2D" parent="." index="0"]
 unique_name_in_owner = true
@@ -23,7 +31,4 @@ offset_bottom = 10.0
 color = Color(0.970717, 0.660276, 0.494899, 1)
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." index="2"]
-unique_name_in_owner = true
-
-[node name="DurabilityModule" parent="." index="3" instance=ExtResource("3_jrba5")]
 unique_name_in_owner = true

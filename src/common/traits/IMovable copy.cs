@@ -6,9 +6,10 @@ namespace EternalJourney.Common.Traits;
 public interface IMovable
 {
     /// <summary>
-    /// スピード
+    /// 移動可能フラグ
     /// </summary>
-    public float Speed { get; set; }
+    /// <returns></returns>
+    public bool CanMove { get; set; }
 
     /// <summary>
     /// 移動
