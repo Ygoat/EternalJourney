@@ -15,10 +15,7 @@ using Godot;
 /// </summary>
 public interface IStandardBulletFactory : IBaseBulletFactory
 {
-    /// <summary>
-    /// 弾丸キュー
-    /// </summary>
-    public Queue<Node2D> BulletsQueue { get; set; }
+
 }
 
 /// <summary>
