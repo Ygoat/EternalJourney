@@ -17,11 +17,21 @@ public interface IBaseBullet : INode2D
     public event BaseBullet.HitEventHandler Hit;
 
     /// <summary>
+    /// 除去シグナル
+    /// </summary>
+    public event BaseBullet.RemovedEventHandler Removed;
+
+    /// <summary>
     /// 弾丸射出
     /// </summary>
     /// <param name="shotGlobalPosition"></param>
     /// <param name="shotGlobalAngle"></param>
     public void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle);
+
+    /// <summary>
+    /// 自ノード除去
+    /// </summary>
+    public void RemoveSelf();
 }
 
 /// <summary>
@@ -41,7 +51,18 @@ public partial class BaseBullet : BaseEntity, IBaseBullet
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    [Signal]
+    public delegate void RemovedEventHandler(StandardBullet bullet);
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     /// <param name="shotGlobalPosition"></param>
     /// <param name="shotGlobalAngle"></param>
     public virtual void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle) { }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public virtual void RemoveSelf() { }
 }

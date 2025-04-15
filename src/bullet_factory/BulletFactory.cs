@@ -120,7 +120,7 @@ public partial class BulletFactory : Node2D, IBulletFactory
             // イベントファンクション付与
             if (e is IStandardBullet iBullet)
             {
-                iBullet.Collapsed += OnCollapsed;
+                iBullet.Removed += OnRemoved;
             }
             // キュー追加
             BulletsQueue.Enqueue(e);
@@ -205,7 +205,7 @@ public partial class BulletFactory : Node2D, IBulletFactory
     /// Collapsedイベントファンクション
     /// </summary>
     /// <param name="bullet"></param>
-    public void OnCollapsed(StandardBullet bullet)
+    public void OnRemoved(StandardBullet bullet)
     {
         // キューに追加
         BulletsQueue.Enqueue(bullet);

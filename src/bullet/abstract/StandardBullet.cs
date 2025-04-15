@@ -15,10 +15,7 @@ using Godot;
 /// </summary>
 public interface IStandardBullet : IBaseBullet, IDestructible, IMovable, IResizable
 {
-    /// <summary>
-    /// 崩壊シグナル
-    /// </summary>
-    public event StandardBullet.CollapsedEventHandler Collapsed;
+
 }
 
 /// <summary>
@@ -28,15 +25,6 @@ public interface IStandardBullet : IBaseBullet, IDestructible, IMovable, IResiza
 public partial class StandardBullet : BaseBullet, IStandardBullet
 {
     public override void _Notification(int what) => this.Notify(what);
-
-    #region Signals
-    /// <summary>
-    /// 崩壊シグナル
-    /// </summary>
-    /// <param name="standardBullet"></param>
-    [Signal]
-    public delegate void CollapsedEventHandler(StandardBullet standardBullet);
-    #endregion Signals
 
     #region State
     /// <summary>
@@ -141,7 +129,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
                 // 物理処理無効化
                 SetPhysicsProcess(false);
                 // OnCollapsedシグナル出力
-                EmitSignal(SignalName.Collapsed, this);
+                EmitSignal(BaseBullet.SignalName.Removed, this);
                 // Reload入力
                 StandardBulletLogic.Input(new StandardBulletLogic.Input.Reload());
             });
@@ -169,7 +157,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// 自インスタンスをツリーから一時的に取り除く
     /// ※インスタンスは完全には削除されない
     /// </summary>
-    public virtual void RemoveSelf()
+    public override void RemoveSelf()
     {
         // 親ノードを取得してから、子である自ノードを削除する
         GetParent().RemoveChild(this);
