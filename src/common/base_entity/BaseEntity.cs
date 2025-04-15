@@ -23,19 +23,19 @@ public partial class BaseEntity : Node2D, IBaseEntity
     public override void _Notification(int what) => this.Notify(what);
 
     /// <summary>
-    /// <inheritdoc/>
+    /// ステータス
     /// </summary>
     [Export]
     protected Status Status { get; set; } = new Status();
 
     /// <summary>
-    /// <inheritdoc/>
+    /// 耐久値モジュール
     /// </summary>
     [Node]
     protected IDurabilityModule DurabilityModule { get; set; } = default!;
 
     /// <summary>
-    /// <inheritdoc/>
+    /// ステータス設定
     /// </summary>
     /// <param name="status"></param>
     protected void SetStatus(Status status)
