@@ -1,5 +1,6 @@
 namespace EternalJourney.Bullet.Abstract.Base;
 
+using System;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseEntity;
@@ -26,5 +27,8 @@ public partial class BaseBulletFactory : BaseEntity, IBaseBulletFactory
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public virtual void GenerateBullet() { }
+    public virtual void GenerateBullet()
+    {
+        throw new NotImplementedException();
+    }
 }

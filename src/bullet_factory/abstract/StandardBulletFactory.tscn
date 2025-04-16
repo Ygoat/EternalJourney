@@ -16,10 +16,10 @@ script = ExtResource("2_ftv4s")
 BulletScene = null
 Status = SubResource("Resource_id1wt")
 
-[node name="Timer" type="Timer" parent="." index="1"]
+[node name="Timer" type="Timer" parent="." index="0"]
 unique_name_in_owner = true
 
-[node name="Control" type="Control" parent="." index="2"]
+[node name="Control" type="Control" parent="." index="1"]
 layout_mode = 3
 anchors_preset = 0
 offset_top = -1.0
