@@ -78,10 +78,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         Area2D.CollisionMask = CollisionEntity.Enemy;
         // ステータスセット
         SetStatus(new Status { Spd = 5.0f, MaxDur = 0.1f });
-        // 耐久値ゼロイベント設定
-        DurabilityModule.ZeroDurability += OnZeroDurability;
-        // 耐久値残存イベント設定
-        DurabilityModule.DurabilityLeft += OnDurabilityLeft;
     }
 
     /// <summary>
@@ -118,6 +114,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         Area2D.AreaEntered += OnAreaEntered;
         // 画面外イベント
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
+        // 耐久値ゼロイベント設定
+        DurabilityModule.ZeroDurability += OnZeroDurability;
+        // 耐久値残存イベント設定
+        DurabilityModule.DurabilityLeft += OnDurabilityLeft;
         // ロジック初期化
         StandardBulletLogic.Start();
         // トップレベルオブジェクトとして扱う（親ノードのRotationの影響を受けないようにするため）
