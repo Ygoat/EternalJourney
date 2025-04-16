@@ -1,0 +1,65 @@
+[gd_scene load_steps=8 format=3 uid="uid://dd0kb5g3fa2xx"]
+
+[ext_resource type="PackedScene" uid="uid://c5fmt1vkl8j58" path="res://src/weapon/abstract/base/BaseWeapon.tscn" id="1_vl25n"]
+[ext_resource type="Script" path="res://src/weapon/abstract/StandardWeapon.cs" id="2_nbie7"]
+[ext_resource type="PackedScene" uid="uid://cbcshx5jiliyh" path="res://src/radar/Radar.tscn" id="3_ufefi"]
+[ext_resource type="PackedScene" uid="uid://dywjjflkf7066" path="res://src/bullet_factory/01_NormalBulletFactory.tscn" id="4_w2wdh"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="5_ivs8m"]
+
+[sub_resource type="Resource" id="Resource_h210x"]
+script = ExtResource("5_ivs8m")
+MaxDur = 0.0
+Atk = 0.0
+Spd = 0.0
+Def = 0.0
+
+[sub_resource type="Resource" id="Resource_qe8yx"]
+script = ExtResource("5_ivs8m")
+MaxDur = 0.0
+Atk = 0.0
+Spd = 0.0
+Def = 0.0
+
+[node name="StandardWeapon" instance=ExtResource("1_vl25n")]
+script = ExtResource("2_nbie7")
+Status = SubResource("Resource_h210x")
+
+[node name="Marker2D" type="Marker2D" parent="." index="1"]
+unique_name_in_owner = true
+position = Vector2(60, 0)
+
+[node name="CenterMarker" type="Marker2D" parent="." index="2"]
+unique_name_in_owner = true
+
+[node name="Radar" parent="." index="3" instance=ExtResource("3_ufefi")]
+unique_name_in_owner = true
+
+[node name="Control" type="Control" parent="." index="4"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+
+[node name="ColorRect1" type="ColorRect" parent="Control" index="0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.913415, 0.667081, 0.713285, 1)
+
+[node name="ColorRect2" type="ColorRect" parent="Control" index="1"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 15.0
+offset_right = 80.0
+offset_bottom = 25.0
+color = Color(0.913415, 0.667081, 0.713285, 1)
+
+[node name="StandardBulletFactory" parent="." index="5" instance=ExtResource("4_w2wdh")]
+unique_name_in_owner = true
+position = Vector2(60, 0)
+Status = SubResource("Resource_qe8yx")

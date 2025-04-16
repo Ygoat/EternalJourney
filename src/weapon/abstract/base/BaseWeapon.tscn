@@ -1,0 +1,16 @@
+[gd_scene load_steps=5 format=3 uid="uid://c5fmt1vkl8j58"]
+
+[ext_resource type="PackedScene" uid="uid://hce48dum5bam" path="res://src/common/base_entity/BaseEntity.tscn" id="1_5c132"]
+[ext_resource type="Script" path="res://src/weapon/abstract/base/BaseWeapon.cs" id="2_0veco"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="3_kjbnc"]
+
+[sub_resource type="Resource" id="Resource_yyg1m"]
+script = ExtResource("3_kjbnc")
+MaxDur = 0.0
+Atk = 0.0
+Spd = 0.0
+Def = 0.0
+
+[node name="BaseWeapon" instance=ExtResource("1_5c132")]
+script = ExtResource("2_0veco")
+Status = SubResource("Resource_yyg1m")

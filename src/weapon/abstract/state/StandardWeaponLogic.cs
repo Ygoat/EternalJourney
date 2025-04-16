@@ -1,4 +1,4 @@
-namespace EternalJourney.Weapon;
+namespace EternalJourney.Weapon.Abstract.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
@@ -6,13 +6,13 @@ using Chickensoft.LogicBlocks;
 /// <summary>
 /// 武器ロジックインターフェース
 /// </summary>
-public interface IWeaponLogic : ILogicBlock<WeaponLogic.State>;
+public interface IStandardWeaponLogic : ILogicBlock<StandardWeaponLogic.State>;
 
 /// <summary>
 /// 武器ロジック
 /// </summary>
 [Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class WeaponLogic : LogicBlock<WeaponLogic.State>, IWeaponLogic
+public partial class StandardWeaponLogic : LogicBlock<StandardWeaponLogic.State>, IStandardWeaponLogic
 {
     /// <summary>
     /// 初期状態

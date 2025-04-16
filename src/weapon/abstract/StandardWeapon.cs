@@ -1,4 +1,4 @@
-namespace EternalJourney.Weapon;
+namespace EternalJourney.Weapon.Abstract;
 
 using System;
 using System.Linq;
@@ -6,32 +6,23 @@ using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.BulletFactory;
 using EternalJourney.Radar;
+using EternalJourney.Weapon.Abstract.Base;
+using EternalJourney.Weapon.Abstract.State;
 using Godot;
 
-
 /// <summary>
-/// 武器インターフェース
+/// スタンダード武器インターフェース
 /// </summary>
-public interface IWeapon : INode2D
+public interface IStandardWeapon : IBaseWeapon
 {
-    /// <summary>
-    /// 発射口マーカー
-    /// </summary>
-    public IMarker2D Marker2D { get; set; }
-
-    /// <summary>
-    /// 武器センターマーカー
-    /// </summary>
-    public IMarker2D CenterMarker { get; set; }
 }
 
 /// <summary>
-/// 武器クラス
+/// スタンダード武器クラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class Weapon : Node2D, IWeapon
+public partial class StandardWeapon : BaseWeapon, IStandardWeapon
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -39,12 +30,12 @@ public partial class Weapon : Node2D, IWeapon
     /// <summary>
     /// 武器ロジック
     /// </summary>
-    public WeaponLogic WeaponLogic { get; set; } = default!;
+    public StandardWeaponLogic StandardWeaponLogic { get; set; } = default!;
 
     /// <summary>
     /// 武器ロジックバインド
     /// </summary>
-    public WeaponLogic.IBinding WeaponBind { get; set; } = default!;
+    public StandardWeaponLogic.IBinding WeaponBind { get; set; } = default!;
     #endregion State
 
     #region Exports
@@ -105,9 +96,9 @@ public partial class Weapon : Node2D, IWeapon
     public void Setup()
     {
         // 武器ロジックインスタンス化
-        WeaponLogic = new WeaponLogic();
+        StandardWeaponLogic = new StandardWeaponLogic();
         // 武器ロジックバインド
-        WeaponBind = WeaponLogic.Bind();
+        WeaponBind = StandardWeaponLogic.Bind();
     }
 
     /// <summary>
@@ -117,13 +108,13 @@ public partial class Weapon : Node2D, IWeapon
     {
         WeaponBind
             // Idling出力時
-            .Handle((in WeaponLogic.Output.Idling _) =>
+            .Handle((in StandardWeaponLogic.Output.Idling _) =>
             {
                 // 物理処理無効化
                 SetPhysicsProcess(false);
             })
             // Attacking出力時
-            .Handle((in WeaponLogic.Output.Attacking _) =>
+            .Handle((in StandardWeaponLogic.Output.Attacking _) =>
             {
                 // 物理処理有効化
                 SetPhysicsProcess(true);
@@ -133,7 +124,7 @@ public partial class Weapon : Node2D, IWeapon
         // 敵未発見イベント
         Radar.NotSearched += OnNotSearched;
         // 武器ロジック初期状態開始
-        WeaponLogic.Start();
+        StandardWeaponLogic.Start();
     }
 
     /// <summary>
@@ -153,16 +144,21 @@ public partial class Weapon : Node2D, IWeapon
             // 敵方向の角度を計算
             float AngleToTarget = Math.Abs(WeaponDirection.AngleTo(TargetDirection));
             // 外積計算
-            float Gaiseki = WeaponDirection.Cross(TargetDirection);
+            float OuterProduct = WeaponDirection.Cross(TargetDirection);
 
             // 外積・敵方向の角度・ローテーションスピード・シグモイド関数から
             // 回転角度を計算
-            float rotation = Math.Sign(Gaiseki) * Math.Sign(AngleToTarget) * RotationSpeed * Sigmoid(1, AngleToTarget);
+            float rotation = Math.Sign(OuterProduct) * Math.Sign(AngleToTarget) * RotationSpeed * Sigmoid(1, AngleToTarget);
 
             // 回転する
             Rotate(rotation);
         }
         // 射撃を行う
+        Attack();
+    }
+
+    public override void Attack()
+    {
         StandardBulletFactory.GenerateBullet();
     }
 
@@ -172,7 +168,7 @@ public partial class Weapon : Node2D, IWeapon
     public void OnSearched()
     {
         // StartAttackを入力
-        WeaponLogic.Input(new WeaponLogic.Input.StartAttack());
+        StandardWeaponLogic.Input(new StandardWeaponLogic.Input.StartAttack());
     }
 
     /// <summary>
@@ -181,7 +177,7 @@ public partial class Weapon : Node2D, IWeapon
     public void OnNotSearched()
     {
         // StartIdleを入力
-        WeaponLogic.Input(new WeaponLogic.Input.StartIdle());
+        StandardWeaponLogic.Input(new StandardWeaponLogic.Input.StartIdle());
     }
 
     /// <summary>

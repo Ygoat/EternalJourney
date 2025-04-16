@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://bf7204x00kgdy"]
+
+[ext_resource type="PackedScene" uid="uid://dd0kb5g3fa2xx" path="res://src/weapon/abstract/StandardWeapon.tscn" id="1_rjxij"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_icwu3"]
+
+[sub_resource type="Resource" id="Resource_h210x"]
+script = ExtResource("2_icwu3")
+MaxDur = 0.0
+Atk = 0.0
+Spd = 0.0
+Def = 0.0
+
+[node name="01_NormalWeapon" instance=ExtResource("1_rjxij")]
+Status = SubResource("Resource_h210x")
