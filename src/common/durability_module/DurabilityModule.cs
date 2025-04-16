@@ -101,15 +101,11 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// <summary>
     /// 最大耐久値
     /// </summary>
-    [ExportGroup("Durability Setting")]
-    [Export(PropertyHint.Range, "0.1,10000,0.1")]
     private float _maxValue { get; set; } = 10;
 
     /// <summary>
     /// 最大値からの現在耐久比
     /// </summary>
-    [ExportGroup("Durability Setting")]
-    [Export(PropertyHint.Range, "0,1,0.01")]
     private float _currentRatio { get; set; } = 1;
 
     /// <summary>
