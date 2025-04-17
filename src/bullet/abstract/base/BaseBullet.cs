@@ -49,7 +49,7 @@ public partial class BaseBullet : BaseEntity, IBaseBullet
     /// 自己除去イベント
     /// </summary>
     [Signal]
-    public delegate void RemovedEventHandler(StandardBullet bullet);
+    public delegate void RemovedEventHandler(BaseBullet bullet);
 
     /// <summary>
     /// <inheritdoc/>

@@ -102,7 +102,7 @@ public partial class StandardBulletFactory : BaseBulletFactory, IStandardBulletF
             // 弾丸ノードインスタンス化&ロード
             e = Instantiator.LoadAndInstantiate<Node2D>(BulletScene.ResourcePath);
             // イベントファンクション付与
-            if (e is IStandardBullet iBullet)
+            if (e is IBaseBullet iBullet)
             {
                 iBullet.Removed += OnRemoved;
             }
@@ -177,7 +177,7 @@ public partial class StandardBulletFactory : BaseBulletFactory, IStandardBulletF
         // 弾丸ノードをノードツリーに追加
         AddChild(bullet);
         // 弾丸射出
-        if (bullet is IStandardBullet iBullet)
+        if (bullet is IBaseBullet iBullet)
         {
             iBullet.Emit(GlobalPosition, GlobalRotation);
         }
@@ -189,7 +189,7 @@ public partial class StandardBulletFactory : BaseBulletFactory, IStandardBulletF
     /// Collapsedイベントファンクション
     /// </summary>
     /// <param name="bullet"></param>
-    public void OnRemoved(StandardBullet bullet)
+    public void OnRemoved(BaseBullet bullet)
     {
         // キューに追加
         BulletsQueue.Enqueue(bullet);
