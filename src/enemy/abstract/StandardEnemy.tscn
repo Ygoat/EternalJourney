@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3 uid="uid://cgt87rvfec4x5"]
+
+[ext_resource type="PackedScene" uid="uid://dtymbdwgg4tmh" path="res://src/enemy/abstract/base/BaseEnemy.tscn" id="1_ammup"]
+[ext_resource type="Script" path="res://src/enemy/abstract/StandardEnemy.cs" id="2_qwgl2"]
+
+[node name="StandardEnemy" instance=ExtResource("1_ammup")]
+script = ExtResource("2_qwgl2")

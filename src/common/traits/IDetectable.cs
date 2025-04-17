@@ -21,5 +21,5 @@ public interface IDetectable
     /// エンティティ探知(1体のエンティティを標的として探知)
     /// </summary>
     /// <returns></returns>
-    public BaseEntity Detect();
+    public T Detect<T>() where T : class;
 }
