@@ -28,5 +28,5 @@ public static class Const
     /// <summary>
     /// エネミーシーンファイルパス
     /// </summary>
-    public const string EnemyNodePath = "res://src/enemy/Enemy.tscn";
+    public const string EnemyNodePath = "res://src/enemy/01_NormalEnemy.tscn";
 }

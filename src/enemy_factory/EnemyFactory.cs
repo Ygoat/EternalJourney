@@ -7,23 +7,24 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Utils;
-using EternalJourney.Enemy;
+using EternalJourney.Enemy.Abstract.Base;
 using EternalJourney.EnemyFactory.State;
 using Godot;
 
 /// <summary>
 /// エネミーファクトリインターフェース
 /// </summary>
-public interface IEnemyFactory : INode, IProvide<IEnemyFactory>
+public interface IEnemyFactory : INode2D, IProvide<IEnemyFactory>
 {
-    public Queue<Enemy> EnemiesQueue { get; set; }
+    public Queue<Node2D> EnemiesQueue { get; set; }
+    public void SpawnEnemy();
 };
 
 /// <summary>
 /// エネミーファクトリークラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class EnemyFactory : Node, IEnemyFactory
+public partial class EnemyFactory : Node2D, IEnemyFactory
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -46,14 +47,14 @@ public partial class EnemyFactory : Node, IEnemyFactory
     public double WaitTime { get; set; } = 0.1;
 
     /// <summary>
-    ///　弾丸配列
+    ///　エネミー配列
     /// </summary>
-    public Enemy[] Enemies { get; set; } = new Enemy[100];
+    public Node2D[] Enemies { get; set; } = new Node2D[200];
 
     /// <summary>
-    /// 弾丸キュー
+    /// エネミーキュー
     /// </summary>
-    public Queue<Enemy> EnemiesQueue { get; set; } = new Queue<Enemy>();
+    public Queue<Node2D> EnemiesQueue { get; set; } = new Queue<Node2D>();
     #endregion Exports
 
     #region Nodes
@@ -102,7 +103,11 @@ public partial class EnemyFactory : Node, IEnemyFactory
         Enemies = Enemies.Select(e =>
         {
             // エネミーインスタンス化
-            e = Instantiator.LoadAndInstantiate<Enemy>(Const.EnemyNodePath);
+            e = Instantiator.LoadAndInstantiate<Node2D>(Const.EnemyNodePath);
+            if (e is IBaseEnemy iBaseEnemy)
+            {
+                iBaseEnemy.Removed += OnRemoved;
+            }
             // エネミーキュー追加
             EnemiesQueue.Enqueue(e);
             return e;
@@ -119,13 +124,14 @@ public partial class EnemyFactory : Node, IEnemyFactory
             .Handle((in EnemyFactoryLogic.Output.ReadyComplete _) =>
             {
                 // 物理処理有効化
-                SetPhysicsProcess(true);
+                // SetPhysicsProcess(true);
+                CallDeferred(nameof(DequeueAndSpawn));
             })
             // StartCoolDown出力時
             .Handle((in EnemyFactoryLogic.Output.StartCoolDown _) =>
             {
                 // 物理処理無効化
-                SetPhysicsProcess(false);
+                // SetPhysicsProcess(false);
                 // タイマーセット
                 SetTimer();
             });
@@ -146,7 +152,7 @@ public partial class EnemyFactory : Node, IEnemyFactory
     public void OnPhysicsProcess(double delta)
     {
         // エネミー生成
-        CallDeferred(nameof(GenerateEnemy));
+        // CallDeferred(nameof(GenerateEnemy));
     }
 
     /// <summary>
@@ -168,17 +174,40 @@ public partial class EnemyFactory : Node, IEnemyFactory
     }
 
     /// <summary>
-    /// 射撃
+    /// キューからエネミーを取り出してスポーン
     /// </summary>
-    public void GenerateEnemy()
+    public void DequeueAndSpawn()
     {
         // Spawn入力
         EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.Spawn());
         // エネミーキュー取り出し
-        Enemy enemy = EnemiesQueue.Dequeue();
-        // エネミー追加
+        Node2D enemy = EnemiesQueue.Dequeue();
+
         AddChild(enemy);
-        // エネミースポーン
-        enemy.EnemySpawn();
+        if (enemy is IBaseEnemy iEnemy)
+        {
+            iEnemy.Spawn(GlobalPosition, GlobalRotation);
+        }
+    }
+
+    /// <summary>
+    /// エネミーをスポーン
+    /// </summary>
+    /// <param name="spawnGlobalPosition"></param>
+    /// <param name="spawnGlobalAngle"></param>
+    public void SpawnEnemy()
+    {
+        // Spawn入力
+        EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.Spawn());
+    }
+
+    /// <summary>
+    /// Collapsedイベントファンクション
+    /// </summary>
+    /// <param name="bullet"></param>
+    public void OnRemoved(BaseEnemy enemy)
+    {
+        // キューに追加
+        EnemiesQueue.Enqueue(enemy);
     }
 }

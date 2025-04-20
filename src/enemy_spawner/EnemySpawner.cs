@@ -78,5 +78,6 @@ public partial class EnemySpawner : Node2D, IEnemySpawner
     {
         // Path2D経路上の進行度を更新
         PathFollow2D.ProgressRatio += (float)delta;
+        EnemyFactory.SpawnEnemy();
     }
 }

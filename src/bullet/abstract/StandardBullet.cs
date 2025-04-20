@@ -103,12 +103,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
             {
                 // フレーム終わりにRemoveSelf()呼び出し
                 CallDeferred(nameof(RemoveSelf));
-                // 物理処理無効化
-                SetPhysicsProcess(false);
-                // OnCollapsedシグナル出力
-                EmitSignal(BaseBullet.SignalName.Removed, this);
-                // Reload入力
-                StandardBulletLogic.Input(new StandardBulletLogic.Input.Reload());
+
             });
         // コリジョンイベント設定
         Area2D.AreaEntered += OnAreaEntered;
@@ -144,6 +139,12 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         GetParent().RemoveChild(this);
         // 弾丸の初期化
         InitializeBullet();
+        // 物理処理無効化
+        SetPhysicsProcess(false);
+        // OnCollapsedシグナル出力
+        EmitSignal(BaseBullet.SignalName.Removed, this);
+        // Reload入力
+        StandardBulletLogic.Input(new StandardBulletLogic.Input.Reload());
     }
 
     /// <summary>

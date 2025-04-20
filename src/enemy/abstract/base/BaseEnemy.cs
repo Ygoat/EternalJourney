@@ -2,7 +2,6 @@ namespace EternalJourney.Enemy.Abstract.Base;
 
 using System;
 using Chickensoft.AutoInject;
-using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseEntity;
 using EternalJourney.Common.Traits;
@@ -11,7 +10,7 @@ using Godot;
 /// <summary>
 /// ベースエネミーインターフェース
 /// </summary>
-public interface IBaseEnemy : INode2D, IDestructible
+public interface IBaseEnemy : IBaseEntity, IDestructible
 {
     /// <summary>
     /// ヒットシグナル

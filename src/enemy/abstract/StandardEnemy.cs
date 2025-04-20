@@ -4,7 +4,6 @@ using Chickensoft.AutoInject;
 using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.Common.BaseEntity;
 using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Enemy.Abstract.Base;
@@ -36,7 +35,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// <summary>
     /// エネミーロジックバインド
     /// </summary>
-    public StandardEnemyLogic.IBinding EnemyBinding { get; set; } = default!;
+    public StandardEnemyLogic.IBinding StandardEnemyBinding { get; set; } = default!;
     #endregion State
 
     #region Exports
@@ -109,8 +108,9 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     {
         // エネミーロジック
         StandardEnemyLogic = new StandardEnemyLogic();
+        GD.Print("Setup");
         // エネミーロジックバインド
-        EnemyBinding = StandardEnemyLogic.Bind();
+        StandardEnemyBinding = StandardEnemyLogic.Bind();
         // コリジョンレイヤをエネミーに設定
         Area2D.CollisionLayer = CollisionEntity.Enemy;
         // コリジョンマスクを船と弾丸に設定
@@ -122,6 +122,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // 耐久ゼロイベント設定
         DurabilityModule.ZeroDurability += OnZeroDurability;
         TargetPosition = Detect<IShip>().EnemyTargetMarker.GlobalPosition;
+        TopLevel = true;
     }
 
     /// <summary>
@@ -129,7 +130,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// </summary>
     public void OnResolved()
     {
-        EnemyBinding
+        StandardEnemyBinding
             // StartClose出力時
             .Handle((in StandardEnemyLogic.Output.StartClose _) =>
             {
@@ -146,12 +147,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
             {
                 // 自ノード除去
                 CallDeferred(nameof(RemoveSelf));
-                // 物理処理無効化
-                SetPhysicsProcess(false);
-                // シグナル出力
-                EmitSignal(BaseEnemy.SignalName.Removed, this);
-                // Removed入力
-                StandardEnemyLogic.Input(new StandardEnemyLogic.Input.Removed());
             })
             // SpawnEnable出力時
             .Handle((in StandardEnemyLogic.Output.SpawnEnable _) =>
@@ -215,6 +210,12 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         GetParent().RemoveChild(this);
         // エネミーの初期化
         InitializeEnemy();
+        // 物理処理無効化
+        SetPhysicsProcess(false);
+        // シグナル出力
+        EmitSignal(BaseEnemy.SignalName.Removed, this);
+        // Removed入力
+        StandardEnemyLogic.Input(new StandardEnemyLogic.Input.Removed());
     }
 
     /// <summary>
