@@ -96,8 +96,9 @@ public partial class Radar : Node2D, IRadar
     public void OnResolved()
     {
 
-        RadarLogicBinding.Handle((in RadarLogic.Output.StatusChanged output) => GD.Print("Changed"));
-
+        RadarLogicBinding.Handle((in RadarLogic.Output.StatusChanged output) =>
+        {
+        });
         RadarLogicBinding.When((RadarLogic.State.Idle _) =>
         {
             Area2D.AreaEntered += OnAreaEntered;
@@ -134,7 +135,6 @@ public partial class Radar : Node2D, IRadar
     /// <param name="area"></param>
     public void OnAreaEntered(Area2D area)
     {
-        GD.Print("Entered!");
         // ロジックブロックに進入した敵のArea2Dノードを入力
         RadarLogic.Input(new RadarLogic.Input.WatchEnemy(area));
     }

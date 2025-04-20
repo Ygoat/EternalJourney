@@ -108,7 +108,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     {
         // エネミーロジック
         StandardEnemyLogic = new StandardEnemyLogic();
-        GD.Print("Setup");
         // エネミーロジックバインド
         StandardEnemyBinding = StandardEnemyLogic.Bind();
         // コリジョンレイヤをエネミーに設定
