@@ -14,7 +14,7 @@ using Godot;
 /// <summary>
 /// エネミーファクトリインターフェース
 /// </summary>
-public interface IEnemyFactory : INode2D, IProvide<IEnemyFactory>
+public interface IEnemyFactory : INode2D
 {
     public Queue<BaseEnemy> EnemiesQueue { get; set; }
     public void SpawnEnemy();
@@ -64,14 +64,6 @@ public partial class EnemyFactory : Node2D, IEnemyFactory
     [Node]
     public ITimer Timer { get; set; } = default!;
     #endregion Nodes
-
-    #region Provisions
-    /// <summary>
-    /// 弾丸ファクトリプロバイダー
-    /// </summary>
-    /// <returns></returns>
-    IEnemyFactory IProvide<IEnemyFactory>.Value() => this;
-    #endregion Provisions
 
     #region Dependencies
     /// <summary>
