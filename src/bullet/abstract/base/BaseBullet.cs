@@ -2,7 +2,6 @@ namespace EternalJourney.Bullet.Abstract.Base;
 
 using System;
 using Chickensoft.AutoInject;
-using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseEntity;
 using EternalJourney.Common.Traits;
@@ -11,7 +10,7 @@ using Godot;
 /// <summary>
 /// ベース弾丸インターフェース
 /// </summary>
-public interface IBaseBullet : INode2D, IDestructible
+public interface IBaseBullet : IBaseEntity, IDestructible
 {
     /// <summary>
     /// ヒットシグナル
