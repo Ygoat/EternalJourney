@@ -8,10 +8,7 @@
 [node name="StandardBullet" instance=ExtResource("1_04t2q")]
 script = ExtResource("2_c4dpx")
 
-[node name="Area2D" type="Area2D" parent="." index="0"]
-unique_name_in_owner = true
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" index="0"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="0"]
 shape = SubResource("CircleShape2D_60sgv")
 
 [node name="ColorRect" type="ColorRect" parent="." index="1"]

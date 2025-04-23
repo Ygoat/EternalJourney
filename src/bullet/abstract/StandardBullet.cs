@@ -1,8 +1,10 @@
 namespace EternalJourney.Bullet.Abstract;
 
 using Chickensoft.AutoInject;
+using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Common.Traits;
@@ -35,6 +37,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// スタンダード弾丸ロジックバインド
     /// </summary>
     public StandardBulletLogic.IBinding StandardBulletBinding { get; set; } = default!;
+
+    [Dependency] public EntityTable EntityTable => this.DependOn<EntityTable>();
+    [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
+
     #endregion State
 
     #region Exports
@@ -56,12 +62,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
 
     #region Nodes
     /// <summary>
-    /// ヒット判定用エリア
-    /// </summary>
-    [Node]
-    public IArea2D Area2D { get; set; } = default!;
-
-    /// <summary>
     /// 画面外検知用通知ノード
     /// </summary>
     [Node]
@@ -73,9 +73,9 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         StandardBulletLogic = new StandardBulletLogic();
         StandardBulletBinding = StandardBulletLogic.Bind();
         // コリジョンレイヤーを弾丸
-        Area2D.CollisionLayer = CollisionEntity.Bullet;
+        CollisionLayer = CollisionEntity.Bullet;
         // コリジョンマスクをエネミー
-        Area2D.CollisionMask = CollisionEntity.Enemy;
+        CollisionMask = CollisionEntity.Enemy;
         // ステータスセット
         SetStatus(new Status { Spd = 5.0f, MaxDur = 0.1f });
     }
@@ -106,7 +106,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
 
             });
         // コリジョンイベント設定
-        Area2D.AreaEntered += OnAreaEntered;
+        AreaEntered += OnAreaEntered;
         // 画面外イベント
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // 耐久値ゼロイベント設定
@@ -164,7 +164,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         // ヒットを入力
         StandardBulletLogic.Input(new StandardBulletLogic.Input.Hit());
         // ヒットシグナルを出力
-        EmitSignal(BaseBullet.SignalName.Hit);
+        // EmitSignal(BaseBullet.SignalName.Hit);
     }
 
     /// <summary>

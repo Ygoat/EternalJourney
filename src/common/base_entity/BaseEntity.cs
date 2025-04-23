@@ -10,7 +10,7 @@ using Godot;
 /// <summary>
 /// ベースエンティティインターフェース
 /// </summary>
-public interface IBaseEntity : INode2D
+public interface IBaseEntity : IArea2D
 {
 }
 
@@ -18,7 +18,7 @@ public interface IBaseEntity : INode2D
 /// ベースエンティティクラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class BaseEntity : Node2D, IBaseEntity
+public partial class BaseEntity : Area2D, IBaseEntity
 {
     public override void _Notification(int what) => this.Notify(what);
 

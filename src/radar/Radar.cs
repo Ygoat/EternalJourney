@@ -12,7 +12,7 @@ using Godot;
 /// <summary>
 /// レーダーインターフェース
 /// </summary>
-public interface IRadar : INode2D
+public interface IRadar : IArea2D
 {
     /// <summary>
     /// エリア内エネミー
@@ -34,17 +34,9 @@ public interface IRadar : INode2D
 /// レーダークラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class Radar : Node2D, IRadar
+public partial class Radar : Area2D, IRadar
 {
     public override void _Notification(int what) => this.Notify(what);
-
-    #region Nodes
-    /// <summary>
-    /// サーチエリア
-    /// </summary>
-    [Node("%SearchArea")]
-    public IArea2D Area2D { get; set; } = default!;
-    #endregion Nodes
 
     #region Signals
     /// <summary>
@@ -85,9 +77,9 @@ public partial class Radar : Node2D, IRadar
         // レーダーロジックバインド
         RadarLogicBinding = RadarLogic.Bind();
         // サーチエリアコリジョンレイヤ
-        Area2D.CollisionLayer = CollisionEntity.Radar;
+        CollisionLayer = CollisionEntity.Radar;
         // サーチエリアコリジョンマスク
-        Area2D.CollisionMask = CollisionEntity.Enemy;
+        CollisionMask = CollisionEntity.Enemy;
     }
 
     /// <summary>
@@ -101,14 +93,14 @@ public partial class Radar : Node2D, IRadar
         });
         RadarLogicBinding.When((RadarLogic.State.Idle _) =>
         {
-            Area2D.AreaEntered += OnAreaEntered;
+            AreaEntered += OnAreaEntered;
             EmitSignal(SignalName.NotSearched);
             SetPhysicsProcess(false);
         });
         // Monitor a specific type of state:
         RadarLogicBinding.When((RadarLogic.State.EnemySearched _) =>
         {
-            Area2D.AreaEntered -= OnAreaEntered;
+            AreaEntered -= OnAreaEntered;
             EmitSignal(SignalName.Searched);
             SetPhysicsProcess(true);
         });
@@ -121,12 +113,12 @@ public partial class Radar : Node2D, IRadar
     /// <param name="delta"></param>
     public void OnPhysicsProcess(double delta)
     {
-        OnAreaEnemies = Area2D.GetOverlappingAreas()
+        OnAreaEnemies = GetOverlappingAreas()
             .Where(enemy => enemy.CollisionLayer == CollisionEntity.Enemy)
             .OrderBy(enemy => GlobalPosition.DistanceTo(enemy.GlobalPosition))
             .ToList();
         // ロジックブロックにオーバーラップしている敵のArea2Dノードリストを入力
-        RadarLogic.Input(new RadarLogic.Input.PhysicProcess(Area2D.GetOverlappingAreas().ToList<Node2D>()));
+        RadarLogic.Input(new RadarLogic.Input.PhysicProcess(GetOverlappingAreas().ToList<Node2D>()));
     }
 
     /// <summary>

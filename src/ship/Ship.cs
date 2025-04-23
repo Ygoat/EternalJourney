@@ -10,7 +10,7 @@ using Godot;
 /// <summary>
 /// 宇宙船インターフェース
 /// </summary>
-public interface IShip : INode2D
+public interface IShip : IArea2D
 {
     /// <summary>
     /// 敵ターゲットマーカ―
@@ -22,7 +22,7 @@ public interface IShip : INode2D
 /// 宇宙船クラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class Ship : Node2D, IShip
+public partial class Ship : Area2D, IShip
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -33,11 +33,6 @@ public partial class Ship : Node2D, IShip
     [Node]
     public IMarker2D EnemyTargetMarker { get; set; } = default!;
 
-    /// <summary>
-    /// 衝突判定用エリア
-    /// </summary>
-    [Node]
-    public IArea2D Area2D { get; set; } = default!;
     #endregion Nodes
 
     #region Dependencies
@@ -53,8 +48,8 @@ public partial class Ship : Node2D, IShip
     /// </summary>
     public void Setup()
     {
-        Area2D.CollisionLayer = CollisionEntity.Ship;
-        Area2D.CollisionMask = CollisionEntity.Enemy;
+        CollisionLayer = CollisionEntity.Ship;
+        CollisionMask = CollisionEntity.Enemy;
     }
 
     /// <summary>

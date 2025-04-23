@@ -72,12 +72,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
 
     #region Nodes
     /// <summary>
-    /// 衝突判定用
-    /// </summary>
-    [Node]
-    public IArea2D Area2D { get; set; } = default!;
-
-    /// <summary>
     /// 画面外検知用
     /// </summary>
     [Node]
@@ -111,9 +105,9 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // エネミーロジックバインド
         StandardEnemyBinding = StandardEnemyLogic.Bind();
         // コリジョンレイヤをエネミーに設定
-        Area2D.CollisionLayer = CollisionEntity.Enemy;
+        CollisionLayer = CollisionEntity.Enemy;
         // コリジョンマスクを船と弾丸に設定
-        Area2D.CollisionMask = CollisionEntity.Ship | CollisionEntity.Bullet;
+        CollisionMask = CollisionEntity.Ship | CollisionEntity.Bullet;
         // ステータスセット
         SetStatus(new Status { Spd = 5.0f, MaxDur = 0.1f });
         // 耐久残存イベント設定
@@ -152,7 +146,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
             {
             });
         // エリアエンターイベント設定
-        Area2D.AreaEntered += OnAreaEntered;
+        AreaEntered += OnAreaEntered;
         // スクリーン外イベント設定
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // エネミーロジック初期状態開始
