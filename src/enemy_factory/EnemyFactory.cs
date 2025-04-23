@@ -14,9 +14,9 @@ using Godot;
 /// <summary>
 /// エネミーファクトリインターフェース
 /// </summary>
-public interface IEnemyFactory : INode2D, IProvide<IEnemyFactory>
+public interface IEnemyFactory : INode2D
 {
-    public Queue<Node2D> EnemiesQueue { get; set; }
+    public Queue<BaseEnemy> EnemiesQueue { get; set; }
     public void SpawnEnemy();
 };
 
@@ -49,12 +49,12 @@ public partial class EnemyFactory : Node2D, IEnemyFactory
     /// <summary>
     ///　エネミー配列
     /// </summary>
-    public Node2D[] Enemies { get; set; } = new Node2D[200];
+    public BaseEnemy[] Enemies { get; set; } = new BaseEnemy[200];
 
     /// <summary>
     /// エネミーキュー
     /// </summary>
-    public Queue<Node2D> EnemiesQueue { get; set; } = new Queue<Node2D>();
+    public Queue<BaseEnemy> EnemiesQueue { get; set; } = new Queue<BaseEnemy>();
     #endregion Exports
 
     #region Nodes
@@ -64,14 +64,6 @@ public partial class EnemyFactory : Node2D, IEnemyFactory
     [Node]
     public ITimer Timer { get; set; } = default!;
     #endregion Nodes
-
-    #region Provisions
-    /// <summary>
-    /// 弾丸ファクトリプロバイダー
-    /// </summary>
-    /// <returns></returns>
-    IEnemyFactory IProvide<IEnemyFactory>.Value() => this;
-    #endregion Provisions
 
     #region Dependencies
     /// <summary>
@@ -103,11 +95,8 @@ public partial class EnemyFactory : Node2D, IEnemyFactory
         Enemies = Enemies.Select(e =>
         {
             // エネミーインスタンス化
-            e = Instantiator.LoadAndInstantiate<Node2D>(Const.EnemyNodePath);
-            if (e is IBaseEnemy iBaseEnemy)
-            {
-                iBaseEnemy.Removed += OnRemoved;
-            }
+            e = Instantiator.LoadAndInstantiate<BaseEnemy>(Const.EnemyNodePath);
+            e.Removed += OnRemoved;
             // エネミーキュー追加
             EnemiesQueue.Enqueue(e);
             return e;

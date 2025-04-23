@@ -52,7 +52,6 @@ public partial class Splash : Control, ISplash
     /// </summary>
     public void SplashTimeOut()
     {
-        GD.Print("splash timeout");
         AppRepo.SkipSplashScreen();
     }
 }
