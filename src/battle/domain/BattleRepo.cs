@@ -4,7 +4,6 @@ using System;
 using Chickensoft.Collections;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Enemy.Abstract.Base;
-using Godot;
 
 /// <summary>
 /// バトルレポジトリクラス
