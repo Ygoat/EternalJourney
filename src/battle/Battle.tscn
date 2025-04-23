@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://s6bxnlpb677r"]
+
+[ext_resource type="PackedScene" uid="uid://brbkk7msm1p13" path="res://src/ship/Ship.tscn" id="1_md3ja"]
+[ext_resource type="PackedScene" uid="uid://gn6847olc4gf" path="res://src/enemy_spawner/EnemySpawner.tscn" id="2_sa8tj"]
+
+[node name="Battle" type="Node2D"]
+
+[node name="Ship" parent="." instance=ExtResource("1_md3ja")]
+position = Vector2(360, 640)
+
+[node name="EnemySpawner" parent="." instance=ExtResource("2_sa8tj")]
