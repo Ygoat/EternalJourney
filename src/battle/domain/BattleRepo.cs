@@ -13,44 +13,58 @@ public interface IBattleRepo : IDisposable
     /// <summary>
     /// 弾丸がヒットした際に呼び出されるイベント
     /// </summary>
-    event Action<IBaseBullet>? BulletHittingStarted;
+    public event Action<IBaseBullet>? BulletHittingStarted;
 
     /// <summary>
     /// 弾丸がヒットし終わった際に呼び出されるイベント
     /// </summary>
-    event Action<IBaseBullet>? BulletHittingCompleted;
+    public event Action<IBaseBullet>? BulletHittingCompleted;
 
     /// <summary>
     /// 敵が破壊された際に呼び出されるイベント
     /// </summary>
-    event Action<IBaseEnemy> EnemyDestroyed;
+    public event Action<IBaseEnemy> EnemyDestroyed;
 
     /// <summary>
     /// 弾丸が破壊された際に呼び出されるイベント
     /// </summary>
-    event Action<IBaseBullet> BulletDestroyed;
+    public event Action<IBaseBullet> BulletDestroyed;
 
     /// <summary>
     /// 敵が倒されたことをバトルに通知する
     /// </summary>
-    void OnEnemyDestroyed(IBaseEnemy BaseEnemy);
+    public void OnEnemyDestroyed(IBaseEnemy baseEnemy);
+
+    /// <summary>
+    /// 敵が弾丸によるダメージを受けた時の処理
+    /// </summary>
+    /// <param name="baseEnemy"></param>
+    /// <param name="baseBullet"></param>
+    public void EnemyDamagedByBullet(IBaseEnemy baseEnemy, IBaseBullet baseBullet);
+
+    /// <summary>
+    /// 弾丸が敵によるダメージを受けた時の処理
+    /// </summary>
+    /// <param name="baseBullet"></param>
+    /// <param name="baseEnemy"></param>
+    public void BulletDamagedByEnemy(IBaseBullet baseBullet, IBaseEnemy baseEnemy);
 
     /// <summary>
     /// 弾丸が当たったことをバトルに通知する
     /// </summary>
-    /// <param name="BaseBullet"></param>
-    void StartBulletHitting(IBaseBullet BaseBullet);
+    /// <param name="baseBullet"></param>
+    public void StartBulletHitting(IBaseBullet baseBullet);
 
     /// <summary>
     /// 弾丸が破壊されたことをバトルに通知する
     /// </summary>
-    void OnBulletDestoryed(IBaseBullet BaseBullet);
+    public void OnBulletDestoryed(IBaseBullet baseBullet);
 
     /// <summary>
     /// 倒された敵の数をバトルに通知する
     /// </summary>
     /// <param name="numEnemyDestoryed"></param>
-    void SetNumEnemyDestoryed(int numEnemyDestoryed);
+    public void SetNumEnemyDestoryed(int numEnemyDestoryed);
 }
 
 /// <summary>
@@ -112,10 +126,10 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="BaseBullet"></param>
-    public void StartBulletHitting(IBaseBullet BaseBullet)
+    /// <param name="baseBullet"></param>
+    public void StartBulletHitting(IBaseBullet baseBullet)
     {
-        BulletHittingStarted?.Invoke(BaseBullet);
+        BulletHittingStarted?.Invoke(baseBullet);
     }
 
     /// <summary>
@@ -130,21 +144,29 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="BaseEnemy"></param>
-    public void OnEnemyDestroyed(IBaseEnemy BaseEnemy)
+    /// <param name="baseEnemy"></param>
+    public void OnEnemyDestroyed(IBaseEnemy baseEnemy)
     {
-        EnemyDestroyed?.Invoke(BaseEnemy);
+        EnemyDestroyed?.Invoke(baseEnemy);
     }
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="BaseBullet"></param>
-    public void OnBulletDestoryed(IBaseBullet BaseBullet)
+    /// <param name="baseBullet"></param>
+    public void OnBulletDestoryed(IBaseBullet baseBullet)
     {
-        BulletDestroyed?.Invoke(BaseBullet);
+        BulletDestroyed?.Invoke(baseBullet);
     }
 
+    public void EnemyDamagedByBullet(IBaseEnemy baseEnemy, IBaseBullet baseBullet)
+    {
+        baseEnemy.Status.CurrentDur -= 1.0f;
+    }
+    public void BulletDamagedByEnemy(IBaseBullet baseBullet, IBaseEnemy baseEnemy)
+    {
+        baseBullet.Status.CurrentDur -= 1.0f;
+    }
 
     #region Internals
 

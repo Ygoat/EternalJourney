@@ -2,6 +2,13 @@ namespace EternalJourney.Bullet.Abstract.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
+using EternalJourney.Battle.Domain;
+using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Enemy.Abstract.Base;
+using Godot;
+
+
+
 
 /// <summary>
 /// 弾丸ロジックインターフェース
@@ -18,7 +25,7 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
     /// 初期状態
     /// </summary>
     /// <returns></returns>
-    public override Transition GetInitialState() => To<State.Loaded>();
+    public override Transition GetInitialState() => To<State.EmitWait>();
 
     /// <summary>
     /// 入力定義
@@ -28,27 +35,12 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
         /// <summary>
         /// 射撃
         /// </summary>
-        public readonly record struct Fire;
+        public readonly record struct Emit(Vector2 ShotGlobalPosition, float ShotGlobalAngle);
 
         /// <summary>
         /// ヒット
         /// </summary>
-        public readonly record struct Hit;
-
-        /// <summary>
-        /// 崩壊
-        /// </summary>
-        public readonly record struct Collapse;
-
-        /// <summary>
-        /// リロード
-        /// </summary>
-        public readonly record struct Reload;
-
-        /// <summary>
-        /// 貫通
-        /// </summary>
-        public readonly record struct Penetrate;
+        public readonly record struct EnemyHit(IBaseEnemy BaseEnemy);
 
         /// <summary>
         /// ミス
@@ -62,19 +54,9 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
     public static class Output
     {
         /// <summary>
-        /// 射出
+        /// 崩壊
         /// </summary>
-        public readonly record struct Emitted;
-
-        /// <summary>
-        /// 劣化
-        /// </summary>
-        public readonly record struct Decay;
-
-        /// <summary>
-        /// 消失
-        /// </summary>
-        public readonly record struct Disappear;
+        public readonly record struct Collapse;
     }
 
     /// <summary>
@@ -85,56 +67,61 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
         /// <summary>
         /// ロード
         /// </summary>
-        public record Loaded : State, IGet<Input.Fire>
+        public record EmitWait : State, IGet<Input.Emit>
         {
-            public Loaded()
+            public EmitWait()
             {
             }
 
-            public Transition On(in Input.Fire input) => To<InFlight>();
+            public Transition On(in Input.Emit input)
+            {
+                Input.Emit ip = input;
+                return To<InFlight>().With(
+                    (state) =>
+                    {
+                        ((InFlight)state).ShotGlobalPosition = ip.ShotGlobalPosition;
+                        ((InFlight)state).ShotGlobalAngle = ip.ShotGlobalAngle;
+                    }
+                );
+
+            }
         }
 
         /// <summary>
         /// 飛翔
         /// </summary>
-        public record InFlight : State, IGet<Input.Hit>, IGet<Input.Miss>
+        public record InFlight : State, IGet<Input.EnemyHit>, IGet<Input.Miss>
         {
+            public Vector2 ShotGlobalPosition;
+            public float ShotGlobalAngle { get; set; }
+
             public InFlight()
             {
-                this.OnEnter(() => Output(new Output.Emitted()));
             }
 
-            public Transition On(in Input.Hit input) => To<Hitting>();
-
-            public Transition On(in Input.Miss input) => To<Destroy>();
-        }
-
-        /// <summary>
-        /// ヒット
-        /// </summary>
-        public record Hitting : State, IGet<Input.Collapse>, IGet<Input.Penetrate>
-        {
-            public Hitting()
+            public Transition On(in Input.EnemyHit input)
             {
-                this.OnEnter(() => Output(new Output.Decay()));
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                IBaseBullet baseBullet = Get<IBaseBullet>();
+                battleRepo.BulletDamagedByEnemy(baseBullet, input.BaseEnemy);
+                // 耐久値が0以下の場合
+                if (baseBullet.Status.CurrentDur <= 0)
+                {
+                    // 崩壊を出力する
+                    Output(new Output.Collapse());
+                    // 射出待機に遷移する
+                    return To<EmitWait>();
+                }
+                return ToSelf();
             }
 
-            public Transition On(in Input.Collapse input) => To<Destroy>();
-
-            public Transition On(in Input.Penetrate input) => To<InFlight>();
-        }
-
-        /// <summary>
-        /// 破壊
-        /// </summary>
-        public record Destroy : State, IGet<Input.Reload>
-        {
-            public Destroy()
+            public Transition On(in Input.Miss input)
             {
-                this.OnEnter(() => Output(new Output.Disappear()));
+                // 崩壊を出力する
+                Output(new Output.Collapse());
+                // 射出待機に遷移する
+                return To<EmitWait>();
             }
-
-            public Transition On(in Input.Reload input) => To<Loaded>();
         }
     }
 }

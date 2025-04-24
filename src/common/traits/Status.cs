@@ -11,6 +11,12 @@ public partial class Status : Resource
     public float MaxDur { get; set; }
 
     /// <summary>
+    /// 現在耐久値
+    /// </summary>
+    [Export]
+    public float CurrentDur { get; set; }
+
+    /// <summary>
     /// 攻撃力
     /// </summary>
     [Export]

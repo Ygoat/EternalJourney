@@ -9,6 +9,7 @@ using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
+using EternalJourney.Enemy.Abstract.Base;
 using Godot;
 
 
@@ -72,12 +73,15 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     {
         StandardBulletLogic = new StandardBulletLogic();
         StandardBulletBinding = StandardBulletLogic.Bind();
+        StandardBulletLogic.Set(this as IBaseBullet);
+        StandardBulletLogic.Set(BattleRepo);
+
         // コリジョンレイヤーを弾丸
         CollisionLayer = CollisionEntity.Bullet;
         // コリジョンマスクをエネミー
         CollisionMask = CollisionEntity.Enemy;
         // ステータスセット
-        SetStatus(new Status { Spd = 5.0f, MaxDur = 0.1f });
+        SetStatus(new Status { Spd = 5.0f, MaxDur = 0.1f, CurrentDur = 0.1f });
     }
 
     /// <summary>
@@ -86,33 +90,26 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     public void OnResolved()
     {
         StandardBulletBinding
-            // Emittedが出力された場合
-            .Handle((in StandardBulletLogic.Output.Emitted _) =>
+            .When<StandardBulletLogic.State.InFlight>(state =>
             {
-                // 物理処理有効化
+                // 射出時の位置を設定(武器の発射口の位置)
+                GlobalPosition = state.ShotGlobalPosition;
+                // 射出時の方向を設定(武器の向いている方向)
+                Direction = new Vector2(1, 0).Rotated(state.ShotGlobalAngle);
+                // 弾丸の向きを設定（武器の向いている方向）
+                Rotation = state.ShotGlobalAngle;
                 SetPhysicsProcess(true);
             })
-            // Decayが出力された場合
-            .Handle((in StandardBulletLogic.Output.Decay _) =>
-            {
-                // 弾丸の耐久値を減少
-                DurabilityModule.TakeDamage(1.0f);
-            })
             // Disappearが出力された場合
-            .Handle((in StandardBulletLogic.Output.Disappear _) =>
+            .Handle((in StandardBulletLogic.Output.Collapse _) =>
             {
                 // フレーム終わりにRemoveSelf()呼び出し
                 CallDeferred(nameof(RemoveSelf));
-
             });
         // コリジョンイベント設定
         AreaEntered += OnAreaEntered;
         // 画面外イベント
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
-        // 耐久値ゼロイベント設定
-        DurabilityModule.ZeroDurability += OnZeroDurability;
-        // 耐久値残存イベント設定
-        DurabilityModule.DurabilityLeft += OnDurabilityLeft;
         // ロジック初期化
         StandardBulletLogic.Start();
         // トップレベルオブジェクトとして扱う（親ノードのRotationの影響を受けないようにするため）
@@ -143,8 +140,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         SetPhysicsProcess(false);
         // OnCollapsedシグナル出力
         EmitSignal(BaseBullet.SignalName.Removed, this);
-        // Reload入力
-        StandardBulletLogic.Input(new StandardBulletLogic.Input.Reload());
     }
 
     /// <summary>
@@ -161,10 +156,11 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <param name="area"></param>
     public void OnAreaEntered(Area2D area)
     {
-        // ヒットを入力
-        StandardBulletLogic.Input(new StandardBulletLogic.Input.Hit());
-        // ヒットシグナルを出力
-        // EmitSignal(BaseBullet.SignalName.Hit);
+        if (area is IBaseEnemy baseEnemy)
+        {
+            // ヒットを入力
+            StandardBulletLogic.Input(new StandardBulletLogic.Input.EnemyHit(baseEnemy));
+        }
     }
 
     /// <summary>
@@ -183,26 +179,8 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <param name="shotGlobalAngle"></param>
     public override void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle)
     {
-        // Fireを入力
-        StandardBulletLogic.Input(new StandardBulletLogic.Input.Fire());
-        // 射出時の位置を設定(武器の発射口の位置)
-        GlobalPosition = shotGlobalPosition;
-        // 射出時の方向を設定(武器の向いている方向)
-        Direction = new Vector2(1, 0).Rotated(shotGlobalAngle);
-        // 弾丸の向きを設定（武器の向いている方向）
-        Rotation = shotGlobalAngle;
-    }
-
-    /// <summary>
-    /// 射出（弾丸攻撃力設定）
-    /// </summary>
-    /// <param name="shotGlobalPosition"></param>
-    /// <param name="shotGlobalAngle"></param>
-    /// <param name="atk"></param>
-    public void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle, float atk)
-    {
-        SetBulletAtk(atk);
-        Emit(shotGlobalPosition, shotGlobalAngle);
+        // Emitを入力
+        StandardBulletLogic.Input(new StandardBulletLogic.Input.Emit(shotGlobalPosition, shotGlobalAngle));
     }
 
     /// <summary>
@@ -216,30 +194,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         Direction = new Vector2(0, 0);
         // 耐久値を回復
         DurabilityModule.FullRepir();
-    }
-
-    /// <summary>
-    /// 弾丸攻撃力設定
-    /// </summary>
-    /// <param name="atk"></param>
-    private void SetBulletAtk(float atk)
-    {
-        Status.Atk = atk;
-    }
-
-    /// <summary>
-    /// 耐久値ゼロイベントファンクション
-    /// </summary>
-    private void OnZeroDurability()
-    {
-        StandardBulletLogic.Input(new StandardBulletLogic.Input.Collapse());
-    }
-
-    /// <summary>
-    /// 耐久値残存イベントファンクション
-    /// </summary>
-    private void OnDurabilityLeft()
-    {
-        StandardBulletLogic.Input(new StandardBulletLogic.Input.Penetrate());
+        Status.CurrentDur = Status.MaxDur;
     }
 }

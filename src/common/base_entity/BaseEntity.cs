@@ -12,6 +12,7 @@ using Godot;
 /// </summary>
 public interface IBaseEntity : IArea2D
 {
+    public Status Status { get; set; }
 }
 
 /// <summary>
@@ -26,7 +27,7 @@ public partial class BaseEntity : Area2D, IBaseEntity
     /// ステータス
     /// </summary>
     [Export]
-    protected Status Status { get; set; } = new Status();
+    public Status Status { get; set; } = new Status();
 
     /// <summary>
     /// 耐久値モジュール
