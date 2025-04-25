@@ -193,7 +193,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         // 方向を初期化
         Direction = new Vector2(0, 0);
         // 耐久値を回復
-        DurabilityModule.FullRepir();
         Status.CurrentDur = Status.MaxDur;
     }
 }
