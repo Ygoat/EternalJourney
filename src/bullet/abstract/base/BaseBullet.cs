@@ -65,6 +65,9 @@ public partial class BaseBullet : BaseEntity, IBaseBullet
     /// </summary>
     public virtual void RemoveSelf()
     {
-        throw new NotImplementedException();
+        // 親ノードを取得してから、子である自ノードを削除する
+        GetParent().RemoveChild(this);
+        // Removedシグナル出力
+        EmitSignal(SignalName.Removed, this);
     }
 }
