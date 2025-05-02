@@ -46,6 +46,13 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
         /// ミス
         /// </summary>
         public readonly record struct Miss;
+
+        /// <summary>
+        /// 物理処理
+        /// </summary>
+        /// <param name="Direction"></param>
+        /// <param name="Speed"></param>
+        public readonly record struct PhysicsProcess(Vector2 Direction, float Speed);
     }
 
     /// <summary>
@@ -57,6 +64,11 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
         /// 崩壊
         /// </summary>
         public readonly record struct Collapse;
+
+        /// <summary>
+        /// 移動
+        /// </summary>
+        public readonly record struct Move(Vector2 NextPositionDelta);
     }
 
     /// <summary>
@@ -90,13 +102,21 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
         /// <summary>
         /// 飛翔
         /// </summary>
-        public record InFlight : State, IGet<Input.EnemyHit>, IGet<Input.Miss>
+        public record InFlight : State, IGet<Input.PhysicsProcess>, IGet<Input.EnemyHit>, IGet<Input.Miss>
         {
             public Vector2 ShotGlobalPosition;
             public float ShotGlobalAngle { get; set; }
 
             public InFlight()
             {
+            }
+
+            public Transition On(in Input.PhysicsProcess input)
+            {
+                // 位置を更新
+                Vector2 nextPositionDelta = input.Direction.Normalized() * input.Speed;
+                Output(new Output.Move(nextPositionDelta));
+                return ToSelf();
             }
 
             public Transition On(in Input.EnemyHit input)

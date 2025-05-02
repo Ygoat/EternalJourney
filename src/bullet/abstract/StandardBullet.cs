@@ -100,6 +100,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
                 Rotation = state.ShotGlobalAngle;
                 SetPhysicsProcess(true);
             })
+            .Handle((in StandardBulletLogic.Output.Move output) =>
+            {
+                GlobalPosition += output.NextPositionDelta;
+            })
             // Disappearが出力された場合
             .Handle((in StandardBulletLogic.Output.Collapse _) =>
             {
@@ -122,8 +126,8 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <param name="delta"></param>
     public void OnPhysicsProcess(double delta)
     {
-        // グローバル位置の更新
-        Move();
+        // PhysicsProcess入力
+        StandardBulletLogic.Input(new StandardBulletLogic.Input.PhysicsProcess(Direction, Status.Spd));
     }
 
     /// <summary>
@@ -147,7 +151,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// </summary>
     public virtual void Move()
     {
-        GlobalPosition += Direction.Normalized() * Status.Spd;
+        // GlobalPosition += Direction.Normalized() * Status.Spd;
     }
 
     /// <summary>
@@ -193,7 +197,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         // 方向を初期化
         Direction = new Vector2(0, 0);
         // 耐久値を回復
-        DurabilityModule.FullRepir();
         Status.CurrentDur = Status.MaxDur;
     }
 }
