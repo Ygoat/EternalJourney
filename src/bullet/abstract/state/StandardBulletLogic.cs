@@ -104,7 +104,7 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
         /// </summary>
         public record InFlight : State, IGet<Input.PhysicsProcess>, IGet<Input.EnemyHit>, IGet<Input.Miss>
         {
-            public Vector2 ShotGlobalPosition;
+            public Vector2 ShotGlobalPosition { get; set; }
             public float ShotGlobalAngle { get; set; }
 
             public InFlight()

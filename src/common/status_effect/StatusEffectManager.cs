@@ -32,6 +32,7 @@ public partial class StatusEffectManager : Node, IStatusEffectManager
 
     public virtual void OnResolved()
     {
+        AddChild(PoisonEffect);
     }
 
     /// <summary>

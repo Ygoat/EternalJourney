@@ -39,7 +39,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// </summary>
     public StandardBulletLogic.IBinding StandardBulletBinding { get; set; } = default!;
 
-    [Dependency] public EntityTable EntityTable => this.DependOn<EntityTable>();
+    [Dependency] public EntityTable<int> EntityTable => this.DependOn<EntityTable<int>>();
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
     #endregion State

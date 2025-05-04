@@ -2,6 +2,12 @@ namespace EternalJourney.Enemy.Abstract.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
+using EternalJourney.Battle.Domain;
+using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Enemy.Abstract.Base;
+using Godot;
+
+
 
 /// <summary>
 /// エネミーロジックインターフェース
@@ -18,7 +24,7 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
     /// 初期状態
     /// </summary>
     /// <returns></returns>
-    public override Transition GetInitialState() => To<State.SpawnWaiting>();
+    public override Transition GetInitialState() => To<State.SpawnWait>();
 
     /// <summary>
     /// 入力定義
@@ -26,34 +32,31 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
     public static class Input
     {
         /// <summary>
-        /// ターゲット発見
-        /// </summary>
-        public readonly record struct TargetDiscover;
-
-        /// <summary>
         /// スポーン
         /// </summary>
-        public readonly record struct Removed;
+        public readonly record struct Spawn(Vector2 SpawnGlobalPosition, float SpawnGlobalAngle);
 
         /// <summary>
-        /// 被ダメージ
+        /// ターゲット検知
         /// </summary>
-        public readonly record struct TakeDamage;
+        public readonly record struct Detect;
 
         /// <summary>
-        /// 崩壊
+        /// ヒット
         /// </summary>
-        public readonly record struct Collapse;
-
-        /// <summary>
-        /// 生存
-        /// </summary>
-        public readonly record struct Alive;
+        public readonly record struct BulletHit(IBaseBullet BaseBullet);
 
         /// <summary>
         /// エリア外
         /// </summary>
         public readonly record struct OutOfArea;
+
+        /// <summary>
+        /// 物理処理
+        /// </summary>
+        /// <param name="Direction"></param>
+        /// <param name="Speed"></param>
+        public readonly record struct PhysicsProcess(Vector2 Direction, float Speed);
     }
 
     /// <summary>
@@ -62,24 +65,16 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
     public static class Output
     {
         /// <summary>
-        /// 接近開始
+        /// 破壊
         /// </summary>
-        public readonly record struct StartClose;
+        public readonly record struct Destroyed;
 
         /// <summary>
-        /// 被弾
+        /// 移動
         /// </summary>
-        public readonly record struct Disappear;
+        /// <param name="NextPositionDelta"></param>
+        public readonly record struct Move(Vector2 NextPositionDelta);
 
-        /// <summary>
-        /// スポーン可能
-        /// </summary>
-        public readonly record struct SpawnEnable;
-
-        /// <summary>
-        /// 劣化
-        /// </summary>
-        public readonly record struct Decay;
     }
 
     /// <summary>
@@ -90,58 +85,68 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
         /// <summary>
         /// スポーン待機
         /// </summary>
-        public record SpawnWaiting : State, IGet<Input.TargetDiscover>
+        public record SpawnWait : State, IGet<Input.Spawn>
         {
-            public SpawnWaiting()
+            public SpawnWait()
             {
-                this.OnEnter(() => Output(new Output.SpawnEnable()));
             }
 
-            public Transition On(in Input.TargetDiscover input) => To<Closing>();
+            public Transition On(in Input.Spawn input)
+            {
+                Input.Spawn ip = input;
+                return To<Invading>().With(
+                    (state) =>
+                    {
+                        ((Invading)state).SpawnGlobalPosition = ip.SpawnGlobalPosition;
+                        ((Invading)state).SpawnGlobalAngle = ip.SpawnGlobalAngle;
+                    }
+                );
+            }
         }
 
         /// <summary>
-        /// 接近
+        /// 侵攻
         /// </summary>
-        public record Closing : State, IGet<Input.TakeDamage>, IGet<Input.OutOfArea>
+        public record Invading : State, IGet<Input.PhysicsProcess>, IGet<Input.BulletHit>, IGet<Input.OutOfArea>
         {
-            public Closing()
+            public Vector2 SpawnGlobalPosition { get; set; }
+            public float SpawnGlobalAngle { get; set; }
+
+            public Invading()
             {
-                this.OnEnter(() => Output(new Output.StartClose()));
             }
 
-            public Transition On(in Input.TakeDamage input) => To<TakingDamage>();
-
-            public Transition On(in Input.OutOfArea input) => To<Destroy>();
-        }
-
-        /// <summary>
-        /// 被弾中
-        /// </summary>
-        public record TakingDamage : State, IGet<Input.Alive>, IGet<Input.Collapse>
-        {
-            public TakingDamage()
+            public Transition On(in Input.PhysicsProcess input)
             {
-                this.OnEnter(() => Output(new Output.Decay()));
+                // 位置を更新
+                Vector2 nextPositionDelta = input.Direction.Normalized() * input.Speed;
+                Output(new Output.Move(nextPositionDelta));
+                return ToSelf();
             }
 
-            public Transition On(in Input.Alive input) => To<Closing>();
-            public Transition On(in Input.Collapse input) => To<Destroy>();
-        }
-
-        /// <summary>
-        /// 破壊
-        /// </summary>
-        public record Destroy : State, IGet<Input.Removed>
-        {
-            public Destroy()
+            public Transition On(in Input.BulletHit input)
             {
-                this.OnEnter(() => Output(new Output.Disappear()));
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                IBaseEnemy baseEnemy = Get<IBaseEnemy>();
+                battleRepo.EnemyDamagedByBullet(baseEnemy, input.BaseBullet);
+                // 耐久値が0以下の場合
+                if (baseEnemy.Status.CurrentDur <= 0)
+                {
+                    // 破壊を出力する
+                    Output(new Output.Destroyed());
+                    // スポーン待機に遷移する
+                    return To<SpawnWait>();
+                }
+                return ToSelf();
             }
 
-            public Transition On(in Input.Removed input) => To<SpawnWaiting>();
+            public Transition On(in Input.OutOfArea input)
+            {
+                // 破壊を出力する
+                Output(new Output.Destroyed());
+                // スポーン待機に遷移する
+                return To<SpawnWait>();
+            }
         }
-
-
     }
 }
