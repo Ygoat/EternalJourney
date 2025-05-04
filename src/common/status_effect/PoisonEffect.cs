@@ -50,22 +50,34 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
     [Signal]
     public delegate void DamagedEventHandler();
 
-    public void OnReady()
+    public void Setup()
     {
         DamageTimer = new Timer();
         RemoveTimer = new Timer();
-    }
-
-    public void Setup()
-    {
-        PoisonEffectLogic = new PoisonEffectLogic();
-        PoisonEffectBinding = PoisonEffectLogic.Bind();
         RemoveTime = 10;
         DamageDuration = 1;
+
+        PoisonEffectLogic = new PoisonEffectLogic();
+        PoisonEffectBinding = PoisonEffectLogic.Bind();
     }
 
     public void OnResolved()
     {
+        // タイマーをシーンツリーに追加して有効化
+        AddChild(DamageTimer);
+        AddChild(RemoveTimer);
+        // ダメージタイマーの間隔設定
+        DamageTimer.WaitTime = DamageDuration;
+        // ダメージタイマーのタイムアウトイベント設定
+        DamageTimer.Timeout += OnDamageTimerTimeout;
+        // 除去タイマーの時間設定
+        RemoveTimer.WaitTime = RemoveTime;
+        // ワンショット設定
+        RemoveTimer.OneShot = true;
+        // 除去タイマーのタイムアウトイベント設定
+        RemoveTimer.Timeout += OnRemoveTimerTimeout;
+
+        // ステートロジック設定
         PoisonEffectBinding
             .When<PoisonEffectLogic.State.Active>(state =>
             {
@@ -88,19 +100,6 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
                 RemoveTimer.WaitTime = RemoveTime;
                 RemoveTimer.Start();
             });
-        // タイマーをシーンツリーに追加して有効化
-        AddChild(DamageTimer);
-        AddChild(RemoveTimer);
-        // ダメージタイマーの間隔設定
-        DamageTimer.WaitTime = DamageDuration;
-        // ダメージタイマーのタイムアウトイベント設定
-        DamageTimer.Timeout += OnDamageTimerTimeout;
-        // 除去タイマーの時間設定
-        RemoveTimer.WaitTime = RemoveTime;
-        // ワンショット設定
-        RemoveTimer.OneShot = true;
-        // 除去タイマーのタイムアウトイベント設定
-        RemoveTimer.Timeout += OnRemoveTimerTimeout;
         // 初期状態開始
         PoisonEffectLogic.Start();
     }

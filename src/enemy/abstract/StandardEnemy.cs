@@ -98,8 +98,10 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void Setup()
+    public override void Setup()
     {
+        base.Setup();
+
         // エネミーロジック
         StandardEnemyLogic = new StandardEnemyLogic();
         // エネミーロジックバインド
@@ -121,8 +123,10 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void OnResolved()
+    public override void OnResolved()
     {
+        base.OnResolved();
+
         StandardEnemyBinding
             // StartClose出力時
             .Handle((in StandardEnemyLogic.Output.StartClose _) =>
@@ -170,6 +174,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     {
         // TakeDamage入力
         StandardEnemyLogic.Input(new StandardEnemyLogic.Input.TakeDamage());
+        StatusEffectManager.ApplyEffect(StatusEffectManager.PoisonEffect);
     }
 
     /// <summary>

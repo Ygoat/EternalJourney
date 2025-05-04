@@ -4,13 +4,14 @@ using System;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseEntity;
+using EternalJourney.Common.StatusEffect;
 using EternalJourney.Common.Traits;
 using Godot;
 
 /// <summary>
 /// ベースエネミーインターフェース
 /// </summary>
-public interface IBaseEnemy : IBaseEntity, IDestructible
+public interface IBaseEnemy : IBaseEntity, IDestructible, IStatusEffectTarget
 {
     /// <summary>
     /// ヒットシグナル
@@ -44,11 +45,23 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy
     [Signal]
     public delegate void HitEventHandler();
 
+    public StatusEffectManager StatusEffectManager { get; set; } = default!;
+
     /// <summary>
     /// 自己除去イベント
     /// </summary>
     [Signal]
     public delegate void RemovedEventHandler(BaseEnemy Enemy);
+
+    public virtual void Setup()
+    {
+        StatusEffectManager = new StatusEffectManager();
+    }
+
+    public virtual void OnResolved()
+    {
+        AddChild(StatusEffectManager);
+    }
 
     /// <summary>
     /// <inheritdoc/>
