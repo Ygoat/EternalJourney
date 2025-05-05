@@ -33,4 +33,10 @@ public partial class Status : Resource
     /// </summary>
     [Export]
     public float Def { get; set; }
+
+    /// <summary>
+    /// サイズ
+    /// </summary>
+    [Export]
+    public float Size { get; set; }
 }

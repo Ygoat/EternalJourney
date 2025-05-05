@@ -5,13 +5,12 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseEntity;
 using EternalJourney.Common.StatusEffect;
-using EternalJourney.Common.Traits;
 using Godot;
 
 /// <summary>
 /// ベースエネミーインターフェース
 /// </summary>
-public interface IBaseEnemy : IBaseEntity, IDestructible, IStatusEffectTarget
+public interface IBaseEnemy : IBaseEntity, IStatusEffectTarget
 {
     /// <summary>
     /// ヒットシグナル

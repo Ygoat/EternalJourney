@@ -11,6 +11,7 @@ CurrentDur = 0.0
 Atk = 0.0
 Spd = 0.0
 Def = 0.0
+Size = 0.0
 
 [node name="BaseEntity" instance=ExtResource("1_uk1je")]
 script = ExtResource("2_giu6a")

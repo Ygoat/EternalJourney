@@ -16,7 +16,7 @@ using Godot;
 /// <summary>
 /// スタンダード弾丸インターフェース
 /// </summary>
-public interface IStandardBullet : IBaseBullet, IMovable, IResizable
+public interface IStandardBullet : IBaseBullet
 {
 }
 
@@ -45,16 +45,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     #endregion State
 
     #region Exports
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public bool CanMove { get; set; } = true;
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public float Size { get; set; } = 1.0f;
-
     /// <summary>
     /// 移動方向
     /// </summary>
@@ -144,14 +134,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         SetPhysicsProcess(false);
         // OnCollapsedシグナル出力
         EmitSignal(BaseBullet.SignalName.Removed, this);
-    }
-
-    /// <summary>
-    /// 弾丸位置移動
-    /// </summary>
-    public virtual void Move()
-    {
-        // GlobalPosition += Direction.Normalized() * Status.Spd;
     }
 
     /// <summary>

@@ -4,13 +4,12 @@ using System;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseEntity;
-using EternalJourney.Common.Traits;
 using Godot;
 
 /// <summary>
 /// ベース弾丸インターフェース
 /// </summary>
-public interface IBaseBullet : IBaseEntity, IDestructible
+public interface IBaseBullet : IBaseEntity
 {
     /// <summary>
     /// ヒットシグナル

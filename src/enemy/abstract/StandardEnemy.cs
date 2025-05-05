@@ -16,7 +16,7 @@ using Godot;
 /// <summary>
 /// スタンダードエネミーインタフェース
 /// </summary>
-public interface IStandardEnemy : IBaseEnemy, IDetectable, IMovable
+public interface IStandardEnemy : IBaseEnemy
 {
 }
 
@@ -44,26 +44,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     #endregion State
 
     #region Exports
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public float DetectRange { get; set; }
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public bool CanDetect { get; set; }
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public bool CanMove { get; set; }
-
-    /// <summary>
-    /// 移動速度
-    /// </summary>
-    public int Speed { get; set; } = 3;
-
     /// <summary>
     /// 標的対象位置
     /// </summary>
@@ -108,11 +88,9 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // コリジョンマスクを船と弾丸に設定
         CollisionMask = CollisionEntity.Ship | CollisionEntity.Bullet;
         // ステータスセット
-        SetStatus(new Status { Spd = 5.0f, MaxDur = 0.1f });
-        // 耐久残存イベント設定
-        // DurabilityModule.DurabilityLeft += OnDurabilityLeft;
-        // 耐久ゼロイベント設定
-        // DurabilityModule.ZeroDurability += OnZeroDurability;
+        SetStatus(new Status { Spd = 1.0f, MaxDur = 0.1f });
+
+        // ターゲット位置
         TargetPosition = EntityTable.Get<IShip>(0)!.EnemyTargetMarker.GlobalPosition;
         TopLevel = true;
     }
@@ -182,8 +160,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     {
         // TargetDiscover入力
         StandardEnemyLogic.Input(new StandardEnemyLogic.Input.Spawn(spawnGlobalPosition, spawnGlobalAngle));
-        // グローバル位置をスポナーのPathFollow2Dの位置から取得
-        // GlobalPosition = spawnGlobalPosition;
     }
 
     /// <summary>
@@ -210,8 +186,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         SetPhysicsProcess(false);
         // シグナル出力
         EmitSignal(BaseEnemy.SignalName.Removed, this);
-        // Removed入力
-        // StandardEnemyLogic.Input(new StandardEnemyLogic.Input.Removed());
     }
 
     /// <summary>
@@ -225,44 +199,5 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         Direction = new Vector2(0, 0);
         // 耐久値を回復
         Status.CurrentDur = Status.MaxDur;
-        // DurabilityModule.FullRepir();
     }
-
-    /// <summary>
-    /// 耐久値ゼロイベントファンクション
-    /// </summary>
-    // private void OnZeroDurability()
-    // {
-    //     StandardEnemyLogic.Input(new StandardEnemyLogic.Input.Collapse());
-    // }
-
-    /// <summary>
-    /// 耐久値残存イベントファンクション
-    /// </summary>
-    // private void OnDurabilityLeft()
-    // {
-    //     StandardEnemyLogic.Input(new StandardEnemyLogic.Input.Alive());
-    // }
-
-    /// <summary>
-    /// 探知
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    public T Detect<T>() where T : class
-    {
-        return EntityTable.Get<T>(0)!;
-    }
-
-    /// <summary>
-    /// 移動
-    /// </summary>
-    public void Move()
-    {
-        // // 進行方向設定
-        // Direction = TargetPosition - GlobalPosition;
-        // // グローバル位置更新
-        // GlobalPosition += Speed * Direction.Normalized();
-    }
-
 }

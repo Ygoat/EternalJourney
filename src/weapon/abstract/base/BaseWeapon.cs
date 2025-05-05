@@ -4,14 +4,13 @@ using System;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseEntity;
-using EternalJourney.Common.Traits;
 
 
 
 /// <summary>
 /// ベース武器インターフェース
 /// </summary>
-public interface IBaseWeapon : IBaseEntity, IAttackable
+public interface IBaseWeapon : IBaseEntity
 {
 }
 

@@ -11,6 +11,7 @@ CurrentDur = 0.0
 Atk = 0.0
 Spd = 0.0
 Def = 0.0
+Size = 0.0
 
 [node name="BaseBullet" instance=ExtResource("1_6d77m")]
 script = ExtResource("2_6x8ms")
