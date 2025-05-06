@@ -1,8 +1,11 @@
 namespace EternalJourney.Battle.Domain;
 
 using System;
+using System.Reflection;
 using Chickensoft.Collections;
 using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Common.StatusEffect;
+using EternalJourney.Common.Traits;
 using EternalJourney.Enemy.Abstract.Base;
 
 /// <summary>
@@ -10,6 +13,11 @@ using EternalJourney.Enemy.Abstract.Base;
 /// </summary>
 public interface IBattleRepo : IDisposable
 {
+    /// <summary>
+    /// 毒ダメージ
+    /// </summary>
+    public float PoisonDamage { get; set; }
+
     /// <summary>
     /// 弾丸がヒットした際に呼び出されるイベント
     /// </summary>
@@ -58,13 +66,21 @@ public interface IBattleRepo : IDisposable
     /// <summary>
     /// 弾丸が破壊されたことをバトルに通知する
     /// </summary>
-    public void OnBulletDestoryed(IBaseBullet baseBullet);
+    public void OnBulletDestroyed(IBaseBullet baseBullet);
 
     /// <summary>
     /// 倒された敵の数をバトルに通知する
     /// </summary>
-    /// <param name="numEnemyDestoryed"></param>
-    public void SetNumEnemyDestoryed(int numEnemyDestoryed);
+    /// <param name="numEnemyDestroyed"></param>
+    public void SetNumEnemyDestroyed(int numEnemyDestroyed);
+
+    /// <summary>
+    /// 耐久値減少処理
+    /// </summary>
+    /// <param name="curDurability">現在耐久値</param>
+    /// <param name="damage">ダメージ</param>
+    /// <returns></returns>
+    public float ReduceDurability(float curDurability, float damage);
 }
 
 /// <summary>
@@ -72,6 +88,11 @@ public interface IBattleRepo : IDisposable
 /// </summary>
 public class BattleRepo : IBattleRepo
 {
+    /// <summary>
+    /// 毒ダメージ
+    /// </summary>
+    public float PoisonDamage { get; set; } = 1.0f;
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
@@ -135,10 +156,10 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="numEnemyDestoryed"></param>
-    public void SetNumEnemyDestoryed(int numEnemyDestoryed)
+    /// <param name="numEnemyDestroyed"></param>
+    public void SetNumEnemyDestroyed(int numEnemyDestroyed)
     {
-        _numEnemyDestroyed.OnNext(numEnemyDestoryed);
+        _numEnemyDestroyed.OnNext(numEnemyDestroyed);
     }
 
     /// <summary>
@@ -154,18 +175,34 @@ public class BattleRepo : IBattleRepo
     /// <inheritdoc/>
     /// </summary>
     /// <param name="baseBullet"></param>
-    public void OnBulletDestoryed(IBaseBullet baseBullet)
+    public void OnBulletDestroyed(IBaseBullet baseBullet)
     {
         BulletDestroyed?.Invoke(baseBullet);
     }
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    /// <param name="poisonEffect"></param>
     public void EnemyDamagedByBullet(IBaseEnemy baseEnemy, IBaseBullet baseBullet)
     {
         baseEnemy.Status.CurrentDur -= 1.0f;
     }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    /// <param name="baseBullet"></param>
+    /// <param name="baseEnemy"></param>
     public void BulletDamagedByEnemy(IBaseBullet baseBullet, IBaseEnemy baseEnemy)
     {
         baseBullet.Status.CurrentDur -= 1.0f;
+    }
+
+
+    public float ReduceDurability(float curDurability, float damage)
+    {
+        return curDurability -= damage;
     }
 
     #region Internals

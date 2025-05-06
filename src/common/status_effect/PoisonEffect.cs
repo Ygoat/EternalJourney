@@ -2,6 +2,7 @@ namespace EternalJourney.Common.StatusEffect;
 
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
+using EternalJourney.Battle.Domain;
 using EternalJourney.Common.StatusEffect.State;
 using Godot;
 
@@ -21,6 +22,13 @@ public interface IPoisonEffect : IStatusEffect
 public partial class PoisonEffect : StatusEffect, IPoisonEffect
 {
     public override void _Notification(int what) => this.Notify(what);
+
+    [Signal]
+    public delegate void AppliedEventHandler();
+
+    [Signal]
+    public delegate void DamagedEventHandler(float damage);
+
 
     /// <summary>
     /// 毒ロジック
@@ -44,11 +52,9 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
 
     public float DamageDuration { get; set; } = default!;
 
-    [Signal]
-    public delegate void AppliedEventHandler();
+    public float PoisonDamage { get; set; } = default!;
 
-    [Signal]
-    public delegate void DamagedEventHandler();
+    [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
     public void Setup()
     {
@@ -59,6 +65,9 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
 
         PoisonEffectLogic = new PoisonEffectLogic();
         PoisonEffectBinding = PoisonEffectLogic.Bind();
+
+        PoisonEffectLogic.Set(this as IPoisonEffect);
+        PoisonEffectLogic.Set(BattleRepo);
     }
 
     public void OnResolved()
@@ -84,6 +93,8 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
                 // タイマー開始
                 DamageTimer.Start();
                 RemoveTimer.Start();
+                // 毒ダメージ設定
+                PoisonDamage = state.PoisonDamage;
             })
             .When<PoisonEffectLogic.State.InActive>(state =>
             {
@@ -127,7 +138,7 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
     /// </summary>
     private void OnDamageTimerTimeout()
     {
-        EmitSignal(SignalName.Damaged);
+        EmitSignal(SignalName.Damaged, PoisonDamage);
     }
 
     /// <summary>

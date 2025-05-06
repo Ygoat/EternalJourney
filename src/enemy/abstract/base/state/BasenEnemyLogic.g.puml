@@ -1,0 +1,11 @@
+@startuml BaseEnemyLogic
+state "BaseEnemyLogic State" as EternalJourney_Enemy_Abstract_Base_State_BaseEnemyLogic_State {
+  state "DummyState" as EternalJourney_Enemy_Abstract_Base_State_BaseEnemyLogic_State_DummyState
+}
+
+EternalJourney_Enemy_Abstract_Base_State_BaseEnemyLogic_State_DummyState --> EternalJourney_Enemy_Abstract_Base_State_BaseEnemyLogic_State_DummyState : PoisonDamage
+
+EternalJourney_Enemy_Abstract_Base_State_BaseEnemyLogic_State_DummyState : OnPoisonDamage → ReduceDurability
+
+[*] --> EternalJourney_Enemy_Abstract_Base_State_BaseEnemyLogic_State_DummyState
+@enduml

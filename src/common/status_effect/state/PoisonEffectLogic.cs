@@ -3,6 +3,8 @@ namespace EternalJourney.Common.StatusEffect.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
+using EternalJourney.Battle.Domain;
+
 
 /// <summary>
 /// 毒効果ロジックインターフェース
@@ -70,8 +72,15 @@ public partial class PoisonEffectLogic : LogicBlock<PoisonEffectLogic.State>, IP
         /// </summary>
         public record Active : State, IGet<Input.Remove>, IGet<Input.Apply>
         {
+            public float PoisonDamage { get; set; } = default!;
+
             public Active()
             {
+                this.OnEnter(() =>
+                {
+                    IBattleRepo battleRepo = Get<IBattleRepo>();
+                    PoisonDamage = battleRepo.PoisonDamage;
+                });
             }
             public Transition On(in Input.Apply input) => ToSelf();
             public Transition On(in Input.Remove input) => To<InActive>();
