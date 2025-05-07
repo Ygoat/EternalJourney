@@ -71,7 +71,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         // コリジョンマスクをエネミー
         CollisionMask = CollisionEntity.Enemy;
         // ステータスセット
-        SetStatus(new Status { Spd = 5.0f, MaxDur = 0.1f, CurrentDur = 0.1f });
+        Status = new Status { Spd = 5.0f, MaxDur = 1.0f, CurrentDur = 1.0f };
     }
 
     /// <summary>

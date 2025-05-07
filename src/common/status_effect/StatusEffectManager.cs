@@ -11,8 +11,6 @@ using Godot;
 public interface IStatusEffectManager : INode
 {
     public PoisonEffect PoisonEffect { get; }
-    public abstract void ApplyEffect(IStatusEffect statusEffect);
-    public abstract void RemoveEffect(IStatusEffect statusEffect);
 }
 
 /// <summary>
@@ -33,24 +31,5 @@ public partial class StatusEffectManager : Node, IStatusEffectManager
     public virtual void OnResolved()
     {
         AddChild(PoisonEffect);
-    }
-
-    /// <summary>
-    /// 状態異常適用
-    /// </summary>
-    /// <param name="statusEffect"></param>
-    public void ApplyEffect(IStatusEffect statusEffect)
-    {
-        statusEffect.Apply();
-        GD.Print("apply");
-    }
-
-    /// <summary>
-    /// 状態異常適用
-    /// </summary>
-    /// <param name="statusEffect"></param>
-    public void RemoveEffect(IStatusEffect statusEffect)
-    {
-        statusEffect.Remove();
     }
 }

@@ -61,8 +61,8 @@ public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEne
             public Transition On(in Input.PoisonDamage input)
             {
                 IBattleRepo battleRepo = Get<IBattleRepo>();
-                Status status = Get<Status>();
-                float reducedDurability = battleRepo.ReduceEnemyDurability(status.CurrentDur, input.Damage);
+                IBaseEnemy baseEnemy = Get<IBaseEnemy>();
+                float reducedDurability = battleRepo.ReduceEnemyDurability(baseEnemy.Status.CurrentDur, input.Damage);
                 Output(new Output.ReduceDurability(reducedDurability));
                 return ToSelf();
             }

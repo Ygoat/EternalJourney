@@ -73,7 +73,7 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy
         BaseEnemyLogic = new BaseEnemyLogic();
         BaseEnemyBinding = BaseEnemyLogic.Bind();
         BaseEnemyLogic.Set(BattleRepo);
-        BaseEnemyLogic.Set(Status);
+        BaseEnemyLogic.Set(this as IBaseEnemy);
     }
 
     public virtual void OnResolved()

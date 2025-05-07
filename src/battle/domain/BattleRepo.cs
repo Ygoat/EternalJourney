@@ -85,7 +85,7 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// 毒ダメージ
     /// </summary>
-    public float PoisonDamage { get; set; } = 1.0f;
+    public float PoisonDamage { get; set; } = 2.5f;
 
     /// <summary>
     /// <inheritdoc/>

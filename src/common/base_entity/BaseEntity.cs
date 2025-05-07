@@ -34,14 +34,4 @@ public partial class BaseEntity : Area2D, IBaseEntity
     /// </summary>
     [Node]
     protected IDurabilityModule DurabilityModule { get; set; } = default!;
-
-    /// <summary>
-    /// ステータス設定
-    /// </summary>
-    /// <param name="status"></param>
-    protected void SetStatus(Status status)
-    {
-        Status = status;
-        DurabilityModule.SetDurability(Status.MaxDur);
-    }
 }

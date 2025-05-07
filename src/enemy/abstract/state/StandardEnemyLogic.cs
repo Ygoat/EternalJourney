@@ -87,6 +87,11 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
         /// <param name="NextPositionDelta"></param>
         public readonly record struct Move(Vector2 NextPositionDelta);
 
+        /// <summary>
+        /// カラー更新
+        /// </summary>
+        public readonly record struct UpdateColor(Color Color);
+
     }
 
     /// <summary>
@@ -123,25 +128,20 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
             {
                 // 位置を更新
                 Vector2 nextPositionDelta = input.Direction.Normalized() * input.Speed;
+                IStandardEnemy standardEnemy = Get<IStandardEnemy>();
                 Output(new Output.Move(nextPositionDelta));
-                return ToSelf();
+                UpdateColor(standardEnemy.Status.CurrentDur, standardEnemy.Status.MaxDur);
+                return CheckUnderZeroDurability(standardEnemy.Status.CurrentDur);
             }
 
             public Transition On(in Input.BulletHit input)
             {
                 IBattleRepo battleRepo = Get<IBattleRepo>();
-                IBaseEnemy baseEnemy = Get<IBaseEnemy>();
-                float currentDur = battleRepo.ReduceEnemyDurability(baseEnemy.Status.CurrentDur, 1.0f);
-                // 耐久値が0以下の場合
-                if (currentDur <= 0)
-                {
-                    // 破壊を出力する
-                    Output(new Output.Destroyed());
-                    // スポーン待機に遷移する
-                    return To<SpawnWait>();
-                }
+                IStandardEnemy standardEnemy = Get<IStandardEnemy>();
+                float currentDur = battleRepo.ReduceEnemyDurability(standardEnemy.Status.CurrentDur, 1.0f);
                 Output(new Output.CurrentDurChange(currentDur));
-                return ToSelf();
+                UpdateColor(currentDur, standardEnemy.Status.MaxDur);
+                return CheckUnderZeroDurability(currentDur);
             }
 
             public Transition On(in Input.OutOfArea input)
@@ -150,6 +150,31 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
                 Output(new Output.Destroyed());
                 // スポーン待機に遷移する
                 return To<SpawnWait>();
+            }
+
+            private Transition CheckUnderZeroDurability(float currentDur)
+            {
+                // 耐久値が0以下の場合
+                if (currentDur <= 0)
+                {
+                    // 破壊を出力する
+                    Output(new Output.Destroyed());
+                    // スポーン待機に遷移する
+                    return To<SpawnWait>();
+                }
+                return ToSelf();
+            }
+
+            private void UpdateColor(float currentDur, float maxDur)
+            {
+                // 耐久割合（0〜1）
+                float ratio = Mathf.Clamp(currentDur / maxDur, 0f, 1f);
+                // 赤（Full）から青（Zero）へ補間
+                Color fullColor = new Color(1f, 0f, 0f);  // 赤
+                Color emptyColor = new Color(0f, 0f, 1f); // 青
+                Color result = fullColor.Lerp(emptyColor, 1f - ratio);
+
+                Output(new Output.UpdateColor(result));
             }
         }
     }

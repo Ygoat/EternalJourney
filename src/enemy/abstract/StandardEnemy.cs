@@ -60,6 +60,9 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// </summary>
     [Node]
     public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
+
+    [Node]
+    public IColorRect ColorRect { get; set; } = default!;
     #endregion Nodes
 
     /// <summary>
@@ -78,7 +81,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
 
         // エネミーロジック
         StandardEnemyLogic = new StandardEnemyLogic();
-        StandardEnemyLogic.Set(this as IBaseEnemy);
+        StandardEnemyLogic.Set(this as IStandardEnemy);
         StandardEnemyLogic.Set(BattleRepo);
         // エネミーロジックバインド
         StandardEnemyBinding = StandardEnemyLogic.Bind();
@@ -87,7 +90,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // コリジョンマスクを船と弾丸に設定
         CollisionMask = CollisionEntity.Ship | CollisionEntity.Bullet;
         // ステータスセット
-        SetStatus(new Status { Spd = 1.0f, MaxDur = 0.1f });
+        Status = new Status { Spd = 0.7f, MaxDur = 10.0f, CurrentDur = 10.0f };
 
         // ターゲット位置
         TargetPosition = EntityTable.Get<IShip>(0)!.EnemyTargetMarker.GlobalPosition;
@@ -119,6 +122,10 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
             .Handle((in StandardEnemyLogic.Output.Move output) =>
             {
                 GlobalPosition += output.NextPositionDelta;
+            })
+            .Handle((in StandardEnemyLogic.Output.UpdateColor output) =>
+            {
+                ColorRect.Color = output.Color;
             })
             .Handle((in StandardEnemyLogic.Output.Destroyed _) =>
             {
@@ -201,5 +208,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         Direction = new Vector2(0, 0);
         // 耐久値を回復
         Status.CurrentDur = Status.MaxDur;
+        // 状態異常解除
+        StatusEffectManager.PoisonEffect.Remove();
     }
 }
