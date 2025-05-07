@@ -62,7 +62,7 @@ public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEne
             {
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 Status status = Get<Status>();
-                float reducedDurability = battleRepo.ReduceDurability(status.CurrentDur, input.Damage);
+                float reducedDurability = battleRepo.ReduceEnemyDurability(status.CurrentDur, input.Damage);
                 Output(new Output.ReduceDurability(reducedDurability));
                 return ToSelf();
             }

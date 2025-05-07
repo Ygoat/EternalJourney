@@ -65,6 +65,18 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
     public static class Output
     {
         /// <summary>
+        /// 耐久値変化
+        /// </summary>
+        public readonly record struct CurrentDurChange(float CurrentDur);
+
+        /// <summary>
+        /// 侵攻開始
+        /// </summary>
+        /// <param name="SpawnGlobalPosition"></param>
+        /// <param name="SpawnGlobalAngle"></param>
+        public readonly record struct StartInvade(Vector2 SpawnGlobalPosition, float SpawnGlobalAngle);
+
+        /// <summary>
         /// 破壊
         /// </summary>
         public readonly record struct Destroyed;
@@ -93,14 +105,8 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
 
             public Transition On(in Input.Spawn input)
             {
-                Input.Spawn ip = input;
-                return To<Invading>().With(
-                    (state) =>
-                    {
-                        ((Invading)state).SpawnGlobalPosition = ip.SpawnGlobalPosition;
-                        ((Invading)state).SpawnGlobalAngle = ip.SpawnGlobalAngle;
-                    }
-                );
+                Output(new Output.StartInvade(input.SpawnGlobalPosition, input.SpawnGlobalAngle));
+                return To<Invading>();
             }
         }
 
@@ -109,9 +115,6 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
         /// </summary>
         public record Invading : State, IGet<Input.PhysicsProcess>, IGet<Input.BulletHit>, IGet<Input.OutOfArea>
         {
-            public Vector2 SpawnGlobalPosition { get; set; }
-            public float SpawnGlobalAngle { get; set; }
-
             public Invading()
             {
             }
@@ -128,15 +131,16 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
             {
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 IBaseEnemy baseEnemy = Get<IBaseEnemy>();
-                battleRepo.EnemyDamagedByBullet(baseEnemy, input.BaseBullet);
+                float currentDur = battleRepo.ReduceEnemyDurability(baseEnemy.Status.CurrentDur, 1.0f);
                 // 耐久値が0以下の場合
-                if (baseEnemy.Status.CurrentDur <= 0)
+                if (currentDur <= 0)
                 {
                     // 破壊を出力する
                     Output(new Output.Destroyed());
                     // スポーン待機に遷移する
                     return To<SpawnWait>();
                 }
+                Output(new Output.CurrentDurChange(currentDur));
                 return ToSelf();
             }
 

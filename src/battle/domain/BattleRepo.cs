@@ -44,20 +44,6 @@ public interface IBattleRepo : IDisposable
     public void OnEnemyDestroyed(IBaseEnemy baseEnemy);
 
     /// <summary>
-    /// 敵が弾丸によるダメージを受けた時の処理
-    /// </summary>
-    /// <param name="baseEnemy"></param>
-    /// <param name="baseBullet"></param>
-    public void EnemyDamagedByBullet(IBaseEnemy baseEnemy, IBaseBullet baseBullet);
-
-    /// <summary>
-    /// 弾丸が敵によるダメージを受けた時の処理
-    /// </summary>
-    /// <param name="baseBullet"></param>
-    /// <param name="baseEnemy"></param>
-    public void BulletDamagedByEnemy(IBaseBullet baseBullet, IBaseEnemy baseEnemy);
-
-    /// <summary>
     /// 弾丸が当たったことをバトルに通知する
     /// </summary>
     /// <param name="baseBullet"></param>
@@ -75,12 +61,20 @@ public interface IBattleRepo : IDisposable
     public void SetNumEnemyDestroyed(int numEnemyDestroyed);
 
     /// <summary>
-    /// 耐久値減少処理
+    /// 敵耐久値減少処理
     /// </summary>
     /// <param name="curDurability">現在耐久値</param>
     /// <param name="damage">ダメージ</param>
     /// <returns></returns>
-    public float ReduceDurability(float curDurability, float damage);
+    public float ReduceEnemyDurability(float curDurability, float damage);
+
+    /// <summary>
+    /// 弾丸耐久値減少処理
+    /// </summary>
+    /// <param name="curDurability">現在耐久値</param>
+    /// <param name="damage">ダメージ</param>
+    /// <returns></returns>
+    public float ReduceBulletDurability(float curDurability, float damage);
 }
 
 /// <summary>
@@ -180,27 +174,12 @@ public class BattleRepo : IBattleRepo
         BulletDestroyed?.Invoke(baseBullet);
     }
 
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    /// <param name="poisonEffect"></param>
-    public void EnemyDamagedByBullet(IBaseEnemy baseEnemy, IBaseBullet baseBullet)
+    public float ReduceEnemyDurability(float curDurability, float damage)
     {
-        baseEnemy.Status.CurrentDur -= 1.0f;
+        return curDurability -= damage;
     }
 
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    /// <param name="baseBullet"></param>
-    /// <param name="baseEnemy"></param>
-    public void BulletDamagedByEnemy(IBaseBullet baseBullet, IBaseEnemy baseEnemy)
-    {
-        baseBullet.Status.CurrentDur -= 1.0f;
-    }
-
-
-    public float ReduceDurability(float curDurability, float damage)
+    public float ReduceBulletDurability(float curDurability, float damage)
     {
         return curDurability -= damage;
     }

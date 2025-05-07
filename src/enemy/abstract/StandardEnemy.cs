@@ -102,15 +102,19 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         base.OnResolved();
 
         StandardEnemyBinding
-            .When<StandardEnemyLogic.State.Invading>(state =>
+            .Handle((in StandardEnemyLogic.Output.StartInvade output) =>
             {
                 // スポーン時の位置を設定
-                GlobalPosition = state.SpawnGlobalPosition;
+                GlobalPosition = output.SpawnGlobalPosition;
                 // スポーン時の方向を設定
                 Direction = TargetPosition - GlobalPosition;
                 // エネミーの向きを設定
-                Rotation = state.SpawnGlobalAngle;
+                Rotation = output.SpawnGlobalAngle;
                 SetPhysicsProcess(true);
+            })
+            .Handle((in StandardEnemyLogic.Output.CurrentDurChange output) =>
+            {
+                Status.CurrentDur = output.CurrentDur;
             })
             .Handle((in StandardEnemyLogic.Output.Move output) =>
             {
@@ -149,7 +153,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
             StandardEnemyLogic.Input(new StandardEnemyLogic.Input.BulletHit(baseBullet));
         }
         // TakeDamage入力
-        StatusEffectManager.ApplyEffect(StatusEffectManager.PoisonEffect);
     }
 
     /// <summary>

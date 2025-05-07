@@ -1,7 +1,6 @@
 namespace EternalJourney.Enemy.Abstract.Base;
 
 using System;
-using System.Net.Http.Headers;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;

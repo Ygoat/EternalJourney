@@ -94,6 +94,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
             {
                 GlobalPosition += output.NextPositionDelta;
             })
+            .Handle((in StandardBulletLogic.Output.CurrentDurChange output) =>
+            {
+                Status.CurrentDur = output.CurrentDur;
+            })
             // Disappearが出力された場合
             .Handle((in StandardBulletLogic.Output.Collapse _) =>
             {

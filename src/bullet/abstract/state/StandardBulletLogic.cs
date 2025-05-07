@@ -61,6 +61,11 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
     public static class Output
     {
         /// <summary>
+        /// 耐久値変化
+        /// </summary>
+        public readonly record struct CurrentDurChange(float CurrentDur);
+
+        /// <summary>
         /// 崩壊
         /// </summary>
         public readonly record struct Collapse;
@@ -116,23 +121,21 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
                 // 位置を更新
                 Vector2 nextPositionDelta = input.Direction.Normalized() * input.Speed;
                 Output(new Output.Move(nextPositionDelta));
-                return ToSelf();
+                // 耐久値チェック
+                IBaseBullet baseBullet = Get<IBaseBullet>();
+                return CheckUnderZeroDurability(baseBullet.Status.CurrentDur);
             }
 
             public Transition On(in Input.EnemyHit input)
             {
+                // 耐久値減少
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 IBaseBullet baseBullet = Get<IBaseBullet>();
-                battleRepo.BulletDamagedByEnemy(baseBullet, input.BaseEnemy);
-                // 耐久値が0以下の場合
-                if (baseBullet.Status.CurrentDur <= 0)
-                {
-                    // 崩壊を出力する
-                    Output(new Output.Collapse());
-                    // 射出待機に遷移する
-                    return To<EmitWait>();
-                }
-                return ToSelf();
+                float currentDur = battleRepo.ReduceBulletDurability(baseBullet.Status.CurrentDur, 1.0f);
+                // 耐久値変更を通知
+                Output(new Output.CurrentDurChange(currentDur));
+                // 耐久値チェック
+                return CheckUnderZeroDurability(currentDur);
             }
 
             public Transition On(in Input.Miss input)
@@ -141,6 +144,19 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
                 Output(new Output.Collapse());
                 // 射出待機に遷移する
                 return To<EmitWait>();
+            }
+
+            private Transition CheckUnderZeroDurability(float currentDur)
+            {
+                // 耐久値が0以下の場合
+                if (currentDur <= 0)
+                {
+                    // 崩壊を出力する
+                    Output(new Output.Collapse());
+                    // 射出待機に遷移する
+                    return To<EmitWait>();
+                }
+                return ToSelf();
             }
         }
     }
