@@ -32,4 +32,9 @@ public partial class StatusEffectManager : Node, IStatusEffectManager
     {
         AddChild(PoisonEffect);
     }
+
+    public virtual void RemoveAll()
+    {
+        PoisonEffect.Remove();
+    }
 }

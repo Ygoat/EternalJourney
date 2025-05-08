@@ -209,6 +209,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // 耐久値を回復
         Status.CurrentDur = Status.MaxDur;
         // 状態異常解除
-        StatusEffectManager.PoisonEffect.Remove();
+        StatusEffectManager.RemoveAll();
     }
 }
