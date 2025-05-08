@@ -4,6 +4,7 @@ using System;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseEntity;
+using EternalJourney.Common.StatusEffect;
 using Godot;
 
 /// <summary>
@@ -27,6 +28,11 @@ public interface IBaseBullet : IBaseEntity
     /// <param name="shotGlobalPosition"></param>
     /// <param name="shotGlobalAngle"></param>
     public void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle);
+
+    /// <summary>
+    /// 状態異常付与マネージャー
+    /// </summary>
+    public ProvideStatusEffectManager ProvideStatusEffectManager { get; set; }
 }
 
 /// <summary>
@@ -48,6 +54,18 @@ public partial class BaseBullet : BaseEntity, IBaseBullet
     /// </summary>
     [Signal]
     public delegate void RemovedEventHandler(BaseBullet bullet);
+
+    public ProvideStatusEffectManager ProvideStatusEffectManager { get; set; } = default!;
+
+    public virtual void Setup()
+    {
+        ProvideStatusEffectManager = new ProvideStatusEffectManager();
+    }
+
+    public virtual void OnResolved()
+    {
+        AddChild(ProvideStatusEffectManager);
+    }
 
     /// <summary>
     /// <inheritdoc/>

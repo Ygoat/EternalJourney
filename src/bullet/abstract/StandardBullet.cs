@@ -7,6 +7,7 @@ using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
+using EternalJourney.Common.StatusEffect;
 using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Enemy.Abstract.Base;
@@ -59,8 +60,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
     #endregion Nodes
 
-    public void Setup()
+    public override void Setup()
     {
+        base.Setup();
+
         StandardBulletLogic = new StandardBulletLogic();
         StandardBulletBinding = StandardBulletLogic.Bind();
         StandardBulletLogic.Set(this as IBaseBullet);
@@ -71,14 +74,19 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         // コリジョンマスクをエネミー
         CollisionMask = CollisionEntity.Enemy;
         // ステータスセット
-        Status = new Status { Spd = 5.0f, MaxDur = 1.0f, CurrentDur = 1.0f };
+        Status = new Status { Spd = 5.0f, MaxDur = 2.0f, CurrentDur = 2.0f };
     }
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void OnResolved()
+    public override void OnResolved()
     {
+        base.OnResolved();
+
+        // 毒を有効化
+        ProvideStatusEffectManager.Configure<PoisonEffect>(true);
+
         StandardBulletBinding
             .When<StandardBulletLogic.State.InFlight>(state =>
             {
