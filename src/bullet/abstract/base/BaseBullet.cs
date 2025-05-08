@@ -32,7 +32,7 @@ public interface IBaseBullet : IBaseEntity
     /// <summary>
     /// 状態異常付与マネージャー
     /// </summary>
-    public ProvideStatusEffectManager ProvideStatusEffectManager { get; set; }
+    public StatusEffectServerManager StatusEffectServerManager { get; set; }
 }
 
 /// <summary>
@@ -55,16 +55,16 @@ public partial class BaseBullet : BaseEntity, IBaseBullet
     [Signal]
     public delegate void RemovedEventHandler(BaseBullet bullet);
 
-    public ProvideStatusEffectManager ProvideStatusEffectManager { get; set; } = default!;
+    public StatusEffectServerManager StatusEffectServerManager { get; set; } = default!;
 
     public virtual void Setup()
     {
-        ProvideStatusEffectManager = new ProvideStatusEffectManager();
+        StatusEffectServerManager = new StatusEffectServerManager();
     }
 
     public virtual void OnResolved()
     {
-        AddChild(ProvideStatusEffectManager);
+        AddChild(StatusEffectServerManager);
     }
 
     /// <summary>

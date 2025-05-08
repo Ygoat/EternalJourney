@@ -85,7 +85,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         base.OnResolved();
 
         // 毒を有効化
-        ProvideStatusEffectManager.Configure<PoisonEffect>(true);
+        StatusEffectServerManager.Configure<PoisonEffect>(true);
 
         StandardBulletBinding
             .When<StandardBulletLogic.State.InFlight>(state =>

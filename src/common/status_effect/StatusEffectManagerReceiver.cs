@@ -8,7 +8,7 @@ using Godot;
 /// <summary>
 /// 状態異常マネージャーインターフェース
 /// </summary>
-public interface IStatusEffectManager : INode
+public interface IStatusEffectReceiverManager : INode
 {
     public PoisonEffect PoisonEffect { get; }
 }
@@ -17,7 +17,7 @@ public interface IStatusEffectManager : INode
 /// 状態異常マネージャークラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class StatusEffectManager : Node, IStatusEffectManager
+public partial class StatusEffectReceiverManager : Node, IStatusEffectReceiverManager
 {
     public override void _Notification(int what) => this.Notify(what);
 

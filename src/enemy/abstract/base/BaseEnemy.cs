@@ -56,7 +56,7 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy
     [Signal]
     public delegate void HitEventHandler();
 
-    public StatusEffectManager StatusEffectManager { get; set; } = default!;
+    public StatusEffectReceiverManager StatusEffectReceiverManager { get; set; } = default!;
 
     /// <summary>
     /// 自己除去イベント
@@ -69,7 +69,7 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy
 
     public virtual void Setup()
     {
-        StatusEffectManager = new StatusEffectManager();
+        StatusEffectReceiverManager = new StatusEffectReceiverManager();
         BaseEnemyLogic = new BaseEnemyLogic();
         BaseEnemyBinding = BaseEnemyLogic.Bind();
         BaseEnemyLogic.Set(BattleRepo);
@@ -78,8 +78,8 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy
 
     public virtual void OnResolved()
     {
-        AddChild(StatusEffectManager);
-        StatusEffectManager.PoisonEffect.Damaged += OnPoisonDamaged;
+        AddChild(StatusEffectReceiverManager);
+        StatusEffectReceiverManager.PoisonEffect.Damaged += OnPoisonDamaged;
         BaseEnemyBinding
             .Handle((in BaseEnemyLogic.Output.ReduceDurability output) =>
             {

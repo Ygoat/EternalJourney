@@ -10,7 +10,7 @@ using Godot;
 /// <summary>
 /// 状態異常マネージャーインターフェース
 /// </summary>
-public interface IProvideStatusEffectManager : INode
+public interface IProvideStatusEffectServerManager : INode
 {
 }
 
@@ -18,7 +18,7 @@ public interface IProvideStatusEffectManager : INode
 /// 状態異常マネージャークラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class ProvideStatusEffectManager : Node, IProvideStatusEffectManager
+public partial class StatusEffectServerManager : Node, IProvideStatusEffectServerManager
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -35,7 +35,7 @@ public partial class ProvideStatusEffectManager : Node, IProvideStatusEffectMana
     }
 
     // 適用
-    public void Apply(IStatusEffectManager manager)
+    public void Apply(IStatusEffectReceiverManager manager)
     {
         foreach (var kvp in _effectEnabled)
         {
@@ -53,7 +53,7 @@ public partial class ProvideStatusEffectManager : Node, IProvideStatusEffectMana
         }
     }
 
-    private StatusEffect? GetStatusEffectInstance(Type type, IStatusEffectManager manager)
+    private StatusEffect? GetStatusEffectInstance(Type type, IStatusEffectReceiverManager manager)
     {
         // 型に応じて manager からインスタンスを取り出す
         // ここは状態異常の種類が増えたら対応を増やします

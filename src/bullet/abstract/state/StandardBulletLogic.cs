@@ -132,7 +132,7 @@ public partial class StandardBulletLogic : LogicBlock<StandardBulletLogic.State>
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 IBaseBullet baseBullet = Get<IBaseBullet>();
                 float currentDur = battleRepo.ReduceBulletDurability(baseBullet.Status.CurrentDur, 1.0f);
-                baseBullet.ProvideStatusEffectManager.Apply(input.BaseEnemy.StatusEffectManager);
+                baseBullet.StatusEffectServerManager.Apply(input.BaseEnemy.StatusEffectReceiverManager);
                 // 耐久値変更を通知
                 Output(new Output.CurrentDurChange(currentDur));
                 // 耐久値チェック
