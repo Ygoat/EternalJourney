@@ -17,7 +17,7 @@ using EternalJourney.Cores.Repositories;
 
 
 
-public partial class Main : Node2D, IServicesConfigurator
+public partial class Main : Node2D
 {
 #if DEBUG
     public TestEnvironment Environment = default!;
@@ -38,20 +38,6 @@ public partial class Main : Node2D, IServicesConfigurator
 
         // If we don't need to run tests, we can just switch to the game scene.
         CallDeferred("RunScene");
-    }
-
-    /// <summary>
-    /// サービス設定
-    /// </summary>
-    /// <param name="services"></param>
-    public void ConfigureServices(IServiceCollection services)
-    {
-        // サービス追加
-        // 廃止予定
-        // services.AddGodotServices();
-        // services.AddSingleton<IAppRepo, AppRepo>();
-        // services.AddSingleton<IInstantiator>(new Instantiator(GetTree()));
-        // services.AddSingleton<ClueCsvReader>();
     }
 
 #if DEBUG
