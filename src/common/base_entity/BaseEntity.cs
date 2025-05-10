@@ -3,7 +3,6 @@ namespace EternalJourney.Common.BaseEntity;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.Common.DurabilityModule;
 using EternalJourney.Common.Traits;
 using Godot;
 
@@ -28,10 +27,4 @@ public partial class BaseEntity : Area2D, IBaseEntity
     /// </summary>
     [Export]
     public Status Status { get; set; } = new Status();
-
-    /// <summary>
-    /// 耐久値モジュール
-    /// </summary>
-    [Node]
-    protected IDurabilityModule DurabilityModule { get; set; } = default!;
 }
