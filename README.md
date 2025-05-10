@@ -1,14 +1,78 @@
-# README
+# GamersLab企画 EternalJourney（エタジャニ）開発
+
+GamersLab第一弾企画！
+放置シューティングゲーム EternalJourney 開発！
 
 ## 開発環境構築
 
-### .NETバージョン
+VSCodeおよびGodotエディタによるゲーム開発になります
+ChickenSoftさんのテンプレートを使用してます
 
-- 8.0.406
+- 必要なもの
+  - GitHubアカウント
+  - Git
+  - EternalJourneyソースコード
+    - 八木所有のgithubプロジェクトに招待するのでGithubアカウント名を共有ください
+  - .NET Sdk
+  - Godot
+  - VSCode
+    - 拡張機能
 
-### VSCode拡張機能
+### Githubアカウント
 
-Recommendのものを入れる
+- [こちら](https://docs.github.com/ja/get-started/start-your-journey/creating-an-account-on-github)に沿って作成する
+
+### Gitインストール
+
+- [こちら](https://gitforwindows.org/)からダウンロードする
+- インストーラーに沿ってインストールする
+  - 改行文字の自動変換は無効化を推奨
+
+### ソースコード
+
+- GithubのEternalJourneyリポジトリからクローンする
+
+### .NETインストール
+
+- ver 8.0.405 以上
+  - [こちらからダウンロード](https://dotnet.microsoft.com/ja-jp/download/dotnet/8.0)
+    - Windowsの場合：Windows x64
+  - インストーラーに従ってインストールする
+
+### Godotインストール
+
+- ver 4.3.0 固定 ※後々アップデート予定
+  - [こちらからダウンロード](https://godotengine.org/download/archive/4.3-stable/)
+    - Windowsの場合：Widowsの.NET
+  - zipファイルを解凍し、解凍後のフォルダを```C:\Program Files```に配置する
+    - 必要であればフォルダを開いてexeファイルをショートカット等に登録する
+
+### VSCode
+
+- VSCodeをインストールする
+  - [こちらからダウンロード](https://code.visualstudio.com/)
+
+- Recommendのものを入れる
+  - "alfish.godot-files",
+  - "christian-kohler.path-intellisense",
+  - "DavidAnson.vscode-markdownlint",
+  - "EditorConfig.EditorConfig",
+  - "gurumukhi.selected-lines-count",
+  - "jjkim.gdscript",
+  - "josefpihrt-vscode.roslynator",
+  - "ms-dotnettools.csharp",
+  - "selcukermaya.se-csproj-extensions",
+  - "streetsidesoftware.code-spell-checker",
+  - "VisualStudioExptTeam.vscodeintellicode"
+
+- ターミナルを開き```dotnet build```を実行する
+  - nugetパッケージのインストール等が行われる
+
+### Godot側のエディタ指定
+
+- エディター > エディター設定 からエディター設定ウィンドウを開く
+- .NET > エディター > Externa lEditor 項目でVisual Studio Codeを選択する
+- Godotエディタの画面で.csファイルを開くとVSCodeで開かれるようになる
 
 ### VSCodeでデバッグする場合
 
@@ -17,21 +81,20 @@ Recommendのものを入れる
   - 変数名：GODOT
   - 値：＜Godot実行ファイルパス＞
 - 実行とデバッグで「Debug Game」を選択して「デバッグの開始」する
-
-### Godot側のエディタ指定
-
-- エディター > エディター設定 からエディター設定ウィンドウを開く
-- .NET > エディター > Externa lEditor 項目でVisual Studio Codeを選択する
-- Godotエディタの画面で.csファイルを開くとVSCodeで開かれるようになる
+  - ブレークポイントで処理を止めることが可能
 
 ## 実装
 
 ### コーディング規約
 
-Godotのコーディング規約に準拠
-[Godotのコーディング規約](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_style_guide.html)
+- 文字コード：UTF-8
+- 改行文字：LF
+- Godotのコーディング規約に準拠（一般的なC#コーディング規約）
+  - [Godotのコーディング規約](https://docs.godotengine.org/en/stable/tutorials/scripting/c_sharp/c_sharp_style_guide.html)
 
-### クラス内（ノードにアタッチするスクリプト）の構成 ※参考
+### ノードにアタッチするスクリプトについて
+
+#### クラス内の構成　※参考
 
 ```csharp
 public interface ISample : INode2D
@@ -73,68 +136,51 @@ public partial class Sample : ISample, Node2D
 }
 ```
 
-### ノードの初期化
+#### ノードの初期化
 
-- Initialiez
-- OnReady
-- Setup
-- OnResolved
+- ChickenSoftのAutoInject(AutoNode)ライブラリにより4つの初期化処理に分割される
+  - Initialize() -> OnReady() -> Setup() -> OnResolved()
+  - ※Godotのデフォルトでは_Ready()の１つだけの初期化処理のみ
+    - 依存関係の処理を行うため4つに分割している
 
-### 処理順について
+- Initialize()
+  - シーンツリーにノードが追加される前に処理が走る
+  - ノードへのアクセスはできない
+  - ノード以外の初期化（定数の設定、ファイルロードやユーティリティクラスのインスタンス化）を行う
 
-Initialize()
--> シーンツリーにノードが追加される前に処理が走る
-- ノードへのアクセスはできない
-- 定数の設定、ファイルロード、初期化やノード以外のユーティリティクラスのインスタンス化などを行う
-- 依存関係の解決
-  - 本メソッドを呼び出すシーンが親の場合（プロバイダー）
-    - this.Provide()で依存性の解決を行うことが可能
-  - 本メソッドを呼び出すシーンが子の場合（レシーバー）
-    - 親から依存性が注入されていない状態
+- OnReady() ※_Ready()
+  - シーンツリーがノードに追加された後に処理が走る
+    - この処理以降からノードへのアクセスが可能となる
 
-OnReady() ※_Ready()
--> シーンツリーがノードに追加された後に処理が走る
-- ノードへアクセス可能
-- 依存関係の解決
-  - 本メソッドを呼び出すシーンが親の場合（プロバイダー）
-    - this.Provide()で依存性の解決を行うことが可能
-  - 本メソッドを呼び出すシーンが子の場合（レシーバー）
-    - 親から依存性が注入されていない状態
+- Setup()
+  - 依存関係が注入されOnResolved()が実行される前に処理が走る
+    - この処理以降から[Dependency]属性がついたノードへのアクセスが可能となる
+  - IsTestingがfalseの場合に実行される ※テスト環境では実行されない
+    - テストスクリプトでSetup()を実装することで、テスト用の初期処理を実装可能
+  - プロパティの初期値設定を行う
 
-Setup()
--> 依存関係が解決しOnResolved()が実行される前に処理が走る
-- IsTestingがfalseの場合に実行される
-  - テストプログラムはテスト用にSetup()を実行する
-  - テスト用の環境を別でセットするのでその切り分けで使う
-- 依存関係の解決
-  - 本メソッドを呼び出すシーンが親の場合（プロバイダー）
-    - this.Provide()で依存性の解決を行うことが可能
-  - 本メソッドを呼び出すシーンが子の場合（レシーバー）
-    - this.DependOn()で親から依存性が注入されており、依存関係を利用することが可能
-- 依存関係を使ってプロパティを初期化する等を行う
+- OnResolved()
+  - ステートのバインドや初期化、イベントへのファンクションの設定等の初期処理を行う
 
-OnResolved()
--> 依存関係が解決された後に実行される
-- 依存関係の解決
-  - 本メソッドを呼び出すシーンが親の場合（プロバイダー）
-    - this.Provide()で依存性の解決を行うことが可能
-  - 本メソッドを呼び出すシーンが子の場合（レシーバー）
-    - this.DependOn()で親から依存性が注入されており、依存関係を利用することが可能
-- 依存関係を使った処理を記述する
+- テスト環境では以下の2つの初期化処理となる
+  - OnReady() -> OnResolved()
+    - テストスクリプトでSetup()を実装することで、テスト用の初期化処理を実装可能
+  - ※基本的にテストスクリプトは使用しない
 
-Child:Initialize -> ChildLabel -> ParentLabel null
-Child:Ready -> ChildLabel -> ParentLabel null
-Parent:Initialize -> ParentLabel
-Child:Setup -> ChildLabel -> ParentLabel Initialize
-Child:Resolved -> ChildLabel -> ParentLabel Initialize
-Parent:Setup -> ParentLabel
-Parent:Resolved -> ParentLabel
-Parent:Ready -> ParentLabel
+## その他
 
-# その他
-Initialize() -> OnReady() -> Setup() -> OnResolved()
+### 用語について
 
-## VSCode再起動
-インテリセンス等が聞かなくなった場合、再起動する
-Ctrl + Shift + p
-でreload windowを実行する
+| 用語 | 読み | 概要 |
+| --- | --- | --- |
+| Godot | ごどー | 本開発で使用するゲームエンジン |
+| ChickenSoft | ちきんそふと | Godot .NET版のOSSツール<br>[詳細はこちら](https://chickensoft.games/) |
+| シーン | しーん | キャラクターやステージなどゲーム内のオブジェクトやロジックをまとめた再利用可能な単位 |
+| ノード | のーど | シーンを構成する最小要素<br>ツリー型に配置することが可能 |
+| シーンツリー | しーんつりー | シーンを構成するノードのツリー |
+| シグナル | しぐなる | ノードでイベントが発生した場合に発信される<br>ノード同士を疎結合に保つ |
+| スクリプト | スクリプト | C#コードのファイル |
+| ステート | すてーと | オブジェクトの状態 |
+| ステートロジック | すてーとろじっく | オブジェクトの状態におうじて異なるふるまいをさせる |
+| 依存関係/依存性 | いぞんかんけい/いぞんせい | Provide()メソッド/[Dependency] 属性で<br>注入/取得されるオブジェクト|
+|  |  |  |
