@@ -22,10 +22,6 @@ public partial class Game : Node, IProvide<string>, IGame
     // 子Nodeへ親Nodeの値をDIするために必要
     public override void _Notification(int what) => this.Notify(what);
 
-
-    public Button TestButton { get; private set; } = default!;
-    public int ButtonPresses { get; private set; }
-
     public EntityTable<int> EntityTable { get; set; } = new EntityTable<int>();
     string IProvide<string>.Value() => "Hello from Provider!";
     EntityTable<int> IProvide<EntityTable<int>>.Value() => EntityTable;
