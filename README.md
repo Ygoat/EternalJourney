@@ -52,7 +52,7 @@ ChickenSoftさんのテンプレートを使用してます
 - VSCodeをインストールする
   - [こちらからダウンロード](https://code.visualstudio.com/)
 
-- Recommendのものを入れる
+- 拡張機能はRecommendのものを入れる
   - "alfish.godot-files",
   - "christian-kohler.path-intellisense",
   - "DavidAnson.vscode-markdownlint",
