@@ -45,14 +45,14 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
         SetPhysicsProcess(true);
     }
 
-    public void OnBlastTimerTimeout()
-    {
-        Blast.Show();
-        SetPhysicsProcess(false);
-    }
-
     public void OnPhysicsProcess(double delta)
     {
         GlobalPosition += new Vector2(1, 0);
+    }
+
+    private void OnBlastTimerTimeout()
+    {
+        Blast.Show();
+        SetPhysicsProcess(false);
     }
 }
