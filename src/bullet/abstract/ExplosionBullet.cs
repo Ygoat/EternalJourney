@@ -28,13 +28,15 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
     [Node]
     public ICollisionShape2D BlastCollisionShape2D { get; set; } = default!;
 
-    public void Setup()
+    public override void Setup()
     {
-
+        base.Setup();
     }
 
-    public void OnResolved()
+    public override void OnResolved()
     {
+        base.OnResolved();
+
         BlastTimer.Timeout += OnBlastTimerTimeout;
         BlastTimer.SetWaitTime(5);
         BlastTimer.OneShot = true;
