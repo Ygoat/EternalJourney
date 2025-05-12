@@ -23,7 +23,10 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
     public ICollisionShape2D BulletCollisionShape2D { get; set; } = default!;
 
     [Node]
-    public IArea2D Blast { get; set; } = default!;
+    public IColorRect BulletColorRect { get; set; } = default!;
+
+    [Node]
+    public IColorRect BlastColorRect { get; set; } = default!;
 
     [Node]
     public ICollisionShape2D BlastCollisionShape2D { get; set; } = default!;
@@ -52,7 +55,7 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
 
     private void OnBlastTimerTimeout()
     {
-        Blast.Show();
+        BlastColorRect.Show();
         SetPhysicsProcess(false);
     }
 }

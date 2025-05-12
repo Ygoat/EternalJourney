@@ -39,18 +39,16 @@ metadata/_edit_use_anchors_ = true
 unique_name_in_owner = true
 shape = SubResource("RectangleShape2D_utpp0")
 
-[node name="Blast" type="Area2D" parent="." index="3"]
+[node name="BlastColorRect" type="ColorRect" parent="." index="3"]
 unique_name_in_owner = true
 visible = false
-
-[node name="BlastColorRect" type="ColorRect" parent="Blast" index="0"]
-unique_name_in_owner = true
 offset_left = -59.0
 offset_top = -59.0
 offset_right = 59.0
 offset_bottom = 59.0
 color = Color(1, 0.654902, 0, 1)
 
-[node name="BlastCollisionShape2D" type="CollisionShape2D" parent="Blast" index="1"]
+[node name="BlastCollisionShape2D" type="CollisionShape2D" parent="." index="4"]
 unique_name_in_owner = true
+visible = false
 shape = SubResource("RectangleShape2D_xejuu")
