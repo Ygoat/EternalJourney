@@ -52,3 +52,6 @@ color = Color(1, 0.654902, 0, 1)
 unique_name_in_owner = true
 visible = false
 shape = SubResource("RectangleShape2D_xejuu")
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." index="5"]
+unique_name_in_owner = true
