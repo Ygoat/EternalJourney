@@ -70,6 +70,10 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
         ExplosionBulletBinding
             .When<ExplosionBulletLogic.State.EmitWait>(state =>
             {
+                // 弾丸テクスチャ非表示と弾丸当たり判定無効化
+                BulletColorRect.Hide();
+                BulletCollisionShape2D.Disabled = true;
+
                 // 爆風テクスチャ非表示と爆風当たり判定無効
                 BlastColorRect.Hide();
                 BlastCollisionShape2D.Disabled = true;
@@ -115,9 +119,9 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
             })
             .Handle((in ExplosionBulletLogic.Output.BlastEnd _) =>
             {
-                // 爆風テクスチャ表示と爆風当たり判定有効化
-                BlastColorRect.Show();
-                BlastCollisionShape2D.Disabled = false;
+                // 爆風テクスチャ表示と爆風当たり判定無効化
+                BlastColorRect.Hide();
+                BlastCollisionShape2D.Disabled = true;
 
                 // フレーム終わりにRemoveSelf()呼び出し
                 CallDeferred(nameof(RemoveSelf));
