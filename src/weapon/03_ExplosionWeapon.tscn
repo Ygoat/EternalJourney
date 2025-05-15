@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://ckea0f5qnrrrv"]
+
+[ext_resource type="PackedScene" uid="uid://dd0kb5g3fa2xx" path="res://src/weapon/abstract/StandardWeapon.tscn" id="1_fcx7l"]
+[ext_resource type="PackedScene" uid="uid://gyffxcgk8skr" path="res://src/bullet/03_ExplosionBullet.tscn" id="2_f3gwh"]
+
+[node name="03_ExplosionWeapon" instance=ExtResource("1_fcx7l")]
+
+[node name="StandardBulletFactory" parent="." index="4"]
+BulletScene = ExtResource("2_f3gwh")

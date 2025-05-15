@@ -1,17 +1,7 @@
-[gd_scene load_steps=7 format=3 uid="uid://dx3yib7f7sbck"]
+[gd_scene load_steps=5 format=3 uid="uid://dx3yib7f7sbck"]
 
 [ext_resource type="PackedScene" uid="uid://cj5278x1kfrxx" path="res://src/bullet/abstract/base/BaseBullet.tscn" id="1_mj6mv"]
 [ext_resource type="Script" path="res://src/bullet/abstract/ExplosionBullet.cs" id="2_63hhr"]
-[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="3_pgqeh"]
-
-[sub_resource type="Resource" id="Resource_cvonw"]
-script = ExtResource("3_pgqeh")
-MaxDur = 0.0
-CurrentDur = 0.0
-Atk = 0.0
-Spd = 0.0
-Def = 0.0
-Size = 0.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_utpp0"]
 
@@ -19,9 +9,7 @@ Size = 0.0
 size = Vector2(118, 118)
 
 [node name="ExplosionBullet" instance=ExtResource("1_mj6mv")]
-position = Vector2(31, 23)
 script = ExtResource("2_63hhr")
-Status = SubResource("Resource_cvonw")
 
 [node name="BlastTimer" type="Timer" parent="." index="0"]
 unique_name_in_owner = true

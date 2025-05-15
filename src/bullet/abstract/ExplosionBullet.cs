@@ -60,7 +60,7 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
         // コリジョンマスクの設定(衝突対象とする衝突レイヤーをEnemy)
         CollisionMask = CollisionEntity.Enemy;
 
-        Status = new Status { Spd = 1, MaxDur = 0.1f, CurrentDur = 0.1f };
+        // Status = new Status { Spd = 1, MaxDur = 0.1f, CurrentDur = 0.1f };
     }
 
     public override void OnResolved()
@@ -71,12 +71,10 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
             .When<ExplosionBulletLogic.State.EmitWait>(state =>
             {
                 // 弾丸テクスチャ非表示と弾丸当たり判定無効化
-                BulletColorRect.Hide();
-                BulletCollisionShape2D.Disabled = true;
+                CallDeferred(nameof(SetBulletBodyEnabled), false);
 
                 // 爆風テクスチャ非表示と爆風当たり判定無効
-                BlastColorRect.Hide();
-                BlastCollisionShape2D.Disabled = true;
+                CallDeferred(nameof(SetBlastBodyEnabled), false);
             })
             .Handle((in ExplosionBulletLogic.Output.Emitted output) =>
             {
@@ -90,8 +88,7 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
             .When<ExplosionBulletLogic.State.InFlight>(state =>
             {
                 // 弾丸テクスチャ表示と弾丸当たり判定有効化
-                BulletColorRect.Show();
-                BulletCollisionShape2D.Disabled = false;
+                CallDeferred(nameof(SetBulletBodyEnabled), true);
 
                 SetPhysicsProcess(true);
             })
@@ -110,18 +107,18 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
             .When<ExplosionBulletLogic.State.Blast>(state =>
             {
                 // 弾丸テクスチャ非表示と弾丸当たり判定無効化
-                BulletColorRect.Hide();
-                BulletCollisionShape2D.Disabled = true;
+                CallDeferred(nameof(SetBulletBodyEnabled), false);
 
                 // 爆風テクスチャ表示と爆風当たり判定有効化
-                BlastColorRect.Show();
-                BlastCollisionShape2D.Disabled = false;
+                CallDeferred(nameof(SetBlastBodyEnabled), true);
+
+                // 爆風タイマースタート
+                BlastTimer.Start();
             })
             .Handle((in ExplosionBulletLogic.Output.BlastEnd _) =>
             {
                 // 爆風テクスチャ表示と爆風当たり判定無効化
-                BlastColorRect.Hide();
-                BlastCollisionShape2D.Disabled = true;
+                CallDeferred(nameof(SetBlastBodyEnabled), false);
 
                 // フレーム終わりにRemoveSelf()呼び出し
                 CallDeferred(nameof(RemoveSelf));
@@ -139,12 +136,16 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
         // InitializeBullet();
         // Emit(new Vector2(1, 0), 0);
         // トップレベルオブジェクトとして扱う（親ノードのRotationの影響を受けないようにするため）
+        BlastTimer.WaitTime = 0.5;
+        BlastTimer.OneShot = true;
+        BlastTimer.Timeout += OnBlastTimerTimeout;
+
         TopLevel = true;
     }
 
     public void OnPhysicsProcess(double delta)
     {
-        ExplosionBulletLogic.Input(new ExplosionBulletLogic.Input.PhysicsProcess(new Vector2(1, 0), Status.Spd));
+        ExplosionBulletLogic.Input(new ExplosionBulletLogic.Input.PhysicsProcess(Direction, Status.Spd));
     }
 
     /// <summary>
@@ -188,9 +189,25 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
     }
 
     /// <summary>
+    /// 自インスタンスをツリーから一時的に取り除く
+    /// ※インスタンスは完全には削除されない
+    /// </summary>
+    public override void RemoveSelf()
+    {
+        // 親ノードを取得してから、子である自ノードを削除する
+        GetParent().RemoveChild(this);
+        // 弾丸の初期化
+        InitializeBullet();
+        // 物理処理無効化
+        SetPhysicsProcess(false);
+        // OnCollapsedシグナル出力
+        EmitSignal(BaseBullet.SignalName.Removed, this);
+    }
+
+    /// <summary>
     /// 弾丸初期化
     /// </summary>
-    public void InitializeBullet()
+    private void InitializeBullet()
     {
         // グローバル座標の初期化
         GlobalPosition = new Vector2(0, 0);
@@ -198,5 +215,30 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
         Direction = new Vector2(0, 0);
         // 耐久値を回復
         Status.CurrentDur = Status.MaxDur;
+        GD.Print(Status.CurrentDur);
+    }
+
+    private void SetBulletBodyEnabled(bool flag)
+    {
+        if (flag)
+        {
+            BulletColorRect.Show();
+            BulletCollisionShape2D.Disabled = false;
+            return;
+        }
+        BulletColorRect.Hide();
+        BulletCollisionShape2D.Disabled = true;
+    }
+
+    private void SetBlastBodyEnabled(bool flag)
+    {
+        if (flag)
+        {
+            BlastColorRect.Show();
+            BlastCollisionShape2D.Disabled = false;
+            return;
+        }
+        BlastColorRect.Hide();
+        BlastCollisionShape2D.Disabled = true;
     }
 }

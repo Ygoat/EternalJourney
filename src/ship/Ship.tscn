@@ -1,8 +1,9 @@
-[gd_scene load_steps=5 format=3 uid="uid://brbkk7msm1p13"]
+[gd_scene load_steps=6 format=3 uid="uid://brbkk7msm1p13"]
 
 [ext_resource type="Script" path="res://src/ship/Ship.cs" id="1_78rl6"]
 [ext_resource type="PackedScene" uid="uid://bf7204x00kgdy" path="res://src/weapon/01_NormalWeapon.tscn" id="2_aq0oi"]
 [ext_resource type="PackedScene" uid="uid://cfpsts638espo" path="res://src/weapon/02_PenetrateWeapon.tscn" id="3_ch63l"]
+[ext_resource type="PackedScene" uid="uid://ckea0f5qnrrrv" path="res://src/weapon/03_ExplosionWeapon.tscn" id="4_clmg6"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_emuxv"]
 size = Vector2(219, 348)
@@ -46,9 +47,6 @@ unique_name_in_owner = true
 position = Vector2(-0.5, 0)
 shape = SubResource("RectangleShape2D_emuxv")
 
-[node name="01_NormalWeapon2" parent="." instance=ExtResource("2_aq0oi")]
-position = Vector2(84, -151)
-
 [node name="01_NormalWeapon4" parent="." instance=ExtResource("2_aq0oi")]
 position = Vector2(-87, 153)
 
@@ -57,3 +55,6 @@ position = Vector2(-80, -140)
 
 [node name="02_PenetrateWeapon2" parent="." instance=ExtResource("3_ch63l")]
 position = Vector2(68, 144)
+
+[node name="03_ExplosionWeapon" parent="." instance=ExtResource("4_clmg6")]
+position = Vector2(84, -144)
