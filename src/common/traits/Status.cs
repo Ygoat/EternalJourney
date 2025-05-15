@@ -2,6 +2,7 @@ namespace EternalJourney.Common.Traits;
 
 using Godot;
 
+[GlobalClass]
 public partial class Status : Resource
 {
     /// <summary>

@@ -1,5 +1,17 @@
-[gd_scene load_steps=2 format=3 uid="uid://dq48eccm7qgxf"]
+[gd_scene load_steps=4 format=3 uid="uid://dq48eccm7qgxf"]
 
 [ext_resource type="PackedScene" uid="uid://2s531ojpmkia" path="res://src/bullet/abstract/StandardBullet.tscn" id="1_sc7ra"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_n5u43"]
+
+[sub_resource type="Resource" id="Resource_awd7k"]
+resource_local_to_scene = true
+script = ExtResource("2_n5u43")
+MaxDur = 10.0
+CurrentDur = 10.0
+Atk = 0.0
+Spd = 2.5
+Def = 0.0
+Size = 0.0
 
 [node name="02_PenetrateBullet" instance=ExtResource("1_sc7ra")]
+Status = SubResource("Resource_awd7k")

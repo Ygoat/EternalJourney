@@ -6,9 +6,11 @@
 [sub_resource type="Resource" id="Resource_h210x"]
 script = ExtResource("2_icwu3")
 MaxDur = 0.0
+CurrentDur = 0.0
 Atk = 0.0
 Spd = 0.0
 Def = 0.0
+Size = 0.0
 
 [node name="01_NormalWeapon" instance=ExtResource("1_rjxij")]
 Status = SubResource("Resource_h210x")

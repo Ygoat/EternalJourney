@@ -1,5 +1,17 @@
-[gd_scene load_steps=2 format=3 uid="uid://moj0xo0e2b7a"]
+[gd_scene load_steps=4 format=3 uid="uid://moj0xo0e2b7a"]
 
 [ext_resource type="PackedScene" uid="uid://2s531ojpmkia" path="res://src/bullet/abstract/StandardBullet.tscn" id="1_4tikl"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_s3lmy"]
+
+[sub_resource type="Resource" id="Resource_nheul"]
+resource_local_to_scene = true
+script = ExtResource("2_s3lmy")
+MaxDur = 1.0
+CurrentDur = 1.0
+Atk = 0.0
+Spd = 5.0
+Def = 0.0
+Size = 0.0
 
 [node name="01_NormalBullet" instance=ExtResource("1_4tikl")]
+Status = SubResource("Resource_nheul")

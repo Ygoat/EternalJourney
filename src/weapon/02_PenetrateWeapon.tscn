@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://cfpsts638espo"]
+
+[ext_resource type="PackedScene" uid="uid://dd0kb5g3fa2xx" path="res://src/weapon/abstract/StandardWeapon.tscn" id="1_0dcbs"]
+[ext_resource type="PackedScene" uid="uid://dq48eccm7qgxf" path="res://src/bullet/02_PenetrateBullet.tscn" id="2_qem7f"]
+
+[node name="02_PenetrateWeapon" instance=ExtResource("1_0dcbs")]
+
+[node name="StandardBulletFactory" parent="." index="4"]
+BulletScene = ExtResource("2_qem7f")
