@@ -86,9 +86,9 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
         public readonly record struct Move(Vector2 NextPositionDelta);
 
         /// <summary>
-        /// 爆風終了
+        /// 自ノード除去
         /// </summary>
-        public readonly record struct BlastEnd();
+        public readonly record struct RemoveSelf();
     }
 
     /// <summary>
@@ -133,13 +133,11 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
 
             public Transition On(in Input.EnemyHit input)
             {
-                GD.Print("hit");
                 // 耐久値減少
                 // IBattleRepo battleRepo = Get<IBattleRepo>();
                 IBaseBullet baseBullet = Get<IBaseBullet>();
                 // float currentDur = battleRepo.ReduceBulletDurability(baseBullet.Status.CurrentDur, 1.0f);
                 float currentDur = baseBullet.Status.CurrentDur - 1.0f;
-                GD.Print(currentDur);
                 // baseBullet.StatusEffectServerManager.Apply(input.BaseEnemy.StatusEffectReceiverManager);
                 // 耐久値変更を通知
                 Output(new Output.CurrentDurChange(currentDur));
@@ -150,7 +148,7 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
             public Transition On(in Input.Miss input)
             {
                 // 崩壊を出力する
-                Output(new Output.Collapse());
+                Output(new Output.RemoveSelf());
                 // 射出待機に遷移する
                 return To<EmitWait>();
             }
@@ -160,13 +158,11 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
                 // 耐久値が0以下の場合
                 if (currentDur <= 0)
                 {
-                    GD.Print("under");
                     // 崩壊を出力する
                     Output(new Output.Collapse());
                     // 射出待機に遷移する
                     return To<Blast>();
                 }
-                GD.Print("upper");
                 return ToSelf();
             }
         }
@@ -182,15 +178,14 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
 
             public Transition On(in Input.BlastTimerTimeout input)
             {
-                // 爆風終了を出力
-                Output(new Output.BlastEnd());
+                // 自ノード除去を出力
+                Output(new Output.RemoveSelf());
                 // 射出待機に遷移
                 return To<EmitWait>();
             }
 
             public Transition On(in Input.EnemyHit input)
             {
-                GD.Print("BlastHit");
                 return ToSelf();
             }
         }

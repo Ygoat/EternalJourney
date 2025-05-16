@@ -9,7 +9,7 @@ script = ExtResource("2_s3lmy")
 MaxDur = 1.0
 CurrentDur = 1.0
 Atk = 0.0
-Spd = 5.0
+Spd = 10.0
 Def = 0.0
 Size = 0.0
 

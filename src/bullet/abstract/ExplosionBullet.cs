@@ -115,7 +115,7 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
                 // 爆風タイマースタート
                 BlastTimer.Start();
             })
-            .Handle((in ExplosionBulletLogic.Output.BlastEnd _) =>
+            .Handle((in ExplosionBulletLogic.Output.RemoveSelf _) =>
             {
                 // 爆風テクスチャ表示と爆風当たり判定無効化
                 CallDeferred(nameof(SetBlastBodyEnabled), false);
@@ -215,7 +215,6 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
         Direction = new Vector2(0, 0);
         // 耐久値を回復
         Status.CurrentDur = Status.MaxDur;
-        GD.Print(Status.CurrentDur);
     }
 
     private void SetBulletBodyEnabled(bool flag)

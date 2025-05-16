@@ -1,12 +1,23 @@
-[gd_scene load_steps=4 format=3 uid="uid://2s531ojpmkia"]
+[gd_scene load_steps=6 format=3 uid="uid://2s531ojpmkia"]
 
 [ext_resource type="PackedScene" uid="uid://cj5278x1kfrxx" path="res://src/bullet/abstract/base/BaseBullet.tscn" id="1_04t2q"]
 [ext_resource type="Script" path="res://src/bullet/abstract/StandardBullet.cs" id="2_c4dpx"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="3_rye7h"]
+
+[sub_resource type="Resource" id="Resource_suwpi"]
+script = ExtResource("3_rye7h")
+MaxDur = 0.0
+CurrentDur = 0.0
+Atk = 0.0
+Spd = 0.0
+Def = 0.0
+Size = 0.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_60sgv"]
 
 [node name="StandardBullet" instance=ExtResource("1_04t2q")]
 script = ExtResource("2_c4dpx")
+Status = SubResource("Resource_suwpi")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." index="0"]
 shape = SubResource("CircleShape2D_60sgv")

@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_utpp0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xejuu"]
-size = Vector2(118, 118)
+size = Vector2(180, 180)
 
 [node name="ExplosionBullet" instance=ExtResource("1_mj6mv")]
 script = ExtResource("2_63hhr")
@@ -30,10 +30,10 @@ shape = SubResource("RectangleShape2D_utpp0")
 [node name="BlastColorRect" type="ColorRect" parent="." index="3"]
 unique_name_in_owner = true
 visible = false
-offset_left = -59.0
-offset_top = -59.0
-offset_right = 59.0
-offset_bottom = 59.0
+offset_left = -90.0
+offset_top = -90.0
+offset_right = 90.0
+offset_bottom = 90.0
 color = Color(1, 0.654902, 0, 1)
 
 [node name="BlastCollisionShape2D" type="CollisionShape2D" parent="." index="4"]
