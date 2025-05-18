@@ -1,11 +1,9 @@
 namespace EternalJourney.Bullet.Abstract;
 
-using System;
-using System.Net.Http.Headers;
-using System.Xml;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Common.Traits;
@@ -45,6 +43,7 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
     public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
 
     public Vector2 Direction { get; set; } = default!;
+    [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
     public override void Setup()
     {
@@ -54,6 +53,7 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
         ExplosionBulletLogic = new ExplosionBulletLogic();
         ExplosionBulletBinding = ExplosionBulletLogic.Bind();
         ExplosionBulletLogic.Set(this as IBaseBullet);
+        ExplosionBulletLogic.Set(BattleRepo);
 
         // コリジョンレイヤーの設定(自身の衝突レイヤーをBullet)
         CollisionLayer = CollisionEntity.Bullet;

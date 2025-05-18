@@ -138,7 +138,7 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
             {
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 IStandardEnemy standardEnemy = Get<IStandardEnemy>();
-                float currentDur = battleRepo.ReduceEnemyDurability(standardEnemy.Status.CurrentDur, 1.0f);
+                float currentDur = battleRepo.ReduceEnemyDurability(standardEnemy.Status.CurrentDur, input.BaseBullet.Status.Atk);
                 Output(new Output.CurrentDurChange(currentDur));
                 UpdateColor(currentDur, standardEnemy.Status.MaxDur);
                 return CheckUnderZeroDurability(currentDur);

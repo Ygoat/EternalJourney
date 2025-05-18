@@ -134,10 +134,10 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
             public Transition On(in Input.EnemyHit input)
             {
                 // 耐久値減少
-                // IBattleRepo battleRepo = Get<IBattleRepo>();
+                IBattleRepo battleRepo = Get<IBattleRepo>();
                 IBaseBullet baseBullet = Get<IBaseBullet>();
-                // float currentDur = battleRepo.ReduceBulletDurability(baseBullet.Status.CurrentDur, 1.0f);
-                float currentDur = baseBullet.Status.CurrentDur - 1.0f;
+                float currentDur = battleRepo.ReduceBulletDurability(baseBullet.Status.CurrentDur, 1.0f);
+                // float currentDur = baseBullet.Status.CurrentDur - 1.0f;
                 // baseBullet.StatusEffectServerManager.Apply(input.BaseEnemy.StatusEffectReceiverManager);
                 // 耐久値変更を通知
                 Output(new Output.CurrentDurChange(currentDur));
