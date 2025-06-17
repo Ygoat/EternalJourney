@@ -184,3 +184,4 @@ public partial class Sample : ISample, Node2D
 | ステートロジック | すてーとろじっく | オブジェクトの状態におうじて異なるふるまいをさせる |
 | 依存関係/依存性 | いぞんかんけい/いぞんせい | Provide()メソッド/[Dependency] 属性で<br>注入/取得されるオブジェクト|
 |  |  |  |
+|  |  |  |
