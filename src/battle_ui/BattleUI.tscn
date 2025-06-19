@@ -1,0 +1,49 @@
+[gd_scene load_steps=2 format=3 uid="uid://xb0mx0074pvs"]
+
+[ext_resource type="PackedScene" uid="uid://bs5x55xlyif41" path="res://src/skill_button/SkillButton.tscn" id="1_xs630"]
+
+[node name="BattleUI" type="CanvasLayer"]
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 50
+alignment = 1
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="SkillButton" parent="MarginContainer/HBoxContainer/VBoxContainer" instance=ExtResource("1_xs630")]
+layout_mode = 2
+
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="SkillButton" parent="MarginContainer/HBoxContainer/VBoxContainer2" instance=ExtResource("1_xs630")]
+layout_mode = 2
+
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="SkillButton" parent="MarginContainer/HBoxContainer/VBoxContainer3" instance=ExtResource("1_xs630")]
+layout_mode = 2
+
+[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="SkillButton" parent="MarginContainer/HBoxContainer/VBoxContainer4" instance=ExtResource("1_xs630")]
+layout_mode = 2

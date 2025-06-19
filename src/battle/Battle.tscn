@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://s6bxnlpb677r"]
+[gd_scene load_steps=5 format=3 uid="uid://s6bxnlpb677r"]
 
 [ext_resource type="PackedScene" uid="uid://brbkk7msm1p13" path="res://src/ship/Ship.tscn" id="1_md3ja"]
 [ext_resource type="Script" path="res://src/battle/Battle.cs" id="1_u2sv4"]
 [ext_resource type="PackedScene" uid="uid://gn6847olc4gf" path="res://src/enemy_spawner/EnemySpawner.tscn" id="2_sa8tj"]
+[ext_resource type="PackedScene" uid="uid://xb0mx0074pvs" path="res://src/battle_ui/BattleUI.tscn" id="4_tif3r"]
 
 [node name="Battle" type="Node2D"]
 script = ExtResource("1_u2sv4")
@@ -11,3 +12,5 @@ script = ExtResource("1_u2sv4")
 position = Vector2(360, 640)
 
 [node name="EnemySpawner" parent="." instance=ExtResource("2_sa8tj")]
+
+[node name="BattleUI" parent="." instance=ExtResource("4_tif3r")]
