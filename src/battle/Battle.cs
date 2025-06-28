@@ -6,7 +6,6 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using Godot;
-
 /// <summary>
 /// バトルインターフェース
 /// </summary>

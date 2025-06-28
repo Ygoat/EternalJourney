@@ -1,11 +1,8 @@
 namespace EternalJourney.Battle.Domain;
 
 using System;
-using System.Reflection;
 using Chickensoft.Collections;
 using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.Common.StatusEffect;
-using EternalJourney.Common.Traits;
 using EternalJourney.Enemy.Abstract.Base;
 
 /// <summary>
@@ -17,6 +14,16 @@ public interface IBattleRepo : IDisposable
     /// 毒ダメージ
     /// </summary>
     public float PoisonDamage { get; set; }
+
+    /// <summary>
+    /// スコア
+    /// </summary>
+    public IAutoProp<int> Score { get; }
+
+    /// <summary>
+    /// エネミー撃破数
+    /// </summary>
+    public IAutoProp<int> NumEnemyDestroyed { get; }
 
     /// <summary>
     /// 弾丸がヒットした際に呼び出されるイベント
@@ -37,6 +44,16 @@ public interface IBattleRepo : IDisposable
     /// 弾丸が破壊された際に呼び出されるイベント
     /// </summary>
     public event Action<IBaseBullet> BulletDestroyed;
+
+    /// <summary>
+    /// スコアカウントアップ
+    /// </summary>
+    public void ScoreCountUp(int score);
+
+    /// <summary>
+    /// エネミー撃破数カウントアップ
+    /// </summary>
+    public void NumEnemyDestroyedCountUp();
 
     /// <summary>
     /// 敵が倒されたことをバトルに通知する
@@ -88,13 +105,19 @@ public class BattleRepo : IBattleRepo
     public float PoisonDamage { get; set; } = 2.5f;
 
     /// <summary>
-    /// <inheritdoc/>
+    /// スコア
     /// </summary>
-    public IAutoProp<int> NumEnemyDestroyed => _numEnemyDestroyed;
+    public IAutoProp<int> Score => _score;
+
+
+    private readonly AutoProp<int> _score;
+
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    public IAutoProp<int> NumEnemyDestroyed => _numEnemyDestroyed;
+
     private readonly AutoProp<int> _numEnemyDestroyed;
 
     /// <summary>
@@ -125,6 +148,7 @@ public class BattleRepo : IBattleRepo
     public BattleRepo()
     {
         _numEnemyDestroyed = new AutoProp<int>(0);
+        _score = new AutoProp<int>(0);
     }
 
     /// <summary>
@@ -132,10 +156,28 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     /// <param name="numEnemyDestroyed"></param>
     internal BattleRepo(
-      AutoProp<int> numEnemyDestroyed
+      AutoProp<int> numEnemyDestroyed,
+      AutoProp<int> score
     )
     {
         _numEnemyDestroyed = numEnemyDestroyed;
+        _score = score;
+    }
+
+    /// <summary>
+    /// <inheritdoc>
+    /// </summary>
+    public void ScoreCountUp(int score)
+    {
+        _score.OnNext(_score.Value + score);
+    }
+
+    /// <summary>
+    /// <inheritdoc>
+    /// </summary>
+    public void NumEnemyDestroyedCountUp()
+    {
+        _numEnemyDestroyed.OnNext(_numEnemyDestroyed.Value + 1);
     }
 
     /// <summary>
