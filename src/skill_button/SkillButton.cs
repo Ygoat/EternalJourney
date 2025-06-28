@@ -3,6 +3,7 @@ namespace EternalJourney.SukillButton;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.StatusUpSkill;
 using Godot;
 
 public interface ISkillButton : IControl
@@ -32,12 +33,19 @@ public partial class SkillButton : Control, ISkillButton
     [Node]
     public IControl Control { get; set; } = default!;
 
+    public StatusUpSkill StatusUpSkill { get; set; } = default!;
+
+    public void Initialize()
+    {
+    }
+
     public void OnReady()
     {
     }
 
     public void Setup()
     {
+        StatusUpSkill = new StatusUpSkill();
     }
 
     public void OnResolved()
@@ -46,6 +54,7 @@ public partial class SkillButton : Control, ISkillButton
         Timer.OneShot = true;
         Timer.WaitTime = 5;
         Timer.Timeout += OnTimerTimeout;
+        AddChild(StatusUpSkill);
     }
 
     public void OnPhysicsProcess(double delta)
@@ -62,6 +71,7 @@ public partial class SkillButton : Control, ISkillButton
         Control.Show();
         CooldownLabel.Text = Timer.TimeLeft.ToString();
         SetPhysicsProcess(true);
+        StatusUpSkill.Apply();
     }
 
     public void OnTimerTimeout()
