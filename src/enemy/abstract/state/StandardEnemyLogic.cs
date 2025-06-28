@@ -159,6 +159,11 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
                 {
                     // 破壊を出力する
                     Output(new Output.Destroyed());
+
+                    // スコアをカウントアップさせる
+                    IBattleRepo battleRepo = Get<IBattleRepo>();
+                    battleRepo.ScoreCountUp(10);
+
                     // スポーン待機に遷移する
                     return To<SpawnWait>();
                 }
