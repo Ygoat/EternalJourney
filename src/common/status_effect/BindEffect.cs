@@ -67,16 +67,15 @@ public partial class BindEffect : StatusEffect, IBindEffect
     public void OnResolved()
     {
         AddChild(BindTimer);
-        BindTimer.WaitTime = BindDuration;
         BindTimer.Timeout += OnBindTimerTimeout;
 
         BindEffectBinding
             .When<BindEffectLogic.State.Active>(state =>
             {
                 // バインド状態になったらタイマー開始
-                BindTimer.WaitTime = state.BindDuration;
+                BindTimer.WaitTime = state.RemainTime;
                 BindTimer.Start();
-                EmitSignal(SignalName.Binded, state.BindDuration);
+                EmitSignal(SignalName.Binded, state.RemainTime);
             })
             .When<BindEffectLogic.State.InActive>(state =>
             {
