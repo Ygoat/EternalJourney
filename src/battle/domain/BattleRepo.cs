@@ -46,6 +46,11 @@ public interface IBattleRepo : IDisposable
     public event Action<IBaseBullet> BulletDestroyed;
 
     /// <summary>
+    /// 弾丸ステータス上昇イベント
+    /// </summary>
+    public event Action<IBaseBullet> BulletStatusUp;
+
+    /// <summary>
     /// スコアカウントアップ
     /// </summary>
     public void ScoreCountUp(int score);
@@ -140,6 +145,11 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public event Action<IBaseBullet>? BulletDestroyed;
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action<IBaseBullet> BulletStatusUp;
+
     private bool _disposedValue;
 
     /// <summary>
@@ -226,6 +236,16 @@ public class BattleRepo : IBattleRepo
         return curDurability -= damage;
     }
 
+    /// <summary>
+    /// 弾丸ステータスアップシグナル発信
+    /// </summary>
+    /// <param name="bullet"></param>
+    public void EmitStatusUpSignal(IBaseBullet bullet)
+    {
+        BulletStatusUp.Invoke(bullet);
+    }
+
+
     #region Internals
 
     protected void Dispose(bool disposing)
@@ -248,7 +268,6 @@ public class BattleRepo : IBattleRepo
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-
 
     #endregion Internals
 }
