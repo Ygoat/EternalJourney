@@ -1,8 +1,8 @@
 namespace EternalJourney.Common.StatusEffect.State;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
-using EternalJourney.Battle.Domain;
 
 /// <summary>
 /// バインド効果ロジックインターフェース
@@ -15,6 +15,10 @@ public interface IBindEffectLogic : ILogicBlock<BindEffectLogic.State>;
 [Meta, LogicBlock(typeof(State), Diagram = true)]
 public partial class BindEffectLogic : LogicBlock<BindEffectLogic.State>, IBindEffectLogic
 {
+    /// <summary>
+    /// 初期状態
+    /// </summary>
+    /// <returns></returns>
     public override Transition GetInitialState() => To<State.InActive>();
 
     /// <summary>
@@ -23,7 +27,7 @@ public partial class BindEffectLogic : LogicBlock<BindEffectLogic.State>, IBindE
     public static class Input
     {
         /// <summary>
-        /// 効果適用（持続時間付き）
+        /// 効果適用
         /// </summary>
         public readonly record struct Apply(float Duration);
 
@@ -39,12 +43,7 @@ public partial class BindEffectLogic : LogicBlock<BindEffectLogic.State>, IBindE
     public static class Output
     {
         /// <summary>
-        /// バインド発動
-        /// </summary>
-        public readonly record struct Binded(float Duration);
-
-        /// <summary>
-        /// バインド解除
+        /// 解除
         /// </summary>
         public readonly record struct Released;
     }
@@ -59,41 +58,22 @@ public partial class BindEffectLogic : LogicBlock<BindEffectLogic.State>, IBindE
         /// </summary>
         public record InActive : State, IGet<Input.Apply>
         {
-            public Transition On(in Input.Apply input)
+            public InActive()
             {
-                Output(new Output.Binded(input.Duration));
-                return To<Active>(input.Duration);
             }
+            public Transition On(in Input.Apply input) => To<Active>();
         }
 
         /// <summary>
         /// 適用
         /// </summary>
-        public record Active(float RemainTime) : State, IGet<Input.Remove>, IGet<Input.Apply>, ITickable
+        public record Active(float RemainTime) : State, IGet<Input.Remove>, IGet<Input.Apply>
         {
-            public Transition On(in Input.Apply input)
-            {
-                // 再適用時はタイマーリセット
-                Output(new Output.Binded(input.Duration));
-                return To<Active>(input.Duration);
-            }
+            // 再適用時は持続時間をリセット
+            public Transition On(in Input.Apply input) => To<Active>();
 
-            public Transition On(in Input.Remove input)
-            {
-                Output(new Output.Released());
-                return To<InActive>();
-            }
-
-            public Transition OnTick(float delta)
-            {
-                float next = RemainTime - delta;
-                if (next <= 0)
-                {
-                    Output(new Output.Released());
-                    return To<InActive>();
-                }
-                return To<Active>(next);
-            }
+            // 解除時は未適用へ
+            public Transition On(in Input.Remove input) => To<InActive>();
         }
     }
 }
