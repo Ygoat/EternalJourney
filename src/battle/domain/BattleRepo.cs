@@ -4,6 +4,8 @@ using System;
 using Chickensoft.Collections;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Enemy.Abstract.Base;
+using EternalJourney.Weapon.Abstract.Base;
+
 
 /// <summary>
 /// バトルレポジトリクラス
@@ -49,6 +51,11 @@ public interface IBattleRepo : IDisposable
     /// 弾丸ステータス上昇イベント
     /// </summary>
     public event Action<IBaseBullet> BulletStatusUp;
+
+    /// <summary>
+    /// 武器ステータスアップ時のイベント
+    /// </summary>
+    public event Action<IBaseWeapon> WeaponStatusUp;
 
     /// <summary>
     /// スコアカウントアップ
@@ -150,6 +157,11 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public event Action<IBaseBullet> BulletStatusUp;
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action<IBaseWeapon> WeaponStatusUp;
+
     private bool _disposedValue;
 
     /// <summary>
@@ -240,11 +252,19 @@ public class BattleRepo : IBattleRepo
     /// 弾丸ステータスアップシグナル発信
     /// </summary>
     /// <param name="bullet"></param>
-    public void EmitStatusUpSignal(IBaseBullet bullet)
+    public void EmitBulletStatusUpSignal(IBaseBullet bullet)
     {
         BulletStatusUp.Invoke(bullet);
     }
 
+    /// <summary>
+    /// 武器ステータスアップシグナル発信
+    /// </summary>
+    /// <param name="bullet"></param>
+    public void EmitWeaponStatusUpSignal(IBaseWeapon weapon)
+    {
+        WeaponStatusUp.Invoke(weapon);
+    }
 
     #region Internals
 
