@@ -54,7 +54,8 @@ public partial class BindEffect : StatusEffect, IBindEffect
 
     public void Setup()
     {
-        BindTimer = new Timer();
+        var timer = new Timer();
+        BindTimer = timer;
         BindTimer.OneShot = true;
 
         BindEffectLogic = new BindEffectLogic();

@@ -3,7 +3,6 @@ namespace EternalJourney.Enemy.Abstract.Base.State;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
-using EternalJourney.Common.Traits;
 
 /// <summary>
 /// エネミーロジックインターフェース

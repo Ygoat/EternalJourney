@@ -23,9 +23,12 @@ public partial class StatusEffectReceiverManager : Node, IStatusEffectReceiverMa
 
     public PoisonEffect PoisonEffect { get; private set; } = default!;
 
+    public BindEffect BindEffect { get; private set; } = default!;
+
     public virtual void Setup()
     {
         PoisonEffect = new PoisonEffect();
+        BindEffect = new BindEffect();
     }
 
     public virtual void OnResolved()

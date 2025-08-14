@@ -80,6 +80,10 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy
     {
         AddChild(StatusEffectReceiverManager);
         StatusEffectReceiverManager.PoisonEffect.Damaged += OnPoisonDamaged;
+
+        StatusEffectReceiverManager.BindEffect.Binded += OnBinded;
+        StatusEffectReceiverManager.BindEffect.Released += OnBindReleased;
+
         BaseEnemyBinding
             .Handle((in BaseEnemyLogic.Output.ReduceDurability output) =>
             {
@@ -109,5 +113,15 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy
     private void OnPoisonDamaged(float damage)
     {
         BaseEnemyLogic.Input(new BaseEnemyLogic.Input.PoisonDamage(damage));
+    }
+
+    private void OnBinded(float duration)
+    {
+
+    }
+
+    private void OnBindReleased()
+    {
+
     }
 }
