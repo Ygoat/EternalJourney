@@ -1,0 +1,8 @@
+@startuml BattleUILogic
+state "BattleUILogic State" as EternalJourney_BattleUI_State_BattleUILogic_State {
+  state "BattleUILogic" as EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic
+}
+EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic : OnScoreCountUp() → ScoreChanged
+
+[*] --> EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic
+@enduml

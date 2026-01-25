@@ -6,6 +6,7 @@ using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Common.BaseEntity;
 using EternalJourney.Common.StatusEffect;
+using EternalJourney.Cores.Pooling;
 using EternalJourney.Enemy.Abstract.Base.State;
 using Godot;
 
@@ -36,7 +37,7 @@ public interface IBaseEnemy : IBaseEntity, IStatusEffectTarget
 /// ベース弾丸クラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class BaseEnemy : BaseEntity, IBaseEnemy
+public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -109,5 +110,38 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy
     private void OnPoisonDamaged(float damage)
     {
         BaseEnemyLogic.Input(new BaseEnemyLogic.Input.PoisonDamage(damage));
+    }
+
+    /// <summary>
+    /// プールから取得された時のコールバック（IPoolable実装）
+    /// </summary>
+    public virtual void OnAcquired()
+    {
+        // 耐久値を最大値にリセット
+        if (Status != null)
+        {
+            Status.CurrentDur = Status.MaxDur;
+        }
+        // 表示状態を有効化
+        Visible = true;
+        // ロジックのリセット（実装されている場合）
+        if (BaseEnemyLogic != null)
+        {
+            // ステートマシンのリセット処理
+        }
+    }
+
+    /// <summary>
+    /// プールに返却される時のコールバック（IPoolable実装）
+    /// </summary>
+    public virtual void OnReleased()
+    {
+        // 表示状態を無効化
+        Visible = false;
+        // 状態異常をクリア
+        if (StatusEffectReceiverManager != null)
+        {
+            // 状態異常のクリーンアップ処理
+        }
     }
 }

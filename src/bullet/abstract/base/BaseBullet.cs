@@ -5,6 +5,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseEntity;
 using EternalJourney.Common.StatusEffect;
+using EternalJourney.Cores.Pooling;
 using Godot;
 
 /// <summary>
@@ -39,7 +40,7 @@ public interface IBaseBullet : IBaseEntity
 /// ベース弾丸クラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class BaseBullet : BaseEntity, IBaseBullet
+public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -86,5 +87,33 @@ public partial class BaseBullet : BaseEntity, IBaseBullet
         GetParent().RemoveChild(this);
         // Removedシグナル出力
         EmitSignal(SignalName.Removed, this);
+    }
+
+    /// <summary>
+    /// プールから取得された時のコールバック（IPoolable実装）
+    /// </summary>
+    public virtual void OnAcquired()
+    {
+        // 耐久値を最大値にリセット
+        if (Status != null)
+        {
+            Status.CurrentDur = Status.MaxDur;
+        }
+        // 表示状態を有効化
+        Visible = true;
+    }
+
+    /// <summary>
+    /// プールに返却される時のコールバック（IPoolable実装）
+    /// </summary>
+    public virtual void OnReleased()
+    {
+        // 表示状態を無効化
+        Visible = false;
+        // 状態異常をクリア
+        if (StatusEffectServerManager != null)
+        {
+            // 状態異常のクリーンアップ処理
+        }
     }
 }
