@@ -5,7 +5,7 @@ using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Bullet.Abstract;
 using EternalJourney.Radar;
 using EternalJourney.Weapon.Abstract.Base;
 using EternalJourney.Weapon.Abstract.State;
@@ -60,7 +60,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// 弾丸ファクトリ
     /// </summary>
     [Node]
-    public IBaseBulletFactory StandardBulletFactory { get; set; } = default!;
+    public IStandardBulletFactory StandardBulletFactory { get; set; } = default!;
 
     /// <summary>
     /// <inheritdoc/>

@@ -1,28 +1,29 @@
 namespace EternalJourney.Bullet.Abstract;
 
-using System.Collections.Generic;
-using System.Linq;
 using Chickensoft.AutoInject;
-using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.BulletFactory.State;
-using EternalJourney.Cores.Utils;
+using EternalJourney.Common.BaseFactory;
 using Godot;
 
 /// <summary>
 /// スタンダード弾丸ファクトリインターフェース
 /// </summary>
-public interface IStandardBulletFactory : IBaseBulletFactory
+public interface IStandardBulletFactory
 {
-
+    /// <summary>
+    /// 弾丸生成
+    /// </summary>
+    public void GenerateBullet();
 }
 
 /// <summary>
-/// スタンダード弾丸ファクトリクラス
+/// スタンダード弾丸ファクトリクラス（BaseFactoryを使用したリファクタリング版）
+/// 重複コードを削減し、Godotエコシステムを活用した実装
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class StandardBulletFactory : BaseBulletFactory, IStandardBulletFactory
+public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulletFactory
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -44,124 +45,89 @@ public partial class StandardBulletFactory : BaseBulletFactory, IStandardBulletF
     /// </summary>
     [Export]
     public Resource BulletScene { get; set; } = default!;
-
-    /// <summary>
-    /// 待機時間
-    /// </summary>
-    public double WaitTime { get; set; } = 0.1;
-
-    /// <summary>
-    ///　弾丸配列
-    /// </summary>
-    public Node2D[] Bullets { get; set; } = new Node2D[100];
-
-    /// <summary>
-    /// 弾丸キュー
-    /// </summary>
-    public Queue<Node2D> BulletsQueue { get; set; } = new Queue<Node2D>();
     #endregion Exports
 
-    #region Nodes
     /// <summary>
-    /// タイマーノード
+    /// シーンパスの取得（BaseFactory抽象メソッドの実装）
     /// </summary>
-    [Node]
-    public ITimer Timer { get; set; } = default!;
-    #endregion Nodes
-
-    #region Dependencies
-    /// <summary>
-    /// インスタンス化部品
-    /// </summary>
-    [Dependency]
-    public IInstantiator Instantiator => this.DependOn<IInstantiator>(() => new Instantiator(GetTree()));
-    #endregion Dependencies
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public void Initialize()
+    /// <returns>弾丸シーンのパス</returns>
+    protected override string GetScenePath()
     {
-        // 依存性提供
-        this.Provide();
+        return BulletScene?.ResourcePath ?? string.Empty;
     }
 
     /// <summary>
-    /// <inheritdoc/>
+    /// プール可能なオブジェクトのセットアップ
+    /// 弾丸がプールに返却される際のイベントを設定
     /// </summary>
-    public void Setup()
+    /// <param name="obj">セットアップする弾丸オブジェクト</param>
+    protected override void SetupPoolableObject(Node2D obj)
     {
-        // 弾丸ロジックインスタンス化
+        // Removedイベントをプールへの返却処理に接続
+        if (obj is IBaseBullet bullet)
+        {
+            bullet.Removed += OnRemoved;
+        }
+    }
+
+    /// <summary>
+    /// セットアップ処理のオーバーライド
+    /// ロジックの初期化とプールの生成を行う
+    /// </summary>
+    public override void Setup()
+    {
+        // 基底クラスの初期化を呼び出す
+        base.Initialize();
+
+        // ロジックの初期化
         StandardBulletFactoryLogic = new StandardBulletFactoryLogic();
-        // 弾丸ロジックバインド
         BulletFactoryBinding = StandardBulletFactoryLogic.Bind();
 
-        // 弾丸配列生成
-        Bullets = Bullets.Select(e =>
-        {
-            // 弾丸ノードインスタンス化&ロード
-            e = Instantiator.LoadAndInstantiate<Node2D>(BulletScene.ResourcePath);
-            // イベントファンクション付与
-            if (e is IBaseBullet iBullet)
-            {
-                iBullet.Removed += OnRemoved;
-            }
-            // キュー追加
-            BulletsQueue.Enqueue(e);
-            return e;
-        }).ToArray();
+        // 基底クラスのセットアップ（プール生成）
+        base.Setup();
     }
 
     /// <summary>
-    /// <inheritdoc/>
+    /// 解決後処理のオーバーライド
+    /// ロジックの出力ハンドラとタイマーの設定
     /// </summary>
-    public void OnResolved()
+    public override void OnResolved()
     {
+        // ロジック出力ハンドラの設定
         BulletFactoryBinding
             // Generated出力時
             .Handle((in StandardBulletFactoryLogic.Output.Generated _) =>
             {
-                // 弾丸生成
-                CallDeferred("BulletEmit");
+                // 弾丸生成（遅延実行）
+                CallDeferred(nameof(BulletEmit));
             })
             // Cooling出力時
             .Handle((in StandardBulletFactoryLogic.Output.Cooling _) =>
             {
-                // タイマーセット
-                SetTimer();
+                // タイマー開始
+                StartTimer();
             });
-        // タイマーワンショット設定
-        Timer.OneShot = true;
-        // 待機時間設定
-        Timer.SetWaitTime(WaitTime);
-        // タイムアウトイベント設定
-        Timer.Timeout += OnTimeout;
-        // 弾丸ロジック初期状態セット
+
+        // 基底クラスの解決後処理（タイマー設定）
+        base.OnResolved();
+
+        // ロジックの開始
         StandardBulletFactoryLogic.Start();
     }
 
     /// <summary>
-    /// タイムアウトイベント
+    /// タイムアウトイベント（BaseFactoryのオーバーライド）
     /// </summary>
-    public void OnTimeout()
+    protected override void OnTimeout()
     {
-        // CoolDownCompleteを入力
+        // クールダウン完了を入力
         StandardBulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.CoolDownComplete());
     }
 
     /// <summary>
-    /// タイマーセット
+    /// 弾丸生成（公開API）
     /// </summary>
-    public void SetTimer()
-    {
-        // クールダウンタイマー開始
-        Timer.Start();
-    }
-
-    /// <summary>
-    /// 弾丸生成
-    /// </summary>
-    public override void GenerateBullet()
+    public void GenerateBullet()
     {
         // Fire入力
         StandardBulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.Fire());
@@ -169,29 +135,36 @@ public partial class StandardBulletFactory : BaseBulletFactory, IStandardBulletF
 
     /// <summary>
     /// 弾丸射出
+    /// プールから弾丸を取得してシーンツリーに追加し、射出処理を実行
     /// </summary>
-    public void BulletEmit()
+    private void BulletEmit()
     {
-        // 弾丸キュー取り出し
-        Node2D bullet = BulletsQueue.Dequeue();
-        // 弾丸ノードをノードツリーに追加
+        // プールから弾丸を取得
+        Node2D? bullet = AcquireFromPool();
+        if (bullet == null)
+            return;
+
+        // シーンツリーに追加
         AddChild(bullet);
+
         // 弾丸射出
         if (bullet is IBaseBullet iBullet)
         {
             iBullet.Emit(GlobalPosition, GlobalRotation);
         }
-        // StartCoolDown入力
+
+        // クールダウン開始
         StandardBulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.StartCoolDonw());
     }
 
     /// <summary>
-    /// Collapsedイベントファンクション
+    /// 弾丸除去イベントハンドラ
+    /// 弾丸がシーンから削除された際にプールに返却
     /// </summary>
-    /// <param name="bullet"></param>
-    public void OnRemoved(BaseBullet bullet)
+    /// <param name="bullet">除去された弾丸</param>
+    private void OnRemoved(BaseBullet bullet)
     {
-        // キューに追加
-        BulletsQueue.Enqueue(bullet);
+        // プールに返却
+        ReleaseToPool(bullet);
     }
 }
