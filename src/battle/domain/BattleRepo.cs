@@ -3,7 +3,7 @@ namespace EternalJourney.Battle.Domain;
 using System;
 using Chickensoft.Collections;
 using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.Enemy.Abstract.Base;
+using EternalJourney.Enemy.Base;
 
 /// <summary>
 /// バトルレポジトリクラス

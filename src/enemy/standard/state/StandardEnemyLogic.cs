@@ -1,11 +1,11 @@
-namespace EternalJourney.Enemy.Abstract.State;
+namespace EternalJourney.Enemy.Standard.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.Enemy.Abstract;
-using EternalJourney.Enemy.Abstract.Base;
+using EternalJourney.Enemy.Base;
+using EternalJourney.Enemy.Standard;
 using EternalJourney.Enemy.Strategies.Movement;
 using Godot;
 

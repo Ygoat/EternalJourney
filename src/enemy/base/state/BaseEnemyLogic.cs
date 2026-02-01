@@ -1,4 +1,4 @@
-namespace EternalJourney.Enemy.Abstract.Base.State;
+namespace EternalJourney.Enemy.Base.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;

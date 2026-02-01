@@ -1,4 +1,4 @@
-namespace EternalJourney.Enemy.Abstract.Base;
+namespace EternalJourney.Enemy.Base;
 
 using System;
 using Chickensoft.AutoInject;
@@ -7,7 +7,7 @@ using EternalJourney.Battle.Domain;
 using EternalJourney.Common.BaseEntity;
 using EternalJourney.Common.StatusEffect;
 using EternalJourney.Cores.Pooling;
-using EternalJourney.Enemy.Abstract.Base.State;
+using EternalJourney.Enemy.Base.State;
 using Godot;
 
 /// <summary>

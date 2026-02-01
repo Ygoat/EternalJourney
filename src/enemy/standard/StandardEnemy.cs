@@ -1,4 +1,4 @@
-namespace EternalJourney.Enemy.Abstract;
+namespace EternalJourney.Enemy.Standard;
 
 using Chickensoft.AutoInject;
 using Chickensoft.Collections;
@@ -9,8 +9,8 @@ using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Models.Enemy;
-using EternalJourney.Enemy.Abstract.Base;
-using EternalJourney.Enemy.Abstract.State;
+using EternalJourney.Enemy.Base;
+using EternalJourney.Enemy.Standard.State;
 using EternalJourney.Enemy.Strategies.Movement;
 using EternalJourney.Ship;
 using Godot;

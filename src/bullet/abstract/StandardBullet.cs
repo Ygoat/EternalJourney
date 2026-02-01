@@ -10,7 +10,7 @@ using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Common.StatusEffect;
 using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
-using EternalJourney.Enemy.Abstract.Base;
+using EternalJourney.Enemy.Base;
 using Godot;
 
 

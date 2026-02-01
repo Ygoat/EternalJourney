@@ -6,8 +6,8 @@ using EternalJourney.Common.BaseFactory;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Models.Enemy;
 using EternalJourney.Cores.Repositories;
-using EternalJourney.Enemy.Abstract;
-using EternalJourney.Enemy.Abstract.Base;
+using EternalJourney.Enemy.Base;
+using EternalJourney.Enemy.Standard;
 using Godot;
 
 /// <summary>
