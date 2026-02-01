@@ -4,7 +4,9 @@ using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Enemy.Abstract;
 using EternalJourney.Enemy.Abstract.Base;
+using EternalJourney.Enemy.Strategies.Movement;
 using Godot;
 
 
@@ -54,9 +56,17 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
         /// <summary>
         /// 物理処理
         /// </summary>
-        /// <param name="Direction"></param>
-        /// <param name="Speed"></param>
-        public readonly record struct PhysicsProcess(Vector2 Direction, float Speed);
+        /// <param name="Direction">方向</param>
+        /// <param name="Speed">速度</param>
+        /// <param name="ElapsedTime">経過時間</param>
+        /// <param name="MovementStrategy">移動戦略</param>
+        /// <param name="CurrentPosition">現在位置</param>
+        public readonly record struct PhysicsProcess(
+            Vector2 Direction,
+            float Speed,
+            float ElapsedTime,
+            IMovementStrategy MovementStrategy,
+            Vector2 CurrentPosition);
     }
 
     /// <summary>
@@ -126,8 +136,12 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
 
             public Transition On(in Input.PhysicsProcess input)
             {
-                // 位置を更新
-                Vector2 nextPositionDelta = input.Direction.Normalized() * input.Speed;
+                // 移動戦略を使用して位置を更新
+                Vector2 nextPositionDelta = input.MovementStrategy.CalculateMovement(
+                    input.CurrentPosition,
+                    input.Direction,
+                    input.Speed,
+                    input.ElapsedTime);
                 IStandardEnemy standardEnemy = Get<IStandardEnemy>();
                 Output(new Output.Move(nextPositionDelta));
                 UpdateColor(standardEnemy.Status.CurrentDur, standardEnemy.Status.MaxDur);
@@ -160,9 +174,10 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
                     // 破壊を出力する
                     Output(new Output.Destroyed());
 
-                    // スコアをカウントアップさせる
+                    // スコアをカウントアップさせる（JSONの設定値を使用）
                     IBattleRepo battleRepo = Get<IBattleRepo>();
-                    battleRepo.ScoreCountUp(10);
+                    IStandardEnemy standardEnemy = Get<IStandardEnemy>();
+                    battleRepo.ScoreCountUp(standardEnemy.ScoreValue);
 
                     // スポーン待機に遷移する
                     return To<SpawnWait>();

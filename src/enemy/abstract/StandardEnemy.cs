@@ -8,8 +8,10 @@ using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
+using EternalJourney.Cores.Models.Enemy;
 using EternalJourney.Enemy.Abstract.Base;
 using EternalJourney.Enemy.Abstract.State;
+using EternalJourney.Enemy.Strategies.Movement;
 using EternalJourney.Ship;
 using Godot;
 
@@ -18,6 +20,10 @@ using Godot;
 /// </summary>
 public interface IStandardEnemy : IBaseEnemy
 {
+    /// <summary>
+    /// スコア値
+    /// </summary>
+    int ScoreValue { get; }
 }
 
 /// <summary>
@@ -40,6 +46,26 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     public StandardEnemyLogic.IBinding StandardEnemyBinding { get; set; } = default!;
 
     [Dependency] public EntityTable<int> EntityTable => this.DependOn<EntityTable<int>>();
+
+    /// <summary>
+    /// エネミー設定
+    /// </summary>
+    private EnemyConfig? _config;
+
+    /// <summary>
+    /// 移動戦略
+    /// </summary>
+    private IMovementStrategy _movementStrategy = new LinearMovementStrategy();
+
+    /// <summary>
+    /// 経過時間
+    /// </summary>
+    private float _elapsedTime;
+
+    /// <summary>
+    /// スコア値
+    /// </summary>
+    public int ScoreValue { get; private set; } = 10;
     #endregion State
 
     #region Exports
@@ -140,13 +166,51 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     }
 
     /// <summary>
+    /// エネミー設定を適用
+    /// </summary>
+    /// <param name="config">エネミー設定</param>
+    public void Configure(EnemyConfig config)
+    {
+        _config = config;
+
+        // ステータスを設定から適用
+        Status = new Status
+        {
+            MaxDur = config.Status.MaxDur,
+            CurrentDur = config.Status.MaxDur,
+            Atk = config.Status.Atk,
+            Spd = config.Status.Spd,
+            Def = config.Status.Def,
+            Size = config.Status.Size
+        };
+
+        // スコア値を設定
+        ScoreValue = config.ScoreValue;
+
+        // 移動戦略を生成・初期化
+        _movementStrategy = MovementStrategyFactory.Create(config.Movement.Type);
+        _movementStrategy.Initialize(config.Movement, TargetPosition);
+
+        // 経過時間をリセット
+        _elapsedTime = 0f;
+    }
+
+    /// <summary>
     /// <inheritdoc/>
     /// </summary>
     /// <param name="delta"></param>
     public void OnPhysicsProcess(double delta)
     {
-        // PhysicsProcess入力
-        StandardEnemyLogic.Input(new StandardEnemyLogic.Input.PhysicsProcess(Direction, Status.Spd));
+        // 経過時間を更新
+        _elapsedTime += (float)delta;
+
+        // PhysicsProcess入力（移動戦略を使用）
+        StandardEnemyLogic.Input(new StandardEnemyLogic.Input.PhysicsProcess(
+            Direction,
+            Status.Spd,
+            _elapsedTime,
+            _movementStrategy,
+            GlobalPosition));
     }
 
     /// <summary>
@@ -210,5 +274,9 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         Status.CurrentDur = Status.MaxDur;
         // 状態異常解除
         StatusEffectReceiverManager.RemoveAll();
+        // 経過時間リセット
+        _elapsedTime = 0f;
+        // 移動戦略リセット
+        _movementStrategy.Reset();
     }
 }

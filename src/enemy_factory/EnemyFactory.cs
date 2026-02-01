@@ -4,6 +4,9 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Common.BaseFactory;
 using EternalJourney.Cores.Consts;
+using EternalJourney.Cores.Models.Enemy;
+using EternalJourney.Cores.Repositories;
+using EternalJourney.Enemy.Abstract;
 using EternalJourney.Enemy.Abstract.Base;
 using Godot;
 
@@ -12,7 +15,8 @@ using Godot;
 /// </summary>
 public interface IEnemyFactory
 {
-    public void SpawnEnemy();
+    void SpawnEnemy();
+    void SpawnEnemy(string enemyId);
 }
 
 /// <summary>
@@ -23,6 +27,16 @@ public interface IEnemyFactory
 public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
 {
     public override void _Notification(int what) => this.Notify(what);
+
+    /// <summary>
+    /// エネミー設定リーダー
+    /// </summary>
+    private readonly EnemyConfigReader _enemyConfigReader = new();
+
+    /// <summary>
+    /// 次にスポーンするエネミーID
+    /// </summary>
+    private string _pendingEnemyId = "normal_enemy";
 
     /// <summary>
     /// シーンパスの取得（BaseFactory抽象メソッドの実装）
@@ -63,9 +77,20 @@ public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
 
     /// <summary>
     /// エネミーをスポーン（公開API）
+    /// デフォルトのnormal_enemyをスポーン
     /// </summary>
     public void SpawnEnemy()
     {
+        SpawnEnemy("normal_enemy");
+    }
+
+    /// <summary>
+    /// 指定IDのエネミーをスポーン
+    /// </summary>
+    /// <param name="enemyId">エネミーID</param>
+    public void SpawnEnemy(string enemyId)
+    {
+        _pendingEnemyId = enemyId;
         RequestGenerate();
     }
 
@@ -89,6 +114,16 @@ public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
         if (enemy == null)
         {
             return;
+        }
+
+        // エネミー設定を取得（フォールバック: デフォルト設定）
+        EnemyConfig? config = _enemyConfigReader.GetById(_pendingEnemyId)
+            ?? _enemyConfigReader.GetById("normal_enemy");
+
+        // 設定を適用
+        if (enemy is StandardEnemy standardEnemy && config != null)
+        {
+            standardEnemy.Configure(config);
         }
 
         // シーンツリーに追加
