@@ -5,7 +5,6 @@ using Chickensoft.Introspection;
 using EternalJourney.Common.BaseFactory;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Enemy.Abstract.Base;
-using EternalJourney.EnemyFactory.State;
 using Godot;
 
 /// <summary>
@@ -24,18 +23,6 @@ public interface IEnemyFactory
 public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
 {
     public override void _Notification(int what) => this.Notify(what);
-
-    #region State
-    /// <summary>
-    /// エネミーファクトリロジック
-    /// </summary>
-    public EnemyFactoryLogic EnemyFactoryLogic { get; set; } = default!;
-
-    /// <summary>
-    /// エネミーファクトリバインド
-    /// </summary>
-    public EnemyFactoryLogic.IBinding EnemyFactoryBinding { get; set; } = default!;
-    #endregion State
 
     /// <summary>
     /// シーンパスの取得（BaseFactory抽象メソッドの実装）
@@ -61,61 +48,17 @@ public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
 
     /// <summary>
     /// セットアップ処理のオーバーライド
-    /// ロジックの初期化とプールの生成を行う
     /// </summary>
     public override void Setup()
     {
         // プールサイズの設定（エネミーは200個）
         PoolSize = 200;
-
+        WaitTime = 0.2f;
         // 基底クラスの初期化を呼び出す
         base.Initialize();
 
-        // ロジックの初期化
-        EnemyFactoryLogic = new EnemyFactoryLogic();
-        EnemyFactoryBinding = EnemyFactoryLogic.Bind();
-
         // 基底クラスのセットアップ（プール生成）
         base.Setup();
-    }
-
-    /// <summary>
-    /// 解決後処理のオーバーライド
-    /// ロジックの出力ハンドラとタイマーの設定
-    /// </summary>
-    public override void OnResolved()
-    {
-        // ロジック出力ハンドラの設定
-        EnemyFactoryBinding
-            // ReadyComplete出力時
-
-            .Handle((in EnemyFactoryLogic.Output.ReadyComplete _) =>
-            {
-                // エネミー生成（遅延実行）
-                CallDeferred(nameof(DequeueAndSpawn));
-            })
-            // StartCoolDown出力時
-
-            .Handle((in EnemyFactoryLogic.Output.StartCoolDown _) =>
-            {
-                // タイマー開始
-                StartTimer();
-            });
-
-        // 基底クラスの解決後処理（タイマー設定）
-        base.OnResolved();
-
-        // ロジックの開始
-        EnemyFactoryLogic.Start();
-    }
-
-    /// <summary>
-    /// タイムアウトイベント（BaseFactoryのオーバーライド）
-    /// </summary>
-    protected override void OnTimeout()
-    {
-        // クールダウン完了を入力
-        EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.CoolDownComplete());
     }
 
     /// <summary>
@@ -123,8 +66,16 @@ public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
     /// </summary>
     public void SpawnEnemy()
     {
-        // Spawn入力
-        EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.Spawn());
+        RequestGenerate();
+    }
+
+    /// <summary>
+    /// 生成完了時の処理（BaseFactoryのオーバーライド）
+    /// </summary>
+    protected override void OnGenerated()
+    {
+        // エネミー生成（遅延実行）
+        CallDeferred(nameof(DequeueAndSpawn));
     }
 
     /// <summary>
@@ -133,9 +84,6 @@ public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
     /// </summary>
     private void DequeueAndSpawn()
     {
-        // Spawn入力
-        EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.Spawn());
-
         // プールからエネミーを取得
         BaseEnemy? enemy = AcquireFromPool();
         if (enemy == null)
@@ -151,6 +99,9 @@ public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
         {
             iEnemy.Spawn(GlobalPosition, GlobalRotation);
         }
+
+        // クールダウン開始
+        StartCoolDown();
     }
 
     /// <summary>

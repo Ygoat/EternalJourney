@@ -2,6 +2,7 @@ namespace EternalJourney.Common.BaseFactory;
 
 using System.Collections.Generic;
 using System.Linq;
+using EternalJourney.Common.BaseFactory.State;
 using EternalJourney.Cores.Pooling;
 using EternalJourney.Cores.Utils;
 using Godot;
@@ -77,6 +78,18 @@ public abstract partial class BaseFactory<T> : Node2D, IBaseFactory<T> where T :
     protected Timer Timer { get; set; } = default!;
     #endregion Nodes
 
+    #region State
+    /// <summary>
+    /// ファクトリロジック
+    /// </summary>
+    protected BaseFactoryLogic FactoryLogic { get; set; } = default!;
+
+    /// <summary>
+    /// ファクトリバインド
+    /// </summary>
+    protected BaseFactoryLogic.IBinding FactoryBinding { get; set; } = default!;
+    #endregion State
+
     #region Dependencies
     /// <summary>
     /// インスタンス化ユーティリティ（シーンのロードと生成を担当）
@@ -94,6 +107,10 @@ public abstract partial class BaseFactory<T> : Node2D, IBaseFactory<T> where T :
 
         // Timerノードの取得
         Timer = GetNode<Timer>("Timer");
+
+        // ロジックの初期化
+        FactoryLogic = new BaseFactoryLogic();
+        FactoryBinding = FactoryLogic.Bind();
     }
 
     /// <summary>
@@ -133,6 +150,20 @@ public abstract partial class BaseFactory<T> : Node2D, IBaseFactory<T> where T :
         Timer.OneShot = true;
         Timer.WaitTime = WaitTime;
         Timer.Timeout += OnTimeout;
+
+        // ロジック出力ハンドラの設定
+        FactoryBinding
+            .Handle((in BaseFactoryLogic.Output.Generated _) =>
+            {
+                OnGenerated();
+            })
+            .Handle((in BaseFactoryLogic.Output.Cooling _) =>
+            {
+                StartTimer();
+            });
+
+        // ロジックの開始
+        FactoryLogic.Start();
     }
 
     /// <summary>
@@ -194,11 +225,37 @@ public abstract partial class BaseFactory<T> : Node2D, IBaseFactory<T> where T :
 
     /// <summary>
     /// タイマータイムアウトイベント
-    /// 子クラスでオーバーライドして、クールダウン完了時の処理を実装してください
+    /// クールダウン完了をロジックに通知
     /// </summary>
     protected virtual void OnTimeout()
     {
+        FactoryLogic.Input(new BaseFactoryLogic.Input.CoolDownComplete());
+    }
+
+    /// <summary>
+    /// 生成リクエスト
+    /// 子クラスから呼び出して生成を開始
+    /// </summary>
+    protected virtual void RequestGenerate()
+    {
+        FactoryLogic.Input(new BaseFactoryLogic.Input.Generate());
+    }
+
+    /// <summary>
+    /// 生成完了時の処理
+    /// 子クラスでオーバーライドして、実際の生成処理を実装してください
+    /// </summary>
+    protected virtual void OnGenerated()
+    {
         // 子クラスで実装
+    }
+
+    /// <summary>
+    /// クールダウン開始をロジックに通知
+    /// </summary>
+    protected virtual void StartCoolDown()
+    {
+        FactoryLogic.Input(new BaseFactoryLogic.Input.StartCoolDown());
     }
 
     /// <summary>

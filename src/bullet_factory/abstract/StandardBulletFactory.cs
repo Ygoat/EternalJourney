@@ -3,7 +3,6 @@ namespace EternalJourney.Bullet.Abstract;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.BulletFactory.State;
 using EternalJourney.Common.BaseFactory;
 using Godot;
 
@@ -26,18 +25,6 @@ public interface IStandardBulletFactory
 public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulletFactory
 {
     public override void _Notification(int what) => this.Notify(what);
-
-    #region State
-    /// <summary>
-    /// 弾丸ファクトリロジック
-    /// </summary>
-    public StandardBulletFactoryLogic StandardBulletFactoryLogic { get; set; } = default!;
-
-    /// <summary>
-    /// 弾丸ファクトリバインド
-    /// </summary>
-    public StandardBulletFactoryLogic.IBinding BulletFactoryBinding { get; set; } = default!;
-    #endregion State
 
     #region Exports
     /// <summary>
@@ -72,56 +59,14 @@ public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulle
 
     /// <summary>
     /// セットアップ処理のオーバーライド
-    /// ロジックの初期化とプールの生成を行う
     /// </summary>
     public override void Setup()
     {
         // 基底クラスの初期化を呼び出す
         base.Initialize();
 
-        // ロジックの初期化
-        StandardBulletFactoryLogic = new StandardBulletFactoryLogic();
-        BulletFactoryBinding = StandardBulletFactoryLogic.Bind();
-
         // 基底クラスのセットアップ（プール生成）
         base.Setup();
-    }
-
-    /// <summary>
-    /// 解決後処理のオーバーライド
-    /// ロジックの出力ハンドラとタイマーの設定
-    /// </summary>
-    public override void OnResolved()
-    {
-        // ロジック出力ハンドラの設定
-        BulletFactoryBinding
-            // Generated出力時
-            .Handle((in StandardBulletFactoryLogic.Output.Generated _) =>
-            {
-                // 弾丸生成（遅延実行）
-                CallDeferred(nameof(BulletEmit));
-            })
-            // Cooling出力時
-            .Handle((in StandardBulletFactoryLogic.Output.Cooling _) =>
-            {
-                // タイマー開始
-                StartTimer();
-            });
-
-        // 基底クラスの解決後処理（タイマー設定）
-        base.OnResolved();
-
-        // ロジックの開始
-        StandardBulletFactoryLogic.Start();
-    }
-
-    /// <summary>
-    /// タイムアウトイベント（BaseFactoryのオーバーライド）
-    /// </summary>
-    protected override void OnTimeout()
-    {
-        // クールダウン完了を入力
-        StandardBulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.CoolDownComplete());
     }
 
     /// <summary>
@@ -129,8 +74,16 @@ public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulle
     /// </summary>
     public void GenerateBullet()
     {
-        // Fire入力
-        StandardBulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.Fire());
+        RequestGenerate();
+    }
+
+    /// <summary>
+    /// 生成完了時の処理（BaseFactoryのオーバーライド）
+    /// </summary>
+    protected override void OnGenerated()
+    {
+        // 弾丸生成（遅延実行）
+        CallDeferred(nameof(BulletEmit));
     }
 
     /// <summary>
@@ -154,7 +107,7 @@ public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulle
         }
 
         // クールダウン開始
-        StandardBulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.StartCoolDonw());
+        StartCoolDown();
     }
 
     /// <summary>
