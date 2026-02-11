@@ -1,9 +1,10 @@
 namespace EternalJourney.Bullet.Abstract.Base;
 
 using System;
-using System.Collections.Generic;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
+using EternalJourney.Bullet.Strategies.Collision;
+using EternalJourney.Bullet.Strategies.Movement;
 using EternalJourney.Common.BaseEntity;
 using EternalJourney.Common.StatusEffect;
 using EternalJourney.Common.Traits;
@@ -66,6 +67,21 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
     /// </summary>
     public Vector2 Direction { get; set; } = new Vector2(1, 0);
 
+    /// <summary>
+    /// 移動ストラテジー
+    /// </summary>
+    public IBulletMovementStrategy MovementStrategy { get; set; } = new LinearBulletMovement();
+
+    /// <summary>
+    /// 衝突ストラテジー
+    /// </summary>
+    public IBulletCollisionStrategy CollisionStrategy { get; set; } = new NormalCollisionStrategy();
+
+    /// <summary>
+    /// 経過時間
+    /// </summary>
+    public float ElapsedTime { get; set; }
+
     public virtual void Setup()
     {
         StatusEffectServerManager = new StatusEffectServerManager();
@@ -126,6 +142,14 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
         {
             ConfigureStatusEffect(effectConfig);
         }
+
+        // 移動ストラテジーを生成・初期化
+        MovementStrategy = BulletMovementStrategyFactory.Create(config.Movement.Type);
+        MovementStrategy.Initialize(config.Movement);
+
+        // 衝突ストラテジーを生成・初期化
+        CollisionStrategy = BulletCollisionStrategyFactory.Create(config.Collision.Type);
+        CollisionStrategy.Initialize(config.Collision);
     }
 
     /// <summary>
@@ -155,6 +179,11 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
         Direction = new Vector2(0, 0);
         // 耐久値を回復
         Status.CurrentDur = Status.MaxDur;
+        // 経過時間リセット
+        ElapsedTime = 0f;
+        // ストラテジーリセット
+        MovementStrategy.Reset();
+        CollisionStrategy.Reset();
     }
 
     /// <summary>

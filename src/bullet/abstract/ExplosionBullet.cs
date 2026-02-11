@@ -6,6 +6,7 @@ using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
+using EternalJourney.Bullet.Strategies.Collision;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Enemy.Base;
 using Godot;
@@ -19,9 +20,15 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
 {
     public override void _Notification(int what) => this.Notify(what);
 
-    public ExplosionBulletLogic ExplosionBulletLogic { get; set; } = default!;
+    /// <summary>
+    /// 弾丸ロジック
+    /// </summary>
+    public BulletLogic BulletLogic { get; set; } = default!;
 
-    public ExplosionBulletLogic.IBinding ExplosionBulletBinding { get; set; } = default!;
+    /// <summary>
+    /// 弾丸ロジックバインド
+    /// </summary>
+    public BulletLogic.IBinding BulletBinding { get; set; } = default!;
 
     [Node]
     public ITimer BlastTimer { get; set; } = default!;
@@ -48,25 +55,24 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
         base.Setup();
 
         // ステートロジックのインスタンス化
-        ExplosionBulletLogic = new ExplosionBulletLogic();
-        ExplosionBulletBinding = ExplosionBulletLogic.Bind();
-        ExplosionBulletLogic.Set(this as IBaseBullet);
-        ExplosionBulletLogic.Set(BattleRepo);
+        BulletLogic = new BulletLogic();
+        BulletBinding = BulletLogic.Bind();
+        BulletLogic.Set(this as IBaseBullet);
+        BulletLogic.Set(BattleRepo);
+        BulletLogic.Set<IBulletCollisionStrategy>(CollisionStrategy);
 
         // コリジョンレイヤーの設定(自身の衝突レイヤーをBullet)
         CollisionLayer = CollisionEntity.Bullet;
         // コリジョンマスクの設定(衝突対象とする衝突レイヤーをEnemy)
         CollisionMask = CollisionEntity.Enemy;
-
-        // Status = new Status { Spd = 1, MaxDur = 0.1f, CurrentDur = 0.1f };
     }
 
     public override void OnResolved()
     {
         base.OnResolved();
 
-        ExplosionBulletBinding
-            .When<ExplosionBulletLogic.State.EmitWait>(state =>
+        BulletBinding
+            .When<BulletLogic.State.EmitWait>(state =>
             {
                 // 弾丸テクスチャ非表示と弾丸当たり判定無効化
                 CallDeferred(nameof(SetBulletBodyEnabled), false);
@@ -74,35 +80,33 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
                 // 爆風テクスチャ非表示と爆風当たり判定無効
                 CallDeferred(nameof(SetBlastBodyEnabled), false);
             })
-            .Handle((in ExplosionBulletLogic.Output.Emitted output) =>
+            .When<BulletLogic.State.InFlight>(state =>
             {
                 // 射出時の位置を設定(武器の発射口の位置)
-                GlobalPosition = output.ShotGlobalPosition;
+                GlobalPosition = state.ShotGlobalPosition;
                 // 射出時の方向を設定(武器の向いている方向)
-                Direction = new Vector2(1, 0).Rotated(output.ShotGlobalAngle);
+                Direction = new Vector2(1, 0).Rotated(state.ShotGlobalAngle);
                 // 弾丸の向きを設定（武器の向いている方向）
-                Rotation = output.ShotGlobalAngle;
-            })
-            .When<ExplosionBulletLogic.State.InFlight>(state =>
-            {
+                Rotation = state.ShotGlobalAngle;
+
                 // 弾丸テクスチャ表示と弾丸当たり判定有効化
                 CallDeferred(nameof(SetBulletBodyEnabled), true);
 
                 SetPhysicsProcess(true);
             })
-            .Handle((in ExplosionBulletLogic.Output.Move output) =>
+            .Handle((in BulletLogic.Output.Move output) =>
             {
                 GlobalPosition += output.NextPositionDelta;
             })
-            .Handle((in ExplosionBulletLogic.Output.CurrentDurChange output) =>
+            .Handle((in BulletLogic.Output.CurrentDurChange output) =>
             {
                 Status.CurrentDur = output.CurrentDur;
             })
-            .Handle((in ExplosionBulletLogic.Output.Collapse output) =>
+            .Handle((in BulletLogic.Output.Collapse _) =>
             {
                 SetPhysicsProcess(false);
             })
-            .When<ExplosionBulletLogic.State.Blast>(state =>
+            .When<BulletLogic.State.Blast>(state =>
             {
                 // 弾丸テクスチャ非表示と弾丸当たり判定無効化
                 CallDeferred(nameof(SetBulletBodyEnabled), false);
@@ -113,7 +117,7 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
                 // 爆風タイマースタート
                 BlastTimer.Start();
             })
-            .Handle((in ExplosionBulletLogic.Output.RemoveSelf _) =>
+            .Handle((in BulletLogic.Output.RemoveSelf _) =>
             {
                 // 爆風テクスチャ表示と爆風当たり判定無効化
                 CallDeferred(nameof(SetBlastBodyEnabled), false);
@@ -127,28 +131,40 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
         // 画面外イベント
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // ロジック初期化
-        ExplosionBulletLogic.Start();
-        BlastTimer.WaitTime = 0.5;
+        BulletLogic.Start();
+
+        // 爆風タイマー設定（衝突ストラテジーからパラメータ取得）
+        if (CollisionStrategy is ExplosionCollisionStrategy explosionStrategy)
+        {
+            BlastTimer.WaitTime = explosionStrategy.BlastDuration;
+        }
+        else
+        {
+            BlastTimer.WaitTime = 0.5;
+        }
         BlastTimer.OneShot = true;
         BlastTimer.Timeout += OnBlastTimerTimeout;
     }
 
     public void OnPhysicsProcess(double delta)
     {
-        ExplosionBulletLogic.Input(new ExplosionBulletLogic.Input.PhysicsProcess(Direction, Status.Spd));
+        // 経過時間を更新
+        ElapsedTime += (float)delta;
+        // PhysicsProcess入力（移動ストラテジーを渡す）
+        BulletLogic.Input(new BulletLogic.Input.PhysicsProcess(
+            Direction, Status.Spd, ElapsedTime, MovementStrategy, GlobalPosition
+        ));
     }
 
     /// <summary>
-    ///
+    /// 射出
     /// </summary>
     /// <param name="shotGlobalPosition"></param>
     /// <param name="shotGlobalAngle"></param>
     public override void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle)
     {
-        ExplosionBulletLogic.Input(new ExplosionBulletLogic.Input.Emit(shotGlobalPosition, shotGlobalAngle));
+        BulletLogic.Input(new BulletLogic.Input.Emit(shotGlobalPosition, shotGlobalAngle));
     }
-
-
 
     /// <summary>
     /// 弾丸/爆風コリジョンエリア進入イベントファンクション
@@ -158,7 +174,7 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
     {
         if (area is IBaseEnemy enemy)
         {
-            ExplosionBulletLogic.Input(new ExplosionBulletLogic.Input.EnemyHit(enemy));
+            BulletLogic.Input(new BulletLogic.Input.EnemyHit(enemy));
         }
     }
 
@@ -167,7 +183,7 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
     /// </summary>
     private void OnScreenExited()
     {
-        ExplosionBulletLogic.Input(new ExplosionBulletLogic.Input.Miss());
+        BulletLogic.Input(new BulletLogic.Input.Miss());
     }
 
     /// <summary>
@@ -175,7 +191,7 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
     /// </summary>
     private void OnBlastTimerTimeout()
     {
-        ExplosionBulletLogic.Input(new ExplosionBulletLogic.Input.BlastTimerTimeout());
+        BulletLogic.Input(new BulletLogic.Input.BlastTimerTimeout());
     }
 
     private void SetBulletBodyEnabled(bool flag)

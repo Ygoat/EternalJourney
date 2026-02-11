@@ -1,0 +1,20 @@
+@startuml BulletLogic
+state "BulletLogic State" as EternalJourney_Bullet_Abstract_State_BulletLogic_State {
+  state "EmitWait" as EternalJourney_Bullet_Abstract_State_BulletLogic_State_EmitWait
+  state "InFlight" as EternalJourney_Bullet_Abstract_State_BulletLogic_State_InFlight
+  state "Blast" as EternalJourney_Bullet_Abstract_State_BulletLogic_State_Blast
+}
+
+EternalJourney_Bullet_Abstract_State_BulletLogic_State_Blast --> EternalJourney_Bullet_Abstract_State_BulletLogic_State_Blast : EnemyHit
+EternalJourney_Bullet_Abstract_State_BulletLogic_State_Blast --> EternalJourney_Bullet_Abstract_State_BulletLogic_State_EmitWait : BlastTimerTimeout
+EternalJourney_Bullet_Abstract_State_BulletLogic_State_EmitWait --> EternalJourney_Bullet_Abstract_State_BulletLogic_State_InFlight : Emit
+EternalJourney_Bullet_Abstract_State_BulletLogic_State_InFlight --> EternalJourney_Bullet_Abstract_State_BulletLogic_State_EmitWait : Miss
+
+EternalJourney_Bullet_Abstract_State_BulletLogic_State_Blast : OnBlastTimerTimeout → RemoveSelf
+EternalJourney_Bullet_Abstract_State_BulletLogic_State_InFlight : CheckUnderZeroDurability() → Collapse
+EternalJourney_Bullet_Abstract_State_BulletLogic_State_InFlight : OnEnemyHit → CurrentDurChange
+EternalJourney_Bullet_Abstract_State_BulletLogic_State_InFlight : OnMiss → Collapse
+EternalJourney_Bullet_Abstract_State_BulletLogic_State_InFlight : OnPhysicsProcess → Move
+
+[*] --> EternalJourney_Bullet_Abstract_State_BulletLogic_State_EmitWait
+@enduml

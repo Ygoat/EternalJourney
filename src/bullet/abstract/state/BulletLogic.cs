@@ -4,27 +4,25 @@ using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Bullet.Strategies.Collision;
+using EternalJourney.Bullet.Strategies.Movement;
 using EternalJourney.Enemy.Base;
 using Godot;
-
-
-
 
 /// <summary>
 /// 弾丸ロジックインターフェース
 /// </summary>
-public interface IExplosionBulletLogic : ILogicBlock<ExplosionBulletLogic.State>;
+public interface IBulletLogic : ILogicBlock<BulletLogic.State>;
 
 /// <summary>
-/// 弾丸ロジック
+/// 統一弾丸ロジック（移動・衝突をストラテジーに委譲）
 /// </summary>
 [Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.State>, IExplosionBulletLogic
+public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
 {
     /// <summary>
     /// 初期状態
     /// </summary>
-    /// <returns></returns>
     public override Transition GetInitialState() => To<State.EmitWait>();
 
     /// <summary>
@@ -50,9 +48,13 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
         /// <summary>
         /// 物理処理
         /// </summary>
-        /// <param name="Direction"></param>
-        /// <param name="Speed"></param>
-        public readonly record struct PhysicsProcess(Vector2 Direction, float Speed);
+        public readonly record struct PhysicsProcess(
+            Vector2 Direction,
+            float Speed,
+            float ElapsedTime,
+            IBulletMovementStrategy MovementStrategy,
+            Vector2 CurrentPosition
+        );
 
         /// <summary>
         /// 爆風タイムアウト
@@ -65,11 +67,6 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
     /// </summary>
     public static class Output
     {
-        /// <summary>
-        /// 射出後
-        /// </summary>
-        public readonly record struct Emitted(Vector2 ShotGlobalPosition, float ShotGlobalAngle);
-
         /// <summary>
         /// 耐久値変化
         /// </summary>
@@ -97,7 +94,7 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
     public abstract record State : StateLogic<State>
     {
         /// <summary>
-        /// ロード
+        /// 射出待機
         /// </summary>
         public record EmitWait : State, IGet<Input.Emit>
         {
@@ -107,8 +104,14 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
 
             public Transition On(in Input.Emit input)
             {
-                Output(new Output.Emitted(input.ShotGlobalPosition, input.ShotGlobalAngle));
-                return To<InFlight>();
+                Input.Emit ip = input;
+                return To<InFlight>().With(
+                    (state) =>
+                    {
+                        ((InFlight)state).ShotGlobalPosition = ip.ShotGlobalPosition;
+                        ((InFlight)state).ShotGlobalAngle = ip.ShotGlobalAngle;
+                    }
+                );
             }
         }
 
@@ -117,14 +120,22 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
         /// </summary>
         public record InFlight : State, IGet<Input.PhysicsProcess>, IGet<Input.EnemyHit>, IGet<Input.Miss>
         {
+            public Vector2 ShotGlobalPosition { get; set; }
+            public float ShotGlobalAngle { get; set; }
+
             public InFlight()
             {
             }
 
             public Transition On(in Input.PhysicsProcess input)
             {
-                // 位置を更新
-                Vector2 nextPositionDelta = input.Direction.Normalized() * input.Speed;
+                // 移動ストラテジーに移動計算を委譲
+                Vector2 nextPositionDelta = input.MovementStrategy.CalculateMovement(
+                    input.CurrentPosition,
+                    input.Direction,
+                    input.Speed,
+                    input.ElapsedTime
+                );
                 Output(new Output.Move(nextPositionDelta));
                 // 耐久値チェック
                 IBaseBullet baseBullet = Get<IBaseBullet>();
@@ -133,12 +144,20 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
 
             public Transition On(in Input.EnemyHit input)
             {
-                // 耐久値減少
+                // 衝突ストラテジーから耐久コストを取得
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 IBaseBullet baseBullet = Get<IBaseBullet>();
-                float currentDur = battleRepo.ReduceBulletDurability(baseBullet.Status.CurrentDur, 1.0f);
-                // float currentDur = baseBullet.Status.CurrentDur - 1.0f;
-                // baseBullet.StatusEffectServerManager.Apply(input.BaseEnemy.StatusEffectReceiverManager);
+                IBulletCollisionStrategy collisionStrategy = Get<IBulletCollisionStrategy>();
+
+                float durabilityCost = collisionStrategy.GetDurabilityCost();
+                float currentDur = battleRepo.ReduceBulletDurability(baseBullet.Status.CurrentDur, durabilityCost);
+
+                // 衝突ストラテジーに基づいてステータスエフェクト適用
+                if (collisionStrategy.ShouldApplyStatusEffects())
+                {
+                    baseBullet.StatusEffectServerManager.Apply(input.BaseEnemy.StatusEffectReceiverManager);
+                }
+
                 // 耐久値変更を通知
                 Output(new Output.CurrentDurChange(currentDur));
                 // 耐久値チェック
@@ -147,28 +166,33 @@ public partial class ExplosionBulletLogic : LogicBlock<ExplosionBulletLogic.Stat
 
             public Transition On(in Input.Miss input)
             {
-                // 崩壊を出力する
-                Output(new Output.RemoveSelf());
-                // 射出待機に遷移する
+                // 崩壊を出力して射出待機に遷移
+                Output(new Output.Collapse());
                 return To<EmitWait>();
             }
 
             private Transition CheckUnderZeroDurability(float currentDur)
             {
-                // 耐久値が0以下の場合
                 if (currentDur <= 0)
                 {
-                    // 崩壊を出力する
+                    // 衝突ストラテジーに基づいて分岐
+                    IBulletCollisionStrategy collisionStrategy = Get<IBulletCollisionStrategy>();
+                    OnDepletedAction action = collisionStrategy.GetOnDepletedAction();
+
                     Output(new Output.Collapse());
-                    // 射出待機に遷移する
-                    return To<Blast>();
+
+                    return action switch
+                    {
+                        OnDepletedAction.Blast => To<Blast>(),
+                        _ => To<EmitWait>(),
+                    };
                 }
                 return ToSelf();
             }
         }
 
         /// <summary>
-        /// 爆風
+        /// 爆風（衝突ストラテジーがBlastを返した場合のみ遷移）
         /// </summary>
         public record Blast : State, IGet<Input.BlastTimerTimeout>, IGet<Input.EnemyHit>
         {

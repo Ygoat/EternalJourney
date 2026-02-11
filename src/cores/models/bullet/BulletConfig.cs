@@ -31,4 +31,16 @@ public class BulletConfig
     /// </summary>
     [JsonPropertyName("statusEffects")]
     public List<BulletStatusEffectConfig> StatusEffects { get; set; } = new();
+
+    /// <summary>
+    /// 移動パターン設定
+    /// </summary>
+    [JsonPropertyName("movement")]
+    public BulletMovementConfig Movement { get; set; } = new();
+
+    /// <summary>
+    /// 衝突パターン設定
+    /// </summary>
+    [JsonPropertyName("collision")]
+    public BulletCollisionConfig Collision { get; set; } = new();
 }

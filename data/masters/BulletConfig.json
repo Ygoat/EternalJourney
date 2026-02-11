@@ -12,7 +12,15 @@
       },
       "statusEffects": [
         { "type": "poison", "enabled": true }
-      ]
+      ],
+      "movement": {
+        "type": "linear",
+        "params": {}
+      },
+      "collision": {
+        "type": "normal",
+        "params": {}
+      }
     },
     {
       "id": "penetrate_bullet",
@@ -24,7 +32,15 @@
         "def": 0.0,
         "size": 1.0
       },
-      "statusEffects": []
+      "statusEffects": [],
+      "movement": {
+        "type": "linear",
+        "params": {}
+      },
+      "collision": {
+        "type": "normal",
+        "params": {}
+      }
     },
     {
       "id": "explosion_bullet",
@@ -36,7 +52,17 @@
         "def": 0.0,
         "size": 1.0
       },
-      "statusEffects": []
+      "statusEffects": [],
+      "movement": {
+        "type": "linear",
+        "params": {}
+      },
+      "collision": {
+        "type": "explosion",
+        "params": {
+          "blastDuration": 0.5
+        }
+      }
     }
   ]
 }

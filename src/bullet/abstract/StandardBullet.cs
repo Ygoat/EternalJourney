@@ -7,6 +7,7 @@ using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
+using EternalJourney.Bullet.Strategies.Collision;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Enemy.Base;
 using Godot;
@@ -29,14 +30,14 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
 
     #region State
     /// <summary>
-    /// スタンダード弾丸ロジック
+    /// 弾丸ロジック
     /// </summary>
-    public StandardBulletLogic StandardBulletLogic { get; set; } = default!;
+    public BulletLogic BulletLogic { get; set; } = default!;
 
     /// <summary>
-    /// スタンダード弾丸ロジックバインド
+    /// 弾丸ロジックバインド
     /// </summary>
-    public StandardBulletLogic.IBinding StandardBulletBinding { get; set; } = default!;
+    public BulletLogic.IBinding BulletBinding { get; set; } = default!;
 
     [Dependency] public EntityTable<int> EntityTable => this.DependOn<EntityTable<int>>();
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
@@ -55,17 +56,16 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     {
         base.Setup();
 
-        StandardBulletLogic = new StandardBulletLogic();
-        StandardBulletBinding = StandardBulletLogic.Bind();
-        StandardBulletLogic.Set(this as IBaseBullet);
-        StandardBulletLogic.Set(BattleRepo);
+        BulletLogic = new BulletLogic();
+        BulletBinding = BulletLogic.Bind();
+        BulletLogic.Set(this as IBaseBullet);
+        BulletLogic.Set(BattleRepo);
+        BulletLogic.Set<IBulletCollisionStrategy>(CollisionStrategy);
 
         // コリジョンレイヤーを弾丸
         CollisionLayer = CollisionEntity.Bullet;
         // コリジョンマスクをエネミー
         CollisionMask = CollisionEntity.Enemy;
-        // ステータスセット
-        // Status = new Status { Spd = 5.0f, MaxDur = 2.0f, CurrentDur = 2.0f };
     }
 
     /// <summary>
@@ -75,8 +75,8 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     {
         base.OnResolved();
 
-        StandardBulletBinding
-            .When<StandardBulletLogic.State.InFlight>(state =>
+        BulletBinding
+            .When<BulletLogic.State.InFlight>(state =>
             {
                 // 射出時の位置を設定(武器の発射口の位置)
                 GlobalPosition = state.ShotGlobalPosition;
@@ -86,16 +86,15 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
                 Rotation = state.ShotGlobalAngle;
                 SetPhysicsProcess(true);
             })
-            .Handle((in StandardBulletLogic.Output.Move output) =>
+            .Handle((in BulletLogic.Output.Move output) =>
             {
                 GlobalPosition += output.NextPositionDelta;
             })
-            .Handle((in StandardBulletLogic.Output.CurrentDurChange output) =>
+            .Handle((in BulletLogic.Output.CurrentDurChange output) =>
             {
                 Status.CurrentDur = output.CurrentDur;
             })
-            // Disappearが出力された場合
-            .Handle((in StandardBulletLogic.Output.Collapse _) =>
+            .Handle((in BulletLogic.Output.Collapse _) =>
             {
                 // フレーム終わりにRemoveSelf()呼び出し
                 CallDeferred(nameof(RemoveSelf));
@@ -105,7 +104,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         // 画面外イベント
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // ロジック初期化
-        StandardBulletLogic.Start();
+        BulletLogic.Start();
     }
 
     /// <summary>
@@ -114,8 +113,12 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <param name="delta"></param>
     public void OnPhysicsProcess(double delta)
     {
-        // PhysicsProcess入力
-        StandardBulletLogic.Input(new StandardBulletLogic.Input.PhysicsProcess(Direction, Status.Spd));
+        // 経過時間を更新
+        ElapsedTime += (float)delta;
+        // PhysicsProcess入力（移動ストラテジーを渡す）
+        BulletLogic.Input(new BulletLogic.Input.PhysicsProcess(
+            Direction, Status.Spd, ElapsedTime, MovementStrategy, GlobalPosition
+        ));
     }
 
     /// <summary>
@@ -127,7 +130,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         if (area is IBaseEnemy baseEnemy)
         {
             // ヒットを入力
-            StandardBulletLogic.Input(new StandardBulletLogic.Input.EnemyHit(baseEnemy));
+            BulletLogic.Input(new BulletLogic.Input.EnemyHit(baseEnemy));
         }
     }
 
@@ -137,7 +140,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     public void OnScreenExited()
     {
         // ミスを入力
-        StandardBulletLogic.Input(new StandardBulletLogic.Input.Miss());
+        BulletLogic.Input(new BulletLogic.Input.Miss());
     }
 
     /// <summary>
@@ -148,7 +151,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     public override void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle)
     {
         // Emitを入力
-        StandardBulletLogic.Input(new StandardBulletLogic.Input.Emit(shotGlobalPosition, shotGlobalAngle));
+        BulletLogic.Input(new BulletLogic.Input.Emit(shotGlobalPosition, shotGlobalAngle));
     }
 
 }
