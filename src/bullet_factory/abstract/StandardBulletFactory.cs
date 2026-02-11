@@ -4,6 +4,8 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Common.BaseFactory;
+using EternalJourney.Cores.Models.Bullet;
+using EternalJourney.Cores.Repositories;
 using Godot;
 
 /// <summary>
@@ -32,7 +34,16 @@ public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulle
     /// </summary>
     [Export]
     public Resource BulletScene { get; set; } = default!;
+
+    /// <summary>
+    /// 弾丸設定ID（BulletConfig.jsonのidと対応）
+    /// </summary>
+    [Export]
+    public string BulletId { get; set; } = string.Empty;
     #endregion Exports
+
+    private readonly BulletConfigReader _bulletConfigReader = new();
+    private BulletConfig? _bulletConfig;
 
     /// <summary>
     /// シーンパスの取得（BaseFactory抽象メソッドの実装）
@@ -67,6 +78,12 @@ public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulle
 
         // 基底クラスのセットアップ（プール生成）
         base.Setup();
+
+        // 弾丸設定をJSONから読み込み
+        if (!string.IsNullOrEmpty(BulletId))
+        {
+            _bulletConfig = _bulletConfigReader.GetById(BulletId);
+        }
     }
 
     /// <summary>
@@ -99,6 +116,12 @@ public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulle
 
         // シーンツリーに追加
         AddChild(bullet);
+
+        // 弾丸設定を適用（Setup()の後に呼び出すことでJSONの値が反映される）
+        if (bullet is BaseBullet baseBullet && _bulletConfig != null)
+        {
+            baseBullet.Configure(_bulletConfig);
+        }
 
         // 弾丸射出
         if (bullet is IBaseBullet iBullet)

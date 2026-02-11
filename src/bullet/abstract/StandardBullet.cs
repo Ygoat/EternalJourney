@@ -7,7 +7,6 @@ using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
-using EternalJourney.Common.StatusEffect;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Enemy.Base;
 using Godot;
@@ -75,9 +74,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     public override void OnResolved()
     {
         base.OnResolved();
-
-        // 毒を有効化
-        StatusEffectServerManager.Configure<PoisonEffect>(true);
 
         StandardBulletBinding
             .When<StandardBulletLogic.State.InFlight>(state =>
