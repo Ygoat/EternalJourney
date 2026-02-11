@@ -34,10 +34,11 @@
    - GCの負荷を軽減し、パフォーマンスを最適化
    - `IPoolable`インターフェースでライフサイクル管理
 
-5. **継承と合成のバランス**
-   - `BaseBullet` → `StandardBullet` / `ExplosionBullet`の継承階層
+5. **単一クラス + シーン分離**
+   - `BaseBullet` → `StandardBullet`の1クラスで全弾丸タイプに対応
+   - 爆風機能はシーン内のノード有無（`GetNodeOrNull`）で自動判定
    - 移動・衝突は合成（ストラテジーパターン）で実装
-   - 共通機能は基底クラス、固有のノード制御は派生クラス
+   - シーンファイルが弾丸のビジュアル・ノード構成を決定
 
 ---
 
@@ -102,28 +103,25 @@ abstract class BaseBullet {
 }
 
 class StandardBullet {
-    通常弾・貫通弾
+    統一弾丸クラス（全タイプ対応）
     --
     + BulletLogic
-    --
-    + OnPhysicsProcess()
-    + OnAreaEntered()
-    + OnScreenExited()
-}
-
-class ExplosionBullet {
-    爆発弾
-    --
-    + BulletLogic
-    + BlastTimer
-    + BulletCollisionShape2D
-    + BlastCollisionShape2D
+    - _blastTimer? : Timer
+    - _bulletCollisionShape2D? : CollisionShape2D
+    - _blastCollisionShape2D? : CollisionShape2D
+    - HasBlastCapability : bool
     --
     + OnPhysicsProcess()
     + OnAreaEntered()
     + OnScreenExited()
     + OnBlastTimerTimeout()
 }
+
+note right of StandardBullet
+  爆風ノードはGetNodeOrNullで
+  オプショナルに取得。
+  シーン構造で機能が決まる。
+end note
 
 interface IPoolable {
     + OnAcquired()
@@ -135,16 +133,13 @@ interface IBaseBullet {
 }
 
 interface IStandardBullet
-interface IExplosionBullet
 
 BaseEntity <|-- BaseBullet
 BaseBullet <|-- StandardBullet
-BaseBullet <|-- ExplosionBullet
 
 BaseBullet ..|> IPoolable
 BaseBullet ..|> IBaseBullet
 StandardBullet ..|> IStandardBullet
-ExplosionBullet ..|> IExplosionBullet
 @enduml
 ```
 
@@ -285,8 +280,7 @@ BulletCollisionStrategyFactory ..> IBulletCollisionStrategy : 生成
 | ファイル | パス | 説明 |
 |----------|------|------|
 | `BaseBullet.cs` | `src/bullet/abstract/base/` | 弾丸基底クラス |
-| `StandardBullet.cs` | `src/bullet/abstract/` | 通常弾・貫通弾実装 |
-| `ExplosionBullet.cs` | `src/bullet/abstract/` | 爆発弾実装 |
+| `StandardBullet.cs` | `src/bullet/abstract/` | 統一弾丸クラス（全タイプ対応） |
 | `BulletLogic.cs` | `src/bullet/abstract/state/` | 統一状態管理ロジック |
 
 ### 移動戦略
@@ -318,8 +312,8 @@ BulletCollisionStrategyFactory ..> IBulletCollisionStrategy : 生成
 | ファイル | パス | 説明 |
 |----------|------|------|
 | `BaseBullet.tscn` | `src/bullet/abstract/base/` | 弾丸基底シーン |
-| `StandardBullet.tscn` | `src/bullet/abstract/` | 通常弾シーン |
-| `ExplosionBullet.tscn` | `src/bullet/abstract/` | 爆発弾シーン |
+| `StandardBullet.tscn` | `src/bullet/abstract/` | 通常弾シーン（爆風ノードなし） |
+| `ExplosionBullet.tscn` | `src/bullet/abstract/` | 爆発弾シーン（爆風ノードあり、スクリプトはStandardBullet.cs） |
 | `01_NormalBullet.tscn` | `src/bullet/` | NormalBullet実体シーン |
 | `02_PenetrateBullet.tscn` | `src/bullet/` | PenetrateBullet実体シーン |
 | `03_ExplosionBullet.tscn` | `src/bullet/` | ExplosionBullet実体シーン |
@@ -601,46 +595,21 @@ private static readonly Dictionary<string, Func<IBulletCollisionStrategy>> _stra
 }
 ```
 
-### 新しい弾丸クラスを作成する（特殊ノード構成が必要な場合）
+### 新しい弾丸シーンを作成する（爆風機能付き）
 
-`ExplosionBullet`のように固有のシーンノード（爆風コリジョン等）を持つ場合は、`BaseBullet`を継承した新しいクラスを作成します：
+爆風機能を持つ新しい弾丸を追加するには、`ExplosionBullet.tscn`を参考にシーンを作成し、以下のノードを含めます：
 
-```csharp
-namespace EternalJourney.Bullet.Abstract;
+| ノード名 | 型 | 用途 |
+| ---------- | ------ | ------ |
+| `BlastTimer` | Timer | 爆風持続時間制御 |
+| `BulletCollisionShape2D` | CollisionShape2D | 弾丸フェーズの当たり判定 |
+| `BulletColorRect` | ColorRect | 弾丸フェーズのビジュアル |
+| `BlastCollisionShape2D` | CollisionShape2D | 爆風フェーズの当たり判定 |
+| `BlastColorRect` | ColorRect | 爆風フェーズのビジュアル |
+| `VisibleOnScreenNotifier2D` | VisibleOnScreenNotifier2D | 画面外検知 |
 
-using Chickensoft.AutoInject;
-using Chickensoft.Introspection;
-using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.Bullet.Abstract.State;
-using Godot;
-
-[Meta(typeof(IAutoNode))]
-public partial class LaserBullet : BaseBullet
-{
-    public override void _Notification(int what) => this.Notify(what);
-
-    public BulletLogic BulletLogic { get; set; } = default!;
-    public BulletLogic.IBinding BulletBinding { get; set; } = default!;
-
-    // レーザー固有のノード
-    [Node]
-    public IRayCast2D LaserRay { get; set; } = default!;
-
-    public override void Setup()
-    {
-        base.Setup();
-        BulletLogic = new BulletLogic();
-        BulletBinding = BulletLogic.Bind();
-        BulletLogic.Set(this as IBaseBullet);
-        // レーザー固有の初期化...
-    }
-
-    public override void Emit(Vector2 shotGlobalPosition, float shotGlobalAngle)
-    {
-        BulletLogic.Input(new BulletLogic.Input.Emit(shotGlobalPosition, shotGlobalAngle));
-    }
-}
-```
+すべてのノードに `unique_name_in_owner = true` を設定してください。
+スクリプトは `StandardBullet.cs` を使用します。`StandardBullet`が `GetNodeOrNull` で自動的に爆風ノードを検出し、爆風機能を有効化します。
 
 ---
 
@@ -657,9 +626,11 @@ public partial class LaserBullet : BaseBullet
 3. パラメータ名が正しいか確認（大文字小文字は区別される）
 
 ### 爆発弾の爆風が表示されない
-1. `ExplosionBullet`シーンに`BlastCollisionShape2D`と`BlastColorRect`ノードが存在するか確認
-2. `collision.type`が`"explosion"`に設定されているか確認
-3. `blastDuration`パラメータが正の値か確認
+
+1. シーンに`BlastTimer`、`BlastCollisionShape2D`、`BlastColorRect`ノードが存在するか確認
+2. 各ノードに`unique_name_in_owner = true`が設定されているか確認
+3. `collision.type`が`"explosion"`に設定されているか確認
+4. `blastDuration`パラメータが正の値か確認
 
 ### ビルドエラー
 1. 新しいクラスの名前空間を確認

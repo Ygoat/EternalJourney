@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://dx3yib7f7sbck"]
 
 [ext_resource type="PackedScene" uid="uid://cj5278x1kfrxx" path="res://src/bullet/abstract/base/BaseBullet.tscn" id="1_mj6mv"]
-[ext_resource type="Script" path="res://src/bullet/abstract/ExplosionBullet.cs" id="2_63hhr"]
+[ext_resource type="Script" path="res://src/bullet/abstract/StandardBullet.cs" id="2_63hhr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_utpp0"]
 
