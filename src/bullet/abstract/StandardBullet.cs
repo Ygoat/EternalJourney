@@ -8,7 +8,6 @@ using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Common.StatusEffect;
-using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Enemy.Base;
 using Godot;
@@ -44,13 +43,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
     #endregion State
-
-    #region Exports
-    /// <summary>
-    /// 移動方向
-    /// </summary>
-    public Vector2 Direction { get; set; } = new Vector2(1, 0);
-    #endregion Exports
 
     #region Nodes
     /// <summary>
@@ -118,8 +110,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // ロジック初期化
         StandardBulletLogic.Start();
-        // トップレベルオブジェクトとして扱う（親ノードのRotationの影響を受けないようにするため）
-        TopLevel = true;
     }
 
     /// <summary>
@@ -130,22 +120,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     {
         // PhysicsProcess入力
         StandardBulletLogic.Input(new StandardBulletLogic.Input.PhysicsProcess(Direction, Status.Spd));
-    }
-
-    /// <summary>
-    /// 自インスタンスをツリーから一時的に取り除く
-    /// ※インスタンスは完全には削除されない
-    /// </summary>
-    public override void RemoveSelf()
-    {
-        // 親ノードを取得してから、子である自ノードを削除する
-        GetParent().RemoveChild(this);
-        // 弾丸の初期化
-        InitializeBullet();
-        // 物理処理無効化
-        SetPhysicsProcess(false);
-        // OnCollapsedシグナル出力
-        EmitSignal(BaseBullet.SignalName.Removed, this);
     }
 
     /// <summary>
@@ -181,16 +155,4 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         StandardBulletLogic.Input(new StandardBulletLogic.Input.Emit(shotGlobalPosition, shotGlobalAngle));
     }
 
-    /// <summary>
-    /// 弾丸初期化
-    /// </summary>
-    public void InitializeBullet()
-    {
-        // グローバル座標の初期化
-        GlobalPosition = new Vector2(0, 0);
-        // 方向を初期化
-        Direction = new Vector2(0, 0);
-        // 耐久値を回復
-        Status.CurrentDur = Status.MaxDur;
-    }
 }

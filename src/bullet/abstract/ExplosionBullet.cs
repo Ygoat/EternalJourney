@@ -6,7 +6,6 @@ using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
-using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Enemy.Base;
 using Godot;
@@ -42,7 +41,6 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
     [Node]
     public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
 
-    public Vector2 Direction { get; set; } = default!;
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
     public override void Setup()
@@ -130,17 +128,9 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // ロジック初期化
         ExplosionBulletLogic.Start();
-        // Emit(new Vector2(1, 0), 0);
-        // ExplosionBulletLogic.Input(new ExplosionBulletLogic.Input.EnemyHit());
-        // ExplosionBulletLogic.Input(new ExplosionBulletLogic.Input.BlastTimerTimeout());
-        // InitializeBullet();
-        // Emit(new Vector2(1, 0), 0);
-        // トップレベルオブジェクトとして扱う（親ノードのRotationの影響を受けないようにするため）
         BlastTimer.WaitTime = 0.5;
         BlastTimer.OneShot = true;
         BlastTimer.Timeout += OnBlastTimerTimeout;
-
-        TopLevel = true;
     }
 
     public void OnPhysicsProcess(double delta)
@@ -186,35 +176,6 @@ public partial class ExplosionBullet : BaseBullet, IExplosionBullet
     private void OnBlastTimerTimeout()
     {
         ExplosionBulletLogic.Input(new ExplosionBulletLogic.Input.BlastTimerTimeout());
-    }
-
-    /// <summary>
-    /// 自インスタンスをツリーから一時的に取り除く
-    /// ※インスタンスは完全には削除されない
-    /// </summary>
-    public override void RemoveSelf()
-    {
-        // 親ノードを取得してから、子である自ノードを削除する
-        GetParent().RemoveChild(this);
-        // 弾丸の初期化
-        InitializeBullet();
-        // 物理処理無効化
-        SetPhysicsProcess(false);
-        // OnCollapsedシグナル出力
-        EmitSignal(BaseBullet.SignalName.Removed, this);
-    }
-
-    /// <summary>
-    /// 弾丸初期化
-    /// </summary>
-    private void InitializeBullet()
-    {
-        // グローバル座標の初期化
-        GlobalPosition = new Vector2(0, 0);
-        // 方向を初期化
-        Direction = new Vector2(0, 0);
-        // 耐久値を回復
-        Status.CurrentDur = Status.MaxDur;
     }
 
     private void SetBulletBodyEnabled(bool flag)

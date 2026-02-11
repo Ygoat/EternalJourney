@@ -58,6 +58,11 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
 
     public StatusEffectServerManager StatusEffectServerManager { get; set; } = default!;
 
+    /// <summary>
+    /// 移動方向
+    /// </summary>
+    public Vector2 Direction { get; set; } = new Vector2(1, 0);
+
     public virtual void Setup()
     {
         StatusEffectServerManager = new StatusEffectServerManager();
@@ -66,6 +71,8 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
     public virtual void OnResolved()
     {
         AddChild(StatusEffectServerManager);
+        // トップレベルオブジェクトとして扱う（親ノードのRotationの影響を受けないようにするため）
+        TopLevel = true;
     }
 
     /// <summary>
@@ -79,14 +86,32 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
     }
 
     /// <summary>
-    /// <inheritdoc/>
+    /// 自インスタンスをツリーから一時的に取り除く
+    /// ※インスタンスは完全には削除されない
     /// </summary>
     public virtual void RemoveSelf()
     {
         // 親ノードを取得してから、子である自ノードを削除する
         GetParent().RemoveChild(this);
+        // 弾丸の初期化
+        InitializeBullet();
+        // 物理処理無効化
+        SetPhysicsProcess(false);
         // Removedシグナル出力
         EmitSignal(SignalName.Removed, this);
+    }
+
+    /// <summary>
+    /// 弾丸初期化
+    /// </summary>
+    public virtual void InitializeBullet()
+    {
+        // グローバル座標の初期化
+        GlobalPosition = new Vector2(0, 0);
+        // 方向を初期化
+        Direction = new Vector2(0, 0);
+        // 耐久値を回復
+        Status.CurrentDur = Status.MaxDur;
     }
 
     /// <summary>
