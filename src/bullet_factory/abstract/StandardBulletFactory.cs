@@ -24,7 +24,7 @@ public interface IStandardBulletFactory
 /// 重複コードを削減し、Godotエコシステムを活用した実装
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulletFactory
+public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStandardBulletFactory
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -34,6 +34,12 @@ public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulle
     /// </summary>
     [Export]
     public Resource BulletScene { get; set; } = default!;
+
+    /// <summary>
+    /// 弾丸名称（弾丸の種類を指定）
+    /// </summary>
+    [Export]
+    public string BulletName { get; set; } = default!;
 
     /// <summary>
     /// 弾丸設定ID（BulletConfig.jsonのidと対応）
@@ -59,13 +65,10 @@ public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulle
     /// 弾丸がプールに返却される際のイベントを設定
     /// </summary>
     /// <param name="obj">セットアップする弾丸オブジェクト</param>
-    protected override void SetupPoolableObject(Node2D obj)
+    protected override void SetupPoolableObject(StandardBullet obj)
     {
         // Removedイベントをプールへの返却処理に接続
-        if (obj is IBaseBullet bullet)
-        {
-            bullet.Removed += OnRemoved;
-        }
+        obj.Removed += OnRemoved;
     }
 
     /// <summary>
@@ -110,24 +113,23 @@ public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulle
     private void BulletEmit()
     {
         // プールから弾丸を取得
-        Node2D? bullet = AcquireFromPool();
+        StandardBullet? bullet = AcquireFromPool();
         if (bullet == null)
             return;
+
+
+
+        // 弾丸設定を適用（Setup()の後に呼び出すことでJSONの値が反映される）
+        if (_bulletConfig != null)
+        {
+            bullet.Configure(_bulletConfig);
+        }
 
         // シーンツリーに追加
         AddChild(bullet);
 
-        // 弾丸設定を適用（Setup()の後に呼び出すことでJSONの値が反映される）
-        if (bullet is BaseBullet baseBullet && _bulletConfig != null)
-        {
-            baseBullet.Configure(_bulletConfig);
-        }
-
         // 弾丸射出
-        if (bullet is IBaseBullet iBullet)
-        {
-            iBullet.Emit(GlobalPosition, GlobalRotation);
-        }
+        bullet.Emit(GlobalPosition, GlobalRotation);
 
         // クールダウン開始
         StartCoolDown();
@@ -141,6 +143,9 @@ public partial class StandardBulletFactory : BaseFactory<Node2D>, IStandardBulle
     private void OnRemoved(BaseBullet bullet)
     {
         // プールに返却
-        ReleaseToPool(bullet);
+        if (bullet is StandardBullet standardBullet)
+        {
+            ReleaseToPool(standardBullet);
+        }
     }
 }

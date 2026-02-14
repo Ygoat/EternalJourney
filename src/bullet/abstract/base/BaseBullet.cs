@@ -90,8 +90,6 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
     public virtual void OnResolved()
     {
         AddChild(StatusEffectServerManager);
-        // トップレベルオブジェクトとして扱う（親ノードのRotationの影響を受けないようにするため）
-        TopLevel = true;
     }
 
     /// <summary>

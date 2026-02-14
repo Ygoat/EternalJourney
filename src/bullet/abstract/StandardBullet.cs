@@ -106,6 +106,8 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         CollisionLayer = CollisionEntity.Bullet;
         // コリジョンマスクをエネミー
         CollisionMask = CollisionEntity.Enemy;
+
+        TopLevel = true;
     }
 
     /// <summary>
@@ -161,6 +163,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
                     CallDeferred(nameof(RemoveSelf));
                 }
                 // 爆風機能あり → Blast状態への遷移を待つ
+                CallDeferred(nameof(RemoveSelf));
             })
             .When<BulletLogic.State.Blast>(state =>
             {

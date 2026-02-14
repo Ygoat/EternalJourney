@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://2s531ojpmkia"]
+[gd_scene load_steps=7 format=3 uid="uid://2s531ojpmkia"]
 
 [ext_resource type="PackedScene" uid="uid://cj5278x1kfrxx" path="res://src/bullet/abstract/base/BaseBullet.tscn" id="1_04t2q"]
 [ext_resource type="Script" path="res://src/bullet/abstract/StandardBullet.cs" id="2_c4dpx"]
@@ -15,14 +15,19 @@ Size = 0.0
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_60sgv"]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fltdy"]
+size = Vector2(69, 68)
+
 [node name="StandardBullet" instance=ExtResource("1_04t2q")]
 script = ExtResource("2_c4dpx")
 Status = SubResource("Resource_suwpi")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="0"]
+[node name="BulletCollisionShape2D" type="CollisionShape2D" parent="." index="0"]
+unique_name_in_owner = true
 shape = SubResource("CircleShape2D_60sgv")
 
-[node name="ColorRect" type="ColorRect" parent="." index="1"]
+[node name="BulletColorRect" type="ColorRect" parent="." index="1"]
+unique_name_in_owner = true
 offset_left = -10.0
 offset_top = -10.0
 offset_right = 30.0
@@ -30,4 +35,22 @@ offset_bottom = 10.0
 color = Color(0.970717, 0.660276, 0.494899, 1)
 
 [node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." index="2"]
+unique_name_in_owner = true
+
+[node name="BlastCollisionShape2D" type="CollisionShape2D" parent="." index="3"]
+unique_name_in_owner = true
+visible = false
+position = Vector2(0.5, 0)
+shape = SubResource("RectangleShape2D_fltdy")
+
+[node name="BlastColorRect" type="ColorRect" parent="." index="4"]
+unique_name_in_owner = true
+visible = false
+offset_left = -34.0
+offset_top = -34.0
+offset_right = 35.0
+offset_bottom = 34.0
+color = Color(0.906627, 0.97, 0.4947, 1)
+
+[node name="BlastTimer" type="Timer" parent="." index="5"]
 unique_name_in_owner = true

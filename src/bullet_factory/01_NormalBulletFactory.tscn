@@ -5,3 +5,7 @@
 
 [node name="01_NormalBulletFactory" instance=ExtResource("1_cttye")]
 BulletScene = ExtResource("2_iyvcl")
+BulletName = ""
+BulletId = ""
+PoolSize = 100
+WaitTime = 0.1

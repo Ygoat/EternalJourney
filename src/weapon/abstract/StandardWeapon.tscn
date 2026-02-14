@@ -57,6 +57,3 @@ color = Color(0.913415, 0.667081, 0.713285, 1)
 [node name="StandardBulletFactory" parent="." index="4" instance=ExtResource("4_w2wdh")]
 unique_name_in_owner = true
 position = Vector2(60, 0)
-BulletId = ""
-PoolSize = 100
-WaitTime = 0.1
