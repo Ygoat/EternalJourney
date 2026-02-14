@@ -85,6 +85,7 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
     public virtual void Setup()
     {
         StatusEffectServerManager = new StatusEffectServerManager();
+        TopLevel = true;
     }
 
     public virtual void OnResolved()
