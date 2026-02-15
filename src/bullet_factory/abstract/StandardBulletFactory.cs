@@ -44,7 +44,7 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     /// <summary>
     /// 弾丸設定ID（BulletConfig.jsonのidと対応）
     /// </summary>
-    [Export]
+    [Export(PropertyHint.Enum, "normal_bullet,penetrate_bullet,explosion_bullet")]
     public string BulletId { get; set; } = string.Empty;
     #endregion Exports
 

@@ -9,9 +9,12 @@ using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Bullet.Strategies.Collision;
 using EternalJourney.Cores.Consts;
+using EternalJourney.Cores.Models.Bullet;
 using EternalJourney.Enemy.Base;
 using Godot;
 
+// TODO: TopLevelの設定をエディター画面上で設定しているため、コード上で設定するようにする。
+// 現状コード側で設定するとエラーとなる
 
 /// <summary>
 /// スタンダード弾丸インターフェース
@@ -87,7 +90,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <summary>
     /// 爆風機能の有無（シーンにBlastTimerが存在するか）
     /// </summary>
-    private bool HasBlastCapability => BlastTimer != null;
+    public bool HasBlastCapability { get; set; }
     #endregion OptionalBlastNodes
 
     public override void Setup()
@@ -159,8 +162,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
                     // 爆風機能なし → 即座に除去
                     CallDeferred(nameof(RemoveSelf));
                 }
-                // 爆風機能あり → Blast状態への遷移を待つ
-                CallDeferred(nameof(RemoveSelf));
             })
             .When<BulletLogic.State.Blast>(state =>
             {
@@ -220,6 +221,12 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         BulletLogic.Input(new BulletLogic.Input.PhysicsProcess(
             Direction, Status.Spd, ElapsedTime, MovementStrategy, GlobalPosition
         ));
+    }
+
+    public override void Configure(BulletConfig config)
+    {
+        HasBlastCapability = config.Collision.Type == "explosion_collision";
+        base.Configure(config);
     }
 
     /// <summary>

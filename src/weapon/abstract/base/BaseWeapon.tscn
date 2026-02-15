@@ -7,9 +7,11 @@
 [sub_resource type="Resource" id="Resource_yyg1m"]
 script = ExtResource("3_kjbnc")
 MaxDur = 0.0
+CurrentDur = 0.0
 Atk = 0.0
 Spd = 0.0
 Def = 0.0
+Size = 0.0
 
 [node name="BaseWeapon" instance=ExtResource("1_5c132")]
 script = ExtResource("2_0veco")

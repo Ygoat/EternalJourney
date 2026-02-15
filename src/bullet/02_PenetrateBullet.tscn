@@ -19,15 +19,15 @@ size = Vector2(69, 68)
 [node name="02_PenetrateBullet" instance=ExtResource("1_sc7ra")]
 Status = SubResource("Resource_awd7k")
 
-[node name="BlastCollisionShape2D" type="CollisionShape2D" parent="." index="3"]
+[node name="BlastCollisionShape2D2" type="CollisionShape2D" parent="." index="3"]
 position = Vector2(0.5, 0)
 shape = SubResource("RectangleShape2D_mjh60")
 
-[node name="BlastColorRect" type="ColorRect" parent="." index="4"]
+[node name="BlastColorRect2" type="ColorRect" parent="." index="4"]
 offset_left = -34.0
 offset_top = -34.0
 offset_right = 35.0
 offset_bottom = 34.0
 color = Color(0.906627, 0.97, 0.4947, 1)
 
-[node name="BlastTimer" type="Timer" parent="." index="5"]
+[node name="BlastTimer2" type="Timer" parent="." index="5"]
