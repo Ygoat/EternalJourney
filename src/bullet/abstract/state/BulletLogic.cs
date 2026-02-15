@@ -180,7 +180,6 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
                     OnDepletedAction action = collisionStrategy.GetOnDepletedAction();
 
                     Output(new Output.Collapse());
-
                     switch (action)
                     {
                         case OnDepletedAction.Blast:

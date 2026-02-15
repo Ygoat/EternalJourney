@@ -17,6 +17,7 @@ Size = 0.0
 
 [node name="StandardWeapon" instance=ExtResource("1_vl25n")]
 script = ExtResource("2_nbie7")
+BulletId = ""
 Status = SubResource("Resource_h210x")
 
 [node name="Marker2D" type="Marker2D" parent="." index="0"]

@@ -14,6 +14,3 @@ Size = 0.0
 
 [node name="01_NormalWeapon" instance=ExtResource("1_rjxij")]
 Status = SubResource("Resource_h210x")
-
-[node name="StandardBulletFactory" parent="." index="4"]
-BulletId = "normal_bullet"

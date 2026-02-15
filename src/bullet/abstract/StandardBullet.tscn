@@ -16,7 +16,7 @@ Size = 0.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_60sgv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fltdy"]
-size = Vector2(69, 68)
+size = Vector2(172, 164)
 
 [node name="StandardBullet" instance=ExtResource("1_04t2q")]
 script = ExtResource("2_c4dpx")

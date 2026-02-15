@@ -60,7 +60,7 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
     [Signal]
     public delegate void RemovedEventHandler(BaseBullet bullet);
 
-    public StatusEffectServerManager StatusEffectServerManager { get; set; } = default!;
+    public StatusEffectServerManager StatusEffectServerManager { get; set; } = new StatusEffectServerManager();
 
     /// <summary>
     /// 移動方向
@@ -84,13 +84,11 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
 
     public virtual void Setup()
     {
-        StatusEffectServerManager = new StatusEffectServerManager();
         TopLevel = true;
     }
 
     public virtual void OnResolved()
     {
-        AddChild(StatusEffectServerManager);
     }
 
     /// <summary>

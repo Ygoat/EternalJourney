@@ -115,13 +115,9 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         BulletBinding
             .When<BulletLogic.State.EmitWait>(state =>
             {
-                if (CollisionStrategy is ExplosionCollisionStrategy)
-                {
-                    // 弾丸テクスチャ非表示と弾丸当たり判定無効化
-                    CallDeferred(nameof(SetBulletBodyEnabled), false);
-                    // 爆風テクスチャ非表示と爆風当たり判定無効化
-                    CallDeferred(nameof(SetBlastBodyEnabled), false);
-                }
+                // 爆風テクスチャ非表示と爆風当たり判定無効化
+                CallDeferred(nameof(SetBlastBodyEnabled), false);
+                // }
             })
             .When<BulletLogic.State.InFlight>(state =>
             {
@@ -132,11 +128,8 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
                 // 弾丸の向きを設定（武器の向いている方向）
                 Rotation = state.ShotGlobalAngle;
 
-                if (CollisionStrategy is ExplosionCollisionStrategy)
-                {
-                    // 弾丸テクスチャ表示と弾丸当たり判定有効化
-                    CallDeferred(nameof(SetBulletBodyEnabled), true);
-                }
+                // 弾丸テクスチャ非表示と弾丸当たり判定有効化
+                CallDeferred(nameof(SetBulletBodyEnabled), true);
 
                 SetPhysicsProcess(true);
             })

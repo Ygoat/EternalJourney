@@ -7,7 +7,6 @@
 script = ExtResource("2_ftv4s")
 BulletScene = null
 BulletName = ""
-BulletId = ""
 PoolSize = 100
 WaitTime = 0.1
 

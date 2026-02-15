@@ -5,7 +5,7 @@
       "name": "Normal Bullet",
       "status": {
         "maxDur": 1.0,
-        "atk": 2.0,
+        "atk": 1.0,
         "spd": 10.0,
         "def": 0.0,
         "size": 1.0
@@ -28,7 +28,7 @@
       "status": {
         "maxDur": 10.0,
         "atk": 1.0,
-        "spd": 10.0,
+        "spd": 8.0,
         "def": 0.0,
         "size": 1.0
       },
@@ -48,7 +48,7 @@
       "status": {
         "maxDur": 1.0,
         "atk": 4.0,
-        "spd": 8.0,
+        "spd": 6.0,
         "def": 0.0,
         "size": 1.0
       },
@@ -60,7 +60,7 @@
       "collision": {
         "type": "explosion",
         "params": {
-          "blastDuration": 0.5
+          "blastDuration": 1.0
         }
       }
     }

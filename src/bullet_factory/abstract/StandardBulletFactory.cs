@@ -1,5 +1,6 @@
 namespace EternalJourney.Bullet.Abstract;
 
+using System.Data;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Bullet.Abstract.Base;
@@ -14,9 +15,15 @@ using Godot;
 public interface IStandardBulletFactory
 {
     /// <summary>
-    /// 弾丸生成
+    /// 弾丸生成（デフォルトのBulletIdを使用）
     /// </summary>
     public void GenerateBullet();
+
+    /// <summary>
+    /// 弾丸生成（弾丸IDを指定）
+    /// </summary>
+    /// <param name="bulletId">弾丸設定ID（BulletConfig.jsonのidと対応）</param>
+    public void GenerateBullet(string bulletId);
 }
 
 /// <summary>
@@ -41,11 +48,6 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     [Export]
     public string BulletName { get; set; } = default!;
 
-    /// <summary>
-    /// 弾丸設定ID（BulletConfig.jsonのidと対応）
-    /// </summary>
-    [Export(PropertyHint.Enum, "normal_bullet,penetrate_bullet,explosion_bullet")]
-    public string BulletId { get; set; } = string.Empty;
     #endregion Exports
 
     private readonly BulletConfigReader _bulletConfigReader = new();
@@ -81,19 +83,24 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
 
         // 基底クラスのセットアップ（プール生成）
         base.Setup();
-
-        // 弾丸設定をJSONから読み込み
-        if (!string.IsNullOrEmpty(BulletId))
-        {
-            _bulletConfig = _bulletConfigReader.GetById(BulletId);
-        }
     }
 
     /// <summary>
-    /// 弾丸生成（公開API）
+    /// 弾丸生成（デフォルトのBulletIdを使用）
     /// </summary>
     public void GenerateBullet()
     {
+        RequestGenerate();
+    }
+
+    /// <summary>
+    /// 弾丸生成（弾丸IDを指定）
+    /// </summary>
+    /// <param name="bulletId">弾丸設定ID（BulletConfig.jsonのidと対応）</param>
+    public void GenerateBullet(string bulletId)
+    {
+        // 指定されたIDの弾丸設定を取得
+        _bulletConfig = _bulletConfigReader.GetById(bulletId);
         RequestGenerate();
     }
 
@@ -117,15 +124,14 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         if (bullet == null)
             return;
 
-
-        // シーンツリーに追加
-        AddChild(bullet);
-
         // 弾丸設定を適用（Setup()の後に呼び出すことでJSONの値が反映される）
         if (_bulletConfig != null)
         {
             bullet.Configure(_bulletConfig);
         }
+
+        // シーンツリーに追加
+        AddChild(bullet);
 
         // 弾丸射出
         bullet.Emit(GlobalPosition, GlobalRotation);

@@ -120,14 +120,14 @@ public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
         EnemyConfig? config = _enemyConfigReader.GetById(_pendingEnemyId)
             ?? _enemyConfigReader.GetById("normal_enemy");
 
-        // シーンツリーに追加（Setup()が呼ばれる）
-        AddChild(enemy);
-
         // 設定を適用（Setup()の後に呼び出すことでJSONの値が反映される）
         if (enemy is StandardEnemy standardEnemy && config != null)
         {
             standardEnemy.Configure(config);
         }
+
+        // シーンツリーに追加（Setup()が呼ばれる）
+        AddChild(enemy);
 
         // エネミースポーン
         if (enemy is IBaseEnemy iEnemy)
