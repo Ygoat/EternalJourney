@@ -167,7 +167,7 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
             public Transition On(in Input.Miss input)
             {
                 // 崩壊を出力して射出待機に遷移
-                Output(new Output.Collapse());
+                Output(new Output.RemoveSelf());
                 return To<EmitWait>();
             }
 
@@ -181,11 +181,14 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
 
                     Output(new Output.Collapse());
 
-                    return action switch
+                    switch (action)
                     {
-                        OnDepletedAction.Blast => To<Blast>(),
-                        _ => To<EmitWait>(),
-                    };
+                        case OnDepletedAction.Blast:
+                            return To<Blast>();
+                        default:
+                            Output(new Output.RemoveSelf());
+                            return To<EmitWait>();
+                    }
                 }
                 return ToSelf();
             }

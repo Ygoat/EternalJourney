@@ -87,10 +87,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     [Node]
     public IColorRect BlastColorRect { get; set; } = default!;
 
-    /// <summary>
-    /// 爆風機能の有無（シーンにBlastTimerが存在するか）
-    /// </summary>
-    public bool HasBlastCapability { get; set; }
     #endregion OptionalBlastNodes
 
     public override void Setup()
@@ -103,7 +99,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         BulletLogic.Set(this as IBaseBullet);
         BulletLogic.Set(BattleRepo);
         BulletLogic.Set<IBulletCollisionStrategy>(CollisionStrategy);
-
         // コリジョンレイヤーを弾丸
         CollisionLayer = CollisionEntity.Bullet;
         // コリジョンマスクをエネミー
@@ -120,7 +115,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         BulletBinding
             .When<BulletLogic.State.EmitWait>(state =>
             {
-                if (HasBlastCapability)
+                if (CollisionStrategy is ExplosionCollisionStrategy)
                 {
                     // 弾丸テクスチャ非表示と弾丸当たり判定無効化
                     CallDeferred(nameof(SetBulletBodyEnabled), false);
@@ -137,7 +132,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
                 // 弾丸の向きを設定（武器の向いている方向）
                 Rotation = state.ShotGlobalAngle;
 
-                if (HasBlastCapability)
+                if (CollisionStrategy is ExplosionCollisionStrategy)
                 {
                     // 弾丸テクスチャ表示と弾丸当たり判定有効化
                     CallDeferred(nameof(SetBulletBodyEnabled), true);
@@ -157,15 +152,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
             {
                 SetPhysicsProcess(false);
 
-                if (!HasBlastCapability)
-                {
-                    // 爆風機能なし → 即座に除去
-                    CallDeferred(nameof(RemoveSelf));
-                }
             })
             .When<BulletLogic.State.Blast>(state =>
             {
-                if (HasBlastCapability)
+                if (CollisionStrategy is ExplosionCollisionStrategy)
                 {
                     // 弾丸テクスチャ非表示と弾丸当たり判定無効化
                     CallDeferred(nameof(SetBulletBodyEnabled), false);
@@ -177,7 +167,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
             })
             .Handle((in BulletLogic.Output.RemoveSelf _) =>
             {
-                if (HasBlastCapability)
+                if (CollisionStrategy is ExplosionCollisionStrategy)
                 {
                     // 爆風テクスチャ非表示と爆風当たり判定無効化
                     CallDeferred(nameof(SetBlastBodyEnabled), false);
@@ -225,7 +215,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
 
     public override void Configure(BulletConfig config)
     {
-        HasBlastCapability = config.Collision.Type == "explosion_collision";
         base.Configure(config);
     }
 
@@ -296,11 +285,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <param name="flag">有効化フラグ</param>
     private void SetBlastBodyEnabled(bool flag)
     {
-        if (BlastColorRect == null || BlastCollisionShape2D == null)
-        {
-            return;
-        }
-
         if (flag)
         {
             BlastColorRect.Show();
