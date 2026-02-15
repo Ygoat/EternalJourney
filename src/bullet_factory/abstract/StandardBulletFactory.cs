@@ -118,15 +118,14 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
             return;
 
 
+        // シーンツリーに追加
+        AddChild(bullet);
 
         // 弾丸設定を適用（Setup()の後に呼び出すことでJSONの値が反映される）
         if (_bulletConfig != null)
         {
             bullet.Configure(_bulletConfig);
         }
-
-        // シーンツリーに追加
-        AddChild(bullet);
 
         // 弾丸射出
         bullet.Emit(GlobalPosition, GlobalRotation);

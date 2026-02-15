@@ -16,4 +16,4 @@ Size = 0.0
 Status = SubResource("Resource_h210x")
 
 [node name="StandardBulletFactory" parent="." index="4"]
-BulletId = "explosion_bullet"
+BulletId = "normal_bullet"
