@@ -167,6 +167,9 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
             case "poison":
                 StatusEffectServerManager.Configure<PoisonEffect>(effectConfig.Enabled);
                 break;
+            case "stun":
+                StatusEffectServerManager.Configure<StunEffect>(effectConfig.Enabled);
+                break;
         }
     }
 

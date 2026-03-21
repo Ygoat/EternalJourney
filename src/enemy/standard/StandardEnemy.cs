@@ -96,6 +96,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// </summary>
     public void OnReady()
     {
+        base.OnReady();
     }
 
     /// <summary>
@@ -236,6 +237,16 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // TargetDiscover入力
         StandardEnemyLogic.Input(new StandardEnemyLogic.Input.Spawn(spawnGlobalPosition, spawnGlobalAngle));
     }
+
+    /// <summary>
+    /// スタン開始：移動を停止する
+    /// </summary>
+    protected override void OnStunStart() => SetPhysicsProcess(false);
+
+    /// <summary>
+    /// スタン終了：移動を再開する
+    /// </summary>
+    protected override void OnStunEnd() => SetPhysicsProcess(true);
 
     /// <summary>
     /// エリア外に出た時消す

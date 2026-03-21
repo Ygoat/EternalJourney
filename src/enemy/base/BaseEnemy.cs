@@ -57,7 +57,7 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
     [Signal]
     public delegate void HitEventHandler();
 
-    public StatusEffectReceiverManager StatusEffectReceiverManager { get; set; } = default!;
+    public StatusEffectReceiverManager StatusEffectReceiverManager { get; set; } = new StatusEffectReceiverManager();
 
     /// <summary>
     /// 自己除去イベント
@@ -68,25 +68,44 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
     [Dependency]
     public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
+    public virtual void OnReady()
+    {
+        AddChild(StatusEffectReceiverManager);
+    }
+
     public virtual void Setup()
     {
-        StatusEffectReceiverManager = new StatusEffectReceiverManager();
         BaseEnemyLogic = new BaseEnemyLogic();
         BaseEnemyBinding = BaseEnemyLogic.Bind();
-        BaseEnemyLogic.Set(BattleRepo);
         BaseEnemyLogic.Set(this as IBaseEnemy);
     }
 
     public virtual void OnResolved()
     {
-        AddChild(StatusEffectReceiverManager);
-        StatusEffectReceiverManager.PoisonEffect.Damaged += OnPoisonDamaged;
+        // DI解決後に依存を設定
+        BaseEnemyLogic.Set(BattleRepo);
+        StatusEffectReceiverManager.Get<PoisonEffect>()!.Damaged += OnPoisonDamaged;
+        StatusEffectReceiverManager.Get<StunEffect>()!.Stunned += OnStunned;
+        StatusEffectReceiverManager.Get<StunEffect>()!.StunEnded += OnStunEnded;
         BaseEnemyBinding
             .Handle((in BaseEnemyLogic.Output.ReduceDurability output) =>
             {
                 Status.CurrentDur = output.ReducedDurability;
-            });
+            })
+            .Handle((in BaseEnemyLogic.Output.StunStart _) => OnStunStart())
+            .Handle((in BaseEnemyLogic.Output.StunEnd _) => OnStunEnd());
+        BaseEnemyLogic.Start();
     }
+
+    /// <summary>
+    /// スタン開始時の処理（サブクラスでオーバーライド）
+    /// </summary>
+    protected virtual void OnStunStart() { }
+
+    /// <summary>
+    /// スタン終了時の処理（サブクラスでオーバーライド）
+    /// </summary>
+    protected virtual void OnStunEnd() { }
 
     /// <summary>
     /// <inheritdoc/>
@@ -110,6 +129,16 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
     private void OnPoisonDamaged(float damage)
     {
         BaseEnemyLogic.Input(new BaseEnemyLogic.Input.PoisonDamage(damage));
+    }
+
+    private void OnStunned()
+    {
+        BaseEnemyLogic.Input(new BaseEnemyLogic.Input.StunStart());
+    }
+
+    private void OnStunEnded()
+    {
+        BaseEnemyLogic.Input(new BaseEnemyLogic.Input.StunEnd());
     }
 
     /// <summary>

@@ -31,6 +31,16 @@ public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEne
         /// 毒ダメージ
         /// </summary>
         public readonly record struct PoisonDamage(float Damage);
+
+        /// <summary>
+        /// スタン開始
+        /// </summary>
+        public readonly record struct StunStart;
+
+        /// <summary>
+        /// スタン終了
+        /// </summary>
+        public readonly record struct StunEnd;
     }
 
     /// <summary>
@@ -42,6 +52,16 @@ public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEne
         /// 減少後耐久値
         /// </summary>
         public readonly record struct ReduceDurability(float ReducedDurability);
+
+        /// <summary>
+        /// スタン開始
+        /// </summary>
+        public readonly record struct StunStart;
+
+        /// <summary>
+        /// スタン終了
+        /// </summary>
+        public readonly record struct StunEnd;
     }
 
     /// <summary>
@@ -52,7 +72,7 @@ public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEne
         /// <summary>
         /// スポーン待機
         /// </summary>
-        public record DummyState : State, IGet<Input.PoisonDamage>
+        public record DummyState : State, IGet<Input.PoisonDamage>, IGet<Input.StunStart>, IGet<Input.StunEnd>
         {
             public DummyState()
             {
@@ -64,6 +84,18 @@ public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEne
                 IBaseEnemy baseEnemy = Get<IBaseEnemy>();
                 float reducedDurability = battleRepo.ReduceEnemyDurability(baseEnemy.Status.CurrentDur, input.Damage);
                 Output(new Output.ReduceDurability(reducedDurability));
+                return ToSelf();
+            }
+
+            public Transition On(in Input.StunStart input)
+            {
+                Output(new Output.StunStart());
+                return ToSelf();
+            }
+
+            public Transition On(in Input.StunEnd input)
+            {
+                Output(new Output.StunEnd());
                 return ToSelf();
             }
         }

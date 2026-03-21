@@ -1,0 +1,15 @@
+@startuml StunEffectLogic
+state "StunEffectLogic State" as EternalJourney_Common_StatusEffect_State_StunEffectLogic_State {
+  state "InActive" as EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_InActive
+  state "Active" as EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_Active
+}
+
+EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_Active --> EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_Active : Apply
+EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_Active --> EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_InActive : Remove
+EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_InActive --> EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_Active : Apply
+
+EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_Active : OnEnter → Activated
+EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_Active : OnExit → Deactivated
+
+[*] --> EternalJourney_Common_StatusEffect_State_StunEffectLogic_State_InActive
+@enduml

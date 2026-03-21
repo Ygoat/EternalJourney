@@ -32,7 +32,9 @@
         "def": 0.0,
         "size": 1.0
       },
-      "statusEffects": [],
+      "statusEffects": [
+        { "type": "stun", "enabled": true }
+      ],
       "movement": {
         "type": "linear",
         "params": {}
