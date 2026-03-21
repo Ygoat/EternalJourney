@@ -108,7 +108,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // エネミーロジック
         StandardEnemyLogic = new StandardEnemyLogic();
         StandardEnemyLogic.Set(this as IStandardEnemy);
-        StandardEnemyLogic.Set(BattleRepo);
         // エネミーロジックバインド
         StandardEnemyBinding = StandardEnemyLogic.Bind();
         // コリジョンレイヤをエネミーに設定
@@ -118,8 +117,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // ステータスセット
         Status = new Status { Spd = 0.7f, MaxDur = 10.0f, CurrentDur = 10.0f };
 
-        // ターゲット位置
-        TargetPosition = EntityTable.Get<IShip>(0)!.EnemyTargetMarker.GlobalPosition;
         TopLevel = true;
     }
 
@@ -129,6 +126,11 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     public override void OnResolved()
     {
         base.OnResolved();
+
+        // DI解決後に依存を設定
+        StandardEnemyLogic.Set(BattleRepo);
+        // ターゲット位置を設定（DI解決後のみアクセス可能）
+        TargetPosition = EntityTable.Get<IShip>(0)!.EnemyTargetMarker.GlobalPosition;
 
         StandardEnemyBinding
             .Handle((in StandardEnemyLogic.Output.StartInvade output) =>

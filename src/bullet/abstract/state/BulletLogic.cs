@@ -147,7 +147,7 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
                 // 衝突ストラテジーから耐久コストを取得
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 IBaseBullet baseBullet = Get<IBaseBullet>();
-                IBulletCollisionStrategy collisionStrategy = Get<IBulletCollisionStrategy>();
+                IBulletCollisionStrategy collisionStrategy = baseBullet.CollisionStrategy;
 
                 float durabilityCost = collisionStrategy.GetDurabilityCost();
                 float currentDur = battleRepo.ReduceBulletDurability(baseBullet.Status.CurrentDur, durabilityCost);
@@ -176,7 +176,7 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
                 if (currentDur <= 0)
                 {
                     // 衝突ストラテジーに基づいて分岐
-                    IBulletCollisionStrategy collisionStrategy = Get<IBulletCollisionStrategy>();
+                    IBulletCollisionStrategy collisionStrategy = Get<IBaseBullet>().CollisionStrategy;
                     OnDepletedAction action = collisionStrategy.GetOnDepletedAction();
 
                     Output(new Output.Collapse());

@@ -1,11 +1,11 @@
 {
   "permissions": {
     "allow": [
-      "bash",
-      "grep",
-      "cat",
-      "find",
-      "ls"
+      "Bash(xargs grep:*)",
+      "Bash(while read:*)",
+      "Bash(do echo:*)",
+      "Bash(done)",
+      "Bash(dotnet build:*)"
     ]
   }
 }

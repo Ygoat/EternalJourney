@@ -18,7 +18,7 @@ public interface IBattleUI : ICanvasLayer
 /// バトルUIクラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class BattleUI : CanvasLayer, IBattleUI, IProvide<IBattleRepo>
+public partial class BattleUI : CanvasLayer, IBattleUI
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -51,12 +51,6 @@ public partial class BattleUI : CanvasLayer, IBattleUI, IProvide<IBattleRepo>
     /// </summary>
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
-
-    /// <summary>
-    /// バトルレポジトリプロバイダー
-    /// </summary>
-    /// <returns></returns>
-    IBattleRepo IProvide<IBattleRepo>.Value() => BattleRepo;
 
     public void OnReady()
     {

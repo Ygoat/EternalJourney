@@ -93,12 +93,9 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     {
         base.Setup();
 
-        // オプショナルノード取得（爆風弾シーンの場合のみ存在）
         BulletLogic = new BulletLogic();
         BulletBinding = BulletLogic.Bind();
         BulletLogic.Set(this as IBaseBullet);
-        BulletLogic.Set(BattleRepo);
-        BulletLogic.Set<IBulletCollisionStrategy>(CollisionStrategy);
         // コリジョンレイヤーを弾丸
         CollisionLayer = CollisionEntity.Bullet;
         // コリジョンマスクをエネミー
@@ -111,6 +108,9 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     public override void OnResolved()
     {
         base.OnResolved();
+
+        // DI解決後に依存を設定
+        BulletLogic.Set(BattleRepo);
 
         BulletBinding
             .When<BulletLogic.State.EmitWait>(state =>

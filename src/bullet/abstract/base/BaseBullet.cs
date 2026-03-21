@@ -38,6 +38,11 @@ public interface IBaseBullet : IBaseEntity
     /// 状態異常付与マネージャー
     /// </summary>
     public StatusEffectServerManager StatusEffectServerManager { get; set; }
+
+    /// <summary>
+    /// 衝突ストラテジー
+    /// </summary>
+    public IBulletCollisionStrategy CollisionStrategy { get; set; }
 }
 
 /// <summary>
