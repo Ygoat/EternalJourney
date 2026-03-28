@@ -56,25 +56,34 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
 
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
-    public void Setup()
+    public void Initialize()
     {
         DamageTimer = new Timer();
         RemoveTimer = new Timer();
         RemoveTime = 10;
         DamageDuration = 1;
-
-        PoisonEffectLogic = new PoisonEffectLogic();
-        PoisonEffectBinding = PoisonEffectLogic.Bind();
-
-        PoisonEffectLogic.Set(this as IPoisonEffect);
-        PoisonEffectLogic.Set(BattleRepo);
     }
 
-    public void OnResolved()
+    public void OnReady()
     {
         // タイマーをシーンツリーに追加して有効化
         AddChild(DamageTimer);
         AddChild(RemoveTimer);
+    }
+
+    public void Setup()
+    {
+        PoisonEffectLogic = new PoisonEffectLogic();
+        PoisonEffectBinding = PoisonEffectLogic.Bind();
+        PoisonEffectLogic.Set(this as IPoisonEffect);
+    }
+
+    public void OnResolved()
+    {
+        // DI解決後に依存を設定
+        PoisonEffectLogic.Set(BattleRepo);
+
+        // タイマー設定
         // ダメージタイマーの間隔設定
         DamageTimer.WaitTime = DamageDuration;
         // ダメージタイマーのタイムアウトイベント設定
@@ -121,7 +130,7 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
     /// <param name="target"></param>
     public override void Apply()
     {
-        PoisonEffectLogic.Input(new PoisonEffectLogic.Input.Apply());
+        PoisonEffectLogic?.Input(new PoisonEffectLogic.Input.Apply());
     }
 
     /// <summary>
@@ -130,7 +139,7 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
     /// <param name="target"></param>
     public override void Remove()
     {
-        PoisonEffectLogic.Input(new PoisonEffectLogic.Input.Remove());
+        PoisonEffectLogic?.Input(new PoisonEffectLogic.Input.Remove());
     }
 
     /// <summary>

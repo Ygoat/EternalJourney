@@ -1,0 +1,70 @@
+{
+  "bullets": [
+    {
+      "id": "normal_bullet",
+      "name": "Normal Bullet",
+      "status": {
+        "maxDur": 1.0,
+        "atk": 1.0,
+        "spd": 10.0,
+        "def": 0.0,
+        "size": 1.0
+      },
+      "statusEffects": [
+        { "type": "poison", "enabled": true }
+      ],
+      "movement": {
+        "type": "linear",
+        "params": {}
+      },
+      "collision": {
+        "type": "normal",
+        "params": {}
+      }
+    },
+    {
+      "id": "penetrate_bullet",
+      "name": "Penetrate Bullet",
+      "status": {
+        "maxDur": 10.0,
+        "atk": 1.0,
+        "spd": 8.0,
+        "def": 0.0,
+        "size": 1.0
+      },
+      "statusEffects": [
+        { "type": "stun", "enabled": true }
+      ],
+      "movement": {
+        "type": "linear",
+        "params": {}
+      },
+      "collision": {
+        "type": "normal",
+        "params": {}
+      }
+    },
+    {
+      "id": "explosion_bullet",
+      "name": "Explosion Bullet",
+      "status": {
+        "maxDur": 1.0,
+        "atk": 4.0,
+        "spd": 6.0,
+        "def": 0.0,
+        "size": 1.0
+      },
+      "statusEffects": [],
+      "movement": {
+        "type": "linear",
+        "params": {}
+      },
+      "collision": {
+        "type": "explosion",
+        "params": {
+          "blastDuration": 1.0
+        }
+      }
+    }
+  ]
+}

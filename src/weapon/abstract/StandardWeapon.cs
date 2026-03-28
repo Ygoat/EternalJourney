@@ -5,7 +5,7 @@ using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Bullet.Abstract;
 using EternalJourney.Radar;
 using EternalJourney.Weapon.Abstract.Base;
 using EternalJourney.Weapon.Abstract.State;
@@ -53,6 +53,12 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// 回転速度
     /// </summary>
     public float RotationSpeed { get; set; } = 0.05f;
+
+    /// <summary>
+    /// 弾丸設定ID（BulletConfig.jsonのidと対応）
+    /// </summary>
+    [Export(PropertyHint.Enum, "normal_bullet,penetrate_bullet,explosion_bullet")]
+    public string BulletId { get; set; } = string.Empty;
     #endregion Exports
 
     #region Nodes
@@ -60,7 +66,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// 弾丸ファクトリ
     /// </summary>
     [Node]
-    public IBaseBulletFactory StandardBulletFactory { get; set; } = default!;
+    public IStandardBulletFactory StandardBulletFactory { get; set; } = default!;
 
     /// <summary>
     /// <inheritdoc/>
@@ -159,7 +165,16 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
 
     public override void Attack()
     {
-        StandardBulletFactory.GenerateBullet();
+        if (!string.IsNullOrEmpty(BulletId))
+        {
+            // 武器側で指定された弾丸IDで射出
+            StandardBulletFactory.GenerateBullet(BulletId);
+        }
+        else
+        {
+            // デフォルトの弾丸IDで射出
+            StandardBulletFactory.GenerateBullet();
+        }
     }
 
     /// <summary>

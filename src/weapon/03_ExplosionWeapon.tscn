@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://gyffxcgk8skr" path="res://src/bullet/03_ExplosionBullet.tscn" id="2_f3gwh"]
 
 [node name="03_ExplosionWeapon" instance=ExtResource("1_fcx7l")]
+BulletId = ""
 
 [node name="StandardBulletFactory" parent="." index="4"]
 BulletScene = ExtResource("2_f3gwh")

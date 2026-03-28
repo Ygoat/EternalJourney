@@ -7,9 +7,11 @@
 [sub_resource type="Resource" id="Resource_id1wt"]
 script = ExtResource("3_ror23")
 MaxDur = 0.0
+CurrentDur = 0.0
 Atk = 0.0
 Spd = 0.0
 Def = 0.0
+Size = 0.0
 
 [node name="BaseBulletFactory" instance=ExtResource("1_wsjvs")]
 script = ExtResource("2_8icn7")

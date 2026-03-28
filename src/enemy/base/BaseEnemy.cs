@@ -1,0 +1,176 @@
+namespace EternalJourney.Enemy.Base;
+
+using System;
+using Chickensoft.AutoInject;
+using Chickensoft.Introspection;
+using EternalJourney.Battle.Domain;
+using EternalJourney.Common.BaseEntity;
+using EternalJourney.Common.StatusEffect;
+using EternalJourney.Cores.Pooling;
+using EternalJourney.Enemy.Base.State;
+using Godot;
+
+/// <summary>
+/// ベースエネミーインターフェース
+/// </summary>
+public interface IBaseEnemy : IBaseEntity, IStatusEffectTarget
+{
+    /// <summary>
+    /// ヒットシグナル
+    /// </summary>
+    public event BaseEnemy.HitEventHandler Hit;
+
+    /// <summary>
+    /// 除去シグナル
+    /// </summary>
+    public event BaseEnemy.RemovedEventHandler Removed;
+
+    /// <summary>
+    /// スポーン
+    /// </summary>
+    /// <param name="shotGlobalPosition"></param>
+    /// <param name="shotGlobalAngle"></param>
+    public void Spawn(Vector2 spawnGlobalPosition, float spawnGlobalAngle);
+}
+
+/// <summary>
+/// ベース弾丸クラス
+/// </summary>
+[Meta(typeof(IAutoNode))]
+public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
+{
+    public override void _Notification(int what) => this.Notify(what);
+
+    /// <summary>
+    /// ベースエネミーロジック
+    /// </summary>
+    public BaseEnemyLogic BaseEnemyLogic { get; set; } = default!;
+
+    /// <summary>
+    /// ベースエネミーバインド
+    /// </summary>
+    public BaseEnemyLogic.IBinding BaseEnemyBinding { get; set; } = default!;
+
+    /// <summary>
+    /// ヒットシグナル
+    /// </summary>
+    [Signal]
+    public delegate void HitEventHandler();
+
+    public StatusEffectReceiverManager StatusEffectReceiverManager { get; set; } = new StatusEffectReceiverManager();
+
+    /// <summary>
+    /// 自己除去イベント
+    /// </summary>
+    [Signal]
+    public delegate void RemovedEventHandler(BaseEnemy Enemy);
+
+    [Dependency]
+    public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
+
+    public virtual void OnReady()
+    {
+        AddChild(StatusEffectReceiverManager);
+    }
+
+    public virtual void Setup()
+    {
+        BaseEnemyLogic = new BaseEnemyLogic();
+        BaseEnemyBinding = BaseEnemyLogic.Bind();
+        BaseEnemyLogic.Set(this as IBaseEnemy);
+    }
+
+    public virtual void OnResolved()
+    {
+        // DI解決後に依存を設定
+        BaseEnemyLogic.Set(BattleRepo);
+        StatusEffectReceiverManager.Get<PoisonEffect>()!.Damaged += OnPoisonDamaged;
+        StatusEffectReceiverManager.Get<StunEffect>()!.Stunned += OnStunned;
+        StatusEffectReceiverManager.Get<StunEffect>()!.StunEnded += OnStunEnded;
+        BaseEnemyBinding
+            .Handle((in BaseEnemyLogic.Output.ReduceDurability output) =>
+            {
+                Status.CurrentDur = output.ReducedDurability;
+            })
+            .Handle((in BaseEnemyLogic.Output.StunStart _) => OnStunStart())
+            .Handle((in BaseEnemyLogic.Output.StunEnd _) => OnStunEnd());
+        BaseEnemyLogic.Start();
+    }
+
+    /// <summary>
+    /// スタン開始時の処理（サブクラスでオーバーライド）
+    /// </summary>
+    protected virtual void OnStunStart() { }
+
+    /// <summary>
+    /// スタン終了時の処理（サブクラスでオーバーライド）
+    /// </summary>
+    protected virtual void OnStunEnd() { }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    /// <param name="spawnGlobalPosition"></param>
+    /// <param name="spawnGlobalAngle"></param>
+    /// <exception cref="NotImplementedException"></exception>
+    public virtual void Spawn(Vector2 spawnGlobalPosition, float spawnGlobalAngle)
+    {
+        throw new NotImplementedException();
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public virtual void RemoveSelf()
+    {
+        throw new NotImplementedException();
+    }
+
+    private void OnPoisonDamaged(float damage)
+    {
+        BaseEnemyLogic.Input(new BaseEnemyLogic.Input.PoisonDamage(damage));
+    }
+
+    private void OnStunned()
+    {
+        BaseEnemyLogic.Input(new BaseEnemyLogic.Input.StunStart());
+    }
+
+    private void OnStunEnded()
+    {
+        BaseEnemyLogic.Input(new BaseEnemyLogic.Input.StunEnd());
+    }
+
+    /// <summary>
+    /// プールから取得された時のコールバック（IPoolable実装）
+    /// </summary>
+    public virtual void OnAcquired()
+    {
+        // 耐久値を最大値にリセット
+        if (Status != null)
+        {
+            Status.CurrentDur = Status.MaxDur;
+        }
+        // 表示状態を有効化
+        Visible = true;
+        // ロジックのリセット（実装されている場合）
+        if (BaseEnemyLogic != null)
+        {
+            // ステートマシンのリセット処理
+        }
+    }
+
+    /// <summary>
+    /// プールに返却される時のコールバック（IPoolable実装）
+    /// </summary>
+    public virtual void OnReleased()
+    {
+        // 表示状態を無効化
+        Visible = false;
+        // 状態異常をクリア
+        if (StatusEffectReceiverManager != null)
+        {
+            // 状態異常のクリーンアップ処理
+        }
+    }
+}

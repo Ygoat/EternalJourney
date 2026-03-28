@@ -8,21 +8,21 @@ using Chickensoft.Introspection;
 using Godot;
 
 /// <summary>
-/// 状態異常マネージャーインターフェース
+/// 状態異常付与マネージャーインターフェース
 /// </summary>
-public interface IProvideStatusEffectServerManager : INode
+public interface IStatusEffectServerManager : INode
 {
 }
 
 /// <summary>
-/// 状態異常マネージャークラス
+/// 状態異常付与マネージャークラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class StatusEffectServerManager : Node, IProvideStatusEffectServerManager
+public partial class StatusEffectServerManager : Node, IStatusEffectServerManager
 {
     public override void _Notification(int what) => this.Notify(what);
 
-    // 状態異常の有効・無効を管理(状態異常が増えたら追加する)
+    // 状態異常の有効・無効を管理（状態異常が増えても変更不要）
     private readonly Dictionary<Type, bool> _effectEnabled = new()
     {
         { typeof(PoisonEffect), false },
@@ -39,31 +39,10 @@ public partial class StatusEffectServerManager : Node, IProvideStatusEffectServe
     {
         foreach (var kvp in _effectEnabled)
         {
-            var effectType = kvp.Key;
-            var enabled = kvp.Value;
+            if (!kvp.Value) continue;
 
-            if (!enabled)
-            {
-                continue;
-            }
-
-            // 状態異常インスタンスを取得して Apply()
-            var effect = GetStatusEffectInstance(effectType, manager);
+            var effect = manager.Get(kvp.Key);
             effect?.Apply();
         }
-    }
-
-    private StatusEffect? GetStatusEffectInstance(Type type, IStatusEffectReceiverManager manager)
-    {
-        // 型に応じて manager からインスタンスを取り出す
-        // ここは状態異常の種類が増えたら対応を増やします
-        if (type == typeof(PoisonEffect))
-        {
-            return manager.PoisonEffect;
-        }
-        // else if (type == typeof(BurnEffect))
-        //     return manager.BurnEffect;
-
-        return null;
     }
 }

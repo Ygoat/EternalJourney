@@ -1,0 +1,93 @@
+{
+  "enemies": [
+    {
+      "id": "normal_enemy",
+      "name": "Normal Enemy",
+      "status": {
+        "maxDur": 10.0,
+        "atk": 1.0,
+        "spd": 1.0,
+        "def": 0.0,
+        "size": 1.0
+      },
+      "movement": {
+        "type": "linear",
+        "params": {}
+      },
+      "attack": {
+        "type": "none",
+        "params": {}
+      },
+      "scoreValue": 10
+    },
+    {
+      "id": "sine_enemy",
+      "name": "Sine Wave Enemy",
+      "status": {
+        "maxDur": 15.0,
+        "atk": 2.0,
+        "spd": 0.1,
+        "def": 1.0,
+        "size": 1.2
+      },
+      "movement": {
+        "type": "sine_wave",
+        "params": {
+          "amplitude": 50.0,
+          "frequency": 2.0
+        }
+      },
+      "attack": {
+        "type": "none",
+        "params": {}
+      },
+      "scoreValue": 25
+    },
+    {
+      "id": "homing_enemy",
+      "name": "Homing Enemy",
+      "status": {
+        "maxDur": 8.0,
+        "atk": 3.0,
+        "spd": 0.4,
+        "def": 0.5,
+        "size": 0.8
+      },
+      "movement": {
+        "type": "homing",
+        "params": {
+          "turnSpeed": 1.5,
+          "maxTurnAngle": 45.0
+        }
+      },
+      "attack": {
+        "type": "none",
+        "params": {}
+      },
+      "scoreValue": 30
+    },
+    {
+      "id": "stop_and_go_enemy",
+      "name": "Stop and Go Enemy",
+      "status": {
+        "maxDur": 20.0,
+        "atk": 2.5,
+        "spd": 1.0,
+        "def": 2.0,
+        "size": 1.5
+      },
+      "movement": {
+        "type": "stop_and_go",
+        "params": {
+          "moveDuration": 1.0,
+          "stopDuration": 0.5
+        }
+      },
+      "attack": {
+        "type": "none",
+        "params": {}
+      },
+      "scoreValue": 50
+    }
+  ]
+}

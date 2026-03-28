@@ -1,202 +1,152 @@
 namespace EternalJourney.EnemyFactory;
 
-using System.Collections.Generic;
-using System.Linq;
 using Chickensoft.AutoInject;
-using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.Common.BaseFactory;
 using EternalJourney.Cores.Consts;
-using EternalJourney.Cores.Utils;
-using EternalJourney.Enemy.Abstract.Base;
-using EternalJourney.EnemyFactory.State;
+using EternalJourney.Cores.Models.Enemy;
+using EternalJourney.Cores.Repositories;
+using EternalJourney.Enemy.Base;
+using EternalJourney.Enemy.Standard;
 using Godot;
 
 /// <summary>
 /// エネミーファクトリインターフェース
 /// </summary>
-public interface IEnemyFactory : INode2D
+public interface IEnemyFactory
 {
-    public Queue<BaseEnemy> EnemiesQueue { get; set; }
-    public void SpawnEnemy();
-};
+    void SpawnEnemy();
+    void SpawnEnemy(string enemyId);
+}
 
 /// <summary>
-/// エネミーファクトリークラス
+/// エネミーファクトリクラス（BaseFactoryを使用したリファクタリング版）
+/// 重複コードを削減し、Godotエコシステムを活用した実装
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class EnemyFactory : Node2D, IEnemyFactory
+public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
 {
     public override void _Notification(int what) => this.Notify(what);
 
-    #region State
     /// <summary>
-    /// エネミーファクトリロジック
+    /// エネミー設定リーダー
     /// </summary>
-    public EnemyFactoryLogic EnemyFactoryLogic { get; set; } = default!;
+    private readonly EnemyConfigReader _enemyConfigReader = new();
 
     /// <summary>
-    /// エネミーファクトリバインド
+    /// 次にスポーンするエネミーID
     /// </summary>
-    public EnemyFactoryLogic.IBinding EnemyFactoryBinding { get; set; } = default!;
-    #endregion State
-
-    #region Exports
-    /// <summary>
-    /// 待機時間
-    /// </summary>
-    public double WaitTime { get; set; } = 0.1;
+    private string _pendingEnemyId = "normal_enemy";
 
     /// <summary>
-    ///　エネミー配列
+    /// シーンパスの取得（BaseFactory抽象メソッドの実装）
     /// </summary>
-    public BaseEnemy[] Enemies { get; set; } = new BaseEnemy[200];
-
-    /// <summary>
-    /// エネミーキュー
-    /// </summary>
-    public Queue<BaseEnemy> EnemiesQueue { get; set; } = new Queue<BaseEnemy>();
-    #endregion Exports
-
-    #region Nodes
-    /// <summary>
-    /// タイマーノード
-    /// </summary>
-    [Node]
-    public ITimer Timer { get; set; } = default!;
-    #endregion Nodes
-
-    #region Dependencies
-    /// <summary>
-    /// インスタンス化部品
-    /// </summary>
-    [Dependency]
-    public IInstantiator Instantiator => this.DependOn<IInstantiator>(() => new Instantiator(GetTree()));
-    #endregion Dependencies
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public void Initialize()
+    /// <returns>エネミーシーンのパス</returns>
+    protected override string GetScenePath()
     {
-        this.Provide();
+        return Const.EnemyNodePath;
     }
 
     /// <summary>
-    /// <inheritdoc/>
+    /// プール可能なオブジェクトのセットアップ
+    /// エネミーがプールに返却される際のイベントを設定
     /// </summary>
-    public void Setup()
+    /// <param name="obj">セットアップするエネミーオブジェクト</param>
+    protected override void SetupPoolableObject(BaseEnemy obj)
     {
-        // エネミーファクトリロジックインスタンス化
-        EnemyFactoryLogic = new EnemyFactoryLogic();
-        // エネミーファクトリロジックバインド
-        EnemyFactoryBinding = EnemyFactoryLogic.Bind();
+        base.SetupPoolableObject(obj);
 
-        // エネミー配列
-        Enemies = Enemies.Select(e =>
-        {
-            // エネミーインスタンス化
-            e = Instantiator.LoadAndInstantiate<BaseEnemy>(Const.EnemyNodePath);
-            e.Removed += OnRemoved;
-            // エネミーキュー追加
-            EnemiesQueue.Enqueue(e);
-            return e;
-        }).ToArray();
+        // Removedイベントをプールへの返却処理に接続
+        obj.Removed += OnRemoved;
     }
 
     /// <summary>
-    /// <inheritdoc/>
+    /// セットアップ処理のオーバーライド
     /// </summary>
-    public void OnReady()
+    public override void Setup()
     {
-        EnemyFactoryBinding
-            // ReadyComplete出力時
-            .Handle((in EnemyFactoryLogic.Output.ReadyComplete _) =>
-            {
-                // 物理処理有効化
-                // SetPhysicsProcess(true);
-                CallDeferred(nameof(DequeueAndSpawn));
-            })
-            // StartCoolDown出力時
-            .Handle((in EnemyFactoryLogic.Output.StartCoolDown _) =>
-            {
-                // 物理処理無効化
-                // SetPhysicsProcess(false);
-                // タイマーセット
-                SetTimer();
-            });
-        // タイマーワンショット設定
-        Timer.OneShot = true;
-        // タイマー待機時間設定
-        Timer.SetWaitTime(WaitTime);
-        // タイマーイベント設定
-        Timer.Timeout += OnTimeout;
-        // エネミーファクトリーロジック初期状態開始
-        EnemyFactoryLogic.Start();
+        // プールサイズの設定（エネミーは200個）
+        PoolSize = 200;
+        WaitTime = 0.2f;
+        // 基底クラスの初期化を呼び出す
+        base.Initialize();
+
+        // 基底クラスのセットアップ（プール生成）
+        base.Setup();
     }
 
     /// <summary>
-    /// <inheritdoc/>
+    /// エネミーをスポーン（公開API）
+    /// デフォルトのnormal_enemyをスポーン
     /// </summary>
-    /// <param name="delta"></param>
-    public void OnPhysicsProcess(double delta)
+    public void SpawnEnemy()
     {
-        // エネミー生成
-        // CallDeferred(nameof(GenerateEnemy));
+        SpawnEnemy("normal_enemy");
     }
 
     /// <summary>
-    /// タイムアウトイベント
+    /// 指定IDのエネミーをスポーン
     /// </summary>
-    public void OnTimeout()
+    /// <param name="enemyId">エネミーID</param>
+    public void SpawnEnemy(string enemyId)
     {
-        // CoolDownComplete入力
-        EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.CoolDownComplete());
+        _pendingEnemyId = enemyId;
+        RequestGenerate();
     }
 
     /// <summary>
-    /// タイマーセット
+    /// 生成完了時の処理（BaseFactoryのオーバーライド）
     /// </summary>
-    public void SetTimer()
+    protected override void OnGenerated()
     {
-        // タイマースタート
-        Timer.Start();
+        // エネミー生成（遅延実行）
+        CallDeferred(nameof(DequeueAndSpawn));
     }
 
     /// <summary>
     /// キューからエネミーを取り出してスポーン
+    /// プールからエネミーを取得してシーンツリーに追加し、スポーン処理を実行
     /// </summary>
-    public void DequeueAndSpawn()
+    private void DequeueAndSpawn()
     {
-        // Spawn入力
-        EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.Spawn());
-        // エネミーキュー取り出し
-        Node2D enemy = EnemiesQueue.Dequeue();
+        // プールからエネミーを取得
+        BaseEnemy? enemy = AcquireFromPool();
+        if (enemy == null)
+        {
+            return;
+        }
 
+        // エネミー設定を取得（フォールバック: デフォルト設定）
+        EnemyConfig? config = _enemyConfigReader.GetById(_pendingEnemyId)
+            ?? _enemyConfigReader.GetById("normal_enemy");
+
+        // 設定を適用（Setup()の後に呼び出すことでJSONの値が反映される）
+        if (enemy is StandardEnemy standardEnemy && config != null)
+        {
+            standardEnemy.Configure(config);
+        }
+
+        // シーンツリーに追加（Setup()が呼ばれる）
         AddChild(enemy);
+
+        // エネミースポーン
         if (enemy is IBaseEnemy iEnemy)
         {
             iEnemy.Spawn(GlobalPosition, GlobalRotation);
         }
+
+        // クールダウン開始
+        StartCoolDown();
     }
 
     /// <summary>
-    /// エネミーをスポーン
+    /// エネミー除去イベントハンドラ
+    /// エネミーがシーンから削除された際にプールに返却
     /// </summary>
-    /// <param name="spawnGlobalPosition"></param>
-    /// <param name="spawnGlobalAngle"></param>
-    public void SpawnEnemy()
+    /// <param name="enemy">除去されたエネミー</param>
+    private void OnRemoved(BaseEnemy enemy)
     {
-        // Spawn入力
-        EnemyFactoryLogic.Input(new EnemyFactoryLogic.Input.Spawn());
-    }
-
-    /// <summary>
-    /// Collapsedイベントファンクション
-    /// </summary>
-    /// <param name="bullet"></param>
-    public void OnRemoved(BaseEnemy enemy)
-    {
-        // キューに追加
-        EnemiesQueue.Enqueue(enemy);
+        // プールに返却
+        ReleaseToPool(enemy);
     }
 }
