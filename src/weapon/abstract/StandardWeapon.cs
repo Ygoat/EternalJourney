@@ -99,8 +99,9 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void Setup()
+    public override void Setup()
     {
+        base.Setup();
         // 武器ロジックインスタンス化
         StandardWeaponLogic = new StandardWeaponLogic();
         // 武器ロジックバインド
@@ -110,8 +111,9 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void OnResolved()
+    public override void OnResolved()
     {
+        base.OnResolved();
         WeaponBind
             // Idling出力時
             .Handle((in StandardWeaponLogic.Output.Idling _) =>
@@ -137,8 +139,10 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// <inheritdoc/>
     /// </summary>
     /// <param name="delta"></param>
-    public void OnPhysicsProcess(double delta)
+    public override void OnPhysicsProcess(double delta)
     {
+        base.OnPhysicsProcess(delta);
+
         // センターマーカーと発射口マーカーから武器の方向を計算
         WeaponDirection = CenterMarker.GlobalPosition.DirectionTo(Marker2D.GlobalPosition);
         // レーダーにて索敵された敵のうち一番近い敵のArea2Dを取得

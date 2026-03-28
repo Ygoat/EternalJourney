@@ -92,8 +92,9 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
         TopLevel = true;
     }
 
-    public virtual void OnResolved()
+    public override void OnResolved()
     {
+        base.OnResolved();
     }
 
     /// <summary>

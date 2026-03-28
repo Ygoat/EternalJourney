@@ -37,6 +37,16 @@ public interface IAppRepo : IDisposable
     /// メインメニュー開始イベントファンクション
     /// </summary>
     void OnMainMenuEntered();
+
+    /// <summary>
+    /// デバッグモード状態
+    /// </summary>
+    bool IsDebugMode { get; }
+
+    /// <summary>
+    /// デバッグモードを開始する
+    /// </summary>
+    void StartDebugMode();
 }
 
 
@@ -80,6 +90,16 @@ public class AppRepo : IAppRepo
     {
         GameEntered?.Invoke();
     }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public bool IsDebugMode { get; private set; }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void StartDebugMode() => IsDebugMode = true;
 
     /// <summary>
     /// <inheritdoc/>

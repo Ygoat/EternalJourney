@@ -94,7 +94,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void OnReady()
+    public override void OnReady()
     {
         base.OnReady();
     }
@@ -202,8 +202,10 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// <inheritdoc/>
     /// </summary>
     /// <param name="delta"></param>
-    public void OnPhysicsProcess(double delta)
+    public override void OnPhysicsProcess(double delta)
     {
+        base.OnPhysicsProcess(delta);
+
         // 経過時間を更新
         _elapsedTime += (float)delta;
 

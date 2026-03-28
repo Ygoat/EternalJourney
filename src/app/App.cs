@@ -106,6 +106,9 @@ public partial class App : CanvasLayer, IApp
         // メニュー：スタートゲームシグナル受信時のイベント設定
         Menu.StartGame += OnStartGame;
 
+        // メニュー：デバッグモードゲームスタートシグナル受信時のイベント設定
+        Menu.StartDebugGame += OnStartDebugGame;
+
         // アプリケーションレポジトリインスタンス化
         AppRepo = new AppRepo();
 
@@ -184,6 +187,16 @@ public partial class App : CanvasLayer, IApp
     public void OnStartGame()
     {
         // StartGame（ゲームスタート）を入力
+        AppLogic.Input(new AppLogic.Input.StartGame());
+    }
+
+    /// <summary>
+    /// デバッグモードゲーム開始イベント
+    /// </summary>
+    public void OnStartDebugGame()
+    {
+        // デバッグモードを有効にしてからゲームスタート
+        AppRepo.StartDebugMode();
         AppLogic.Input(new AppLogic.Input.StartGame());
     }
 

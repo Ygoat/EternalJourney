@@ -54,3 +54,7 @@ color = Color(0.906627, 0.97, 0.4947, 1)
 
 [node name="BlastTimer" type="Timer" parent="." index="5"]
 unique_name_in_owner = true
+
+[node name="DebugLabel" parent="." index="6"]
+visible = true
+text = "test"

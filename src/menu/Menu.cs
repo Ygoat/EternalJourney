@@ -14,6 +14,11 @@ public interface IMenu : IControl
     /// スタートゲームイベント
     /// </summary>
     public event Menu.StartGameEventHandler StartGame;
+
+    /// <summary>
+    /// デバッグモードでゲームスタートするイベント
+    /// </summary>
+    public event Menu.StartDebugGameEventHandler StartDebugGame;
 }
 
 /// <summary>
@@ -30,6 +35,12 @@ public partial class Menu : Control, IMenu
     /// </summary>
     [Signal]
     public delegate void StartGameEventHandler();
+
+    /// <summary>
+    /// デバッグモードゲームスタートシグナル
+    /// </summary>
+    [Signal]
+    public delegate void StartDebugGameEventHandler();
     #endregion Signals
 
     #region Nodes
@@ -38,6 +49,12 @@ public partial class Menu : Control, IMenu
     /// </summary>
     [Node]
     public IButton StartGameButton { get; set; } = default!;
+
+    /// <summary>
+    /// デバッグボタン
+    /// </summary>
+    [Node]
+    public IButton DebugButton { get; set; } = default!;
     #endregion Nodes
 
     /// <summary>
@@ -45,8 +62,8 @@ public partial class Menu : Control, IMenu
     /// </summary>
     public void OnReady()
     {
-        // スタートボタン押下イベント
         StartGameButton.Pressed += OnStartGamePressed;
+        DebugButton.Pressed += OnDebugButtonPressed;
     }
 
     /// <summary>
@@ -54,7 +71,14 @@ public partial class Menu : Control, IMenu
     /// </summary>
     public void OnStartGamePressed()
     {
-        // スタートゲームイベントシグナルを出力
         EmitSignal(SignalName.StartGame);
+    }
+
+    /// <summary>
+    /// デバッグボタン押下イベントファンクション
+    /// </summary>
+    public void OnDebugButtonPressed()
+    {
+        EmitSignal(SignalName.StartDebugGame);
     }
 }

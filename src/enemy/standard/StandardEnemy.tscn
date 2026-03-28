@@ -55,3 +55,7 @@ unique_name_in_owner = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." index="2"]
 shape = SubResource("RectangleShape2D_s7ltu")
+
+[node name="DebugLabel" parent="." index="3"]
+visible = true
+text = "test"

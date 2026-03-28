@@ -200,8 +200,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <inheritdoc/>
     /// </summary>
     /// <param name="delta"></param>
-    public void OnPhysicsProcess(double delta)
+    public override void OnPhysicsProcess(double delta)
     {
+        base.OnPhysicsProcess(delta);
+
         // 経過時間を更新
         ElapsedTime += (float)delta;
         // PhysicsProcess入力（移動ストラテジーを渡す）

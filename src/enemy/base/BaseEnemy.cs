@@ -68,20 +68,23 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
     [Dependency]
     public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
-    public virtual void OnReady()
+    public override void OnReady()
     {
+        base.OnReady();
         AddChild(StatusEffectReceiverManager);
     }
 
-    public virtual void Setup()
+    public override void Setup()
     {
+        base.Setup();
         BaseEnemyLogic = new BaseEnemyLogic();
         BaseEnemyBinding = BaseEnemyLogic.Bind();
         BaseEnemyLogic.Set(this as IBaseEnemy);
     }
 
-    public virtual void OnResolved()
+    public override void OnResolved()
     {
+        base.OnResolved();
         // DI解決後に依存を設定
         BaseEnemyLogic.Set(BattleRepo);
         StatusEffectReceiverManager.Get<PoisonEffect>()!.Damaged += OnPoisonDamaged;
