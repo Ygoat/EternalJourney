@@ -16,6 +16,16 @@ public interface IBattleRepo : IDisposable
     public float PoisonDamage { get; set; }
 
     /// <summary>
+    /// ATK乗数（スキルバフ用）
+    /// </summary>
+    public float AtkMultiplier { get; set; }
+
+    /// <summary>
+    /// SPD乗数（スキルバフ用）
+    /// </summary>
+    public float SpdMultiplier { get; set; }
+
+    /// <summary>
     /// スコア
     /// </summary>
     public IAutoProp<int> Score { get; }
@@ -103,6 +113,16 @@ public class BattleRepo : IBattleRepo
     /// 毒ダメージ
     /// </summary>
     public float PoisonDamage { get; set; } = 2.5f;
+
+    /// <summary>
+    /// ATK乗数（スキルバフ用）
+    /// </summary>
+    public float AtkMultiplier { get; set; } = 1.0f;
+
+    /// <summary>
+    /// SPD乗数（スキルバフ用）
+    /// </summary>
+    public float SpdMultiplier { get; set; } = 1.0f;
 
     /// <summary>
     /// スコア
@@ -218,7 +238,7 @@ public class BattleRepo : IBattleRepo
 
     public float ReduceEnemyDurability(float curDurability, float damage)
     {
-        return curDurability -= damage;
+        return curDurability - damage * AtkMultiplier;
     }
 
     public float ReduceBulletDurability(float curDurability, float damage)

@@ -7,12 +7,22 @@ using Godot;
 
 public interface ISkillButton : IControl
 {
+    /// <summary>
+    /// スキルボタン押下シグナル
+    /// </summary>
+    public event SkillButton.ActivatedEventHandler Activated;
 }
 
 [Meta(typeof(IAutoNode))]
 public partial class SkillButton : Control, ISkillButton
 {
     public override void _Notification(int what) => this.Notify(what);
+
+    /// <summary>
+    /// スキル発動シグナル
+    /// </summary>
+    [Signal]
+    public delegate void ActivatedEventHandler();
 
     [Node]
     public ITimer Timer { get; set; } = default!;
@@ -56,7 +66,7 @@ public partial class SkillButton : Control, ISkillButton
 
     public void OnPressed()
     {
-        GD.Print("Pressed");
+        EmitSignal(SignalName.Activated);
         Button.Disabled = true;
         Timer.Start();
         Control.Show();

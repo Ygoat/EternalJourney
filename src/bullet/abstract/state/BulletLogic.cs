@@ -86,6 +86,11 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
         /// 自ノード除去
         /// </summary>
         public readonly record struct RemoveSelf();
+
+        /// <summary>
+        /// SPD更新（バフ乗数適用後の値）
+        /// </summary>
+        public readonly record struct SpdUpdated(float Spd);
     }
 
     /// <summary>
@@ -104,6 +109,11 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
 
             public Transition On(in Input.Emit input)
             {
+                // SPDバフ乗数を適用してOutput
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                IBaseBullet baseBullet = Get<IBaseBullet>();
+                Output(new Output.SpdUpdated(baseBullet.Status.Spd * battleRepo.SpdMultiplier));
+
                 Input.Emit ip = input;
                 return To<InFlight>().With(
                     (state) =>

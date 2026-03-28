@@ -141,6 +141,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
             {
                 Status.CurrentDur = output.CurrentDur;
             })
+            .Handle((in BulletLogic.Output.SpdUpdated output) =>
+            {
+                Status.Spd = output.Spd;
+            })
             .Handle((in BulletLogic.Output.Collapse _) =>
             {
                 SetPhysicsProcess(false);

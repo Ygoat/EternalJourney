@@ -1,0 +1,18 @@
+@startuml StatusUpSkillLogic
+state "StatusUpSkillLogic State" as EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State {
+  state "InActive" as EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_InActive
+  state "Active" as EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active
+}
+
+EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active --> EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active : Apply
+EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active --> EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active : Remove
+EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active --> EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_InActive : Remove
+EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_InActive --> EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active : Apply
+
+EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active : OnApply → Activated
+EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active : OnEnter → Activated
+EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active : OnExit → Deactivated
+EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_Active : OnRemove → Activated
+
+[*] --> EternalJourney_StatusUpSkill_State_StatusUpSkillLogic_State_InActive
+@enduml

@@ -66,26 +66,30 @@ alignment = 1
 layout_mode = 2
 alignment = 2
 
-[node name="SkillButton" parent="MarginContainer/HBoxContainer/VBoxContainer" instance=ExtResource("1_xs630")]
+[node name="SkillButton1" parent="MarginContainer/HBoxContainer/VBoxContainer" instance=ExtResource("1_xs630")]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="SkillButton" parent="MarginContainer/HBoxContainer/VBoxContainer2" instance=ExtResource("1_xs630")]
+[node name="SkillButton2" parent="MarginContainer/HBoxContainer/VBoxContainer2" instance=ExtResource("1_xs630")]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="SkillButton" parent="MarginContainer/HBoxContainer/VBoxContainer3" instance=ExtResource("1_xs630")]
+[node name="SkillButton3" parent="MarginContainer/HBoxContainer/VBoxContainer3" instance=ExtResource("1_xs630")]
+unique_name_in_owner = true
 layout_mode = 2
 
 [node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="SkillButton" parent="MarginContainer/HBoxContainer/VBoxContainer4" instance=ExtResource("1_xs630")]
+[node name="SkillButton4" parent="MarginContainer/HBoxContainer/VBoxContainer4" instance=ExtResource("1_xs630")]
+unique_name_in_owner = true
 layout_mode = 2
