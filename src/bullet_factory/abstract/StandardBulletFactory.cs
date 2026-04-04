@@ -5,6 +5,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Common.BaseFactory;
+using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Models.Bullet;
 using EternalJourney.Cores.Repositories;
 using Godot;
@@ -14,6 +15,11 @@ using Godot;
 /// </summary>
 public interface IStandardBulletFactory
 {
+    /// <summary>
+    /// 弾丸のコリジョンマスク（武器所有者に応じて設定される）
+    /// </summary>
+    uint BulletCollisionMask { get; set; }
+
     /// <summary>
     /// 弾丸生成（デフォルトのBulletIdを使用）
     /// </summary>
@@ -52,6 +58,11 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
 
     private readonly BulletConfigReader _bulletConfigReader = new();
     private BulletConfig? _bulletConfig;
+
+    /// <summary>
+    /// 弾丸のコリジョンマスク（武器所有者に応じて設定される）
+    /// </summary>
+    public uint BulletCollisionMask { get; set; } = CollisionEntity.Enemy;
 
     /// <summary>
     /// シーンパスの取得（BaseFactory抽象メソッドの実装）
@@ -129,6 +140,9 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         {
             bullet.Configure(_bulletConfig);
         }
+
+        // 武器所有者に応じたコリジョンマスクを適用
+        bullet.CollisionMask = BulletCollisionMask;
 
         // シーンツリーに追加
         AddChild(bullet);

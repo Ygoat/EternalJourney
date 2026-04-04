@@ -1,7 +1,6 @@
 namespace EternalJourney.Bullet.Abstract;
 
 using Chickensoft.AutoInject;
-using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
@@ -43,7 +42,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// </summary>
     public BulletLogic.IBinding BulletBinding { get; set; } = default!;
 
-    [Dependency] public EntityTable<int> EntityTable => this.DependOn<EntityTable<int>>();
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
     #endregion State
@@ -98,8 +96,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         BulletLogic.Set(this as IBaseBullet);
         // コリジョンレイヤーを弾丸
         CollisionLayer = CollisionEntity.Bullet;
-        // コリジョンマスクをエネミー
-        CollisionMask = CollisionEntity.Enemy;
     }
 
     /// <summary>
@@ -236,6 +232,11 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         if (area is IBaseEnemy baseEnemy)
         {
             BulletLogic.Input(new BulletLogic.Input.EnemyHit(baseEnemy));
+        }
+        else
+        {
+            // Enemy以外のターゲット（Shipなど）に命中した場合
+            BulletLogic.Input(new BulletLogic.Input.TargetHit());
         }
     }
 

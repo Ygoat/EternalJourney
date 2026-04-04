@@ -13,6 +13,7 @@ using EternalJourney.Enemy.Base;
 using EternalJourney.Enemy.Standard.State;
 using EternalJourney.Enemy.Strategies.Movement;
 using EternalJourney.Ship;
+using EternalJourney.Weapon.Abstract;
 using Godot;
 
 /// <summary>
@@ -89,6 +90,9 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
 
     [Node]
     public IColorRect ColorRect { get; set; } = default!;
+
+    [Node]
+    public IStandardWeapon StandardWeapon { get; set; } = default!;
     #endregion Nodes
 
     /// <summary>
@@ -130,8 +134,10 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
 
         // DI解決後に依存を設定
         StandardEnemyLogic.Set(BattleRepo);
-        // ターゲット位置を設定（DI解決後のみアクセス可能）
+        // ターゲット位置を設定（Configure呼び出し時点でShipは登録済み）
         TargetPosition = EntityTable.Get<IShip>(0)!.EnemyTargetMarker.GlobalPosition;
+        // WeaponのターゲットをShipに設定
+        StandardWeapon.SetTargetMask(CollisionEntity.Ship);
 
         StandardEnemyBinding
             .Handle((in StandardEnemyLogic.Output.StartInvade output) =>

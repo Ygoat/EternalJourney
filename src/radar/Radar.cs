@@ -28,6 +28,11 @@ public interface IRadar : IArea2D
     /// 敵未発見イベント
     /// </summary>
     public event Radar.NotSearchedEventHandler NotSearched;
+
+    /// <summary>
+    /// 検知対象のコリジョンマスク
+    /// </summary>
+    public uint TargetMask { get; set; }
 };
 
 /// <summary>
@@ -58,6 +63,12 @@ public partial class Radar : Area2D, IRadar
     public List<Area2D> OnAreaEnemies { get; set; } = new List<Area2D>();
 
     /// <summary>
+    /// 検知対象のコリジョンマスク（デフォルト：Enemy）
+    /// </summary>
+    [Export]
+    public uint TargetMask { get; set; } = CollisionEntity.Enemy;
+
+    /// <summary>
     /// レーダーロジック
     /// </summary>
     public IRadarLogic RadarLogic { get; set; } = default!;
@@ -79,7 +90,7 @@ public partial class Radar : Area2D, IRadar
         // サーチエリアコリジョンレイヤ
         CollisionLayer = CollisionEntity.Radar;
         // サーチエリアコリジョンマスク
-        CollisionMask = CollisionEntity.Enemy;
+        CollisionMask = TargetMask;
     }
 
     /// <summary>
@@ -114,7 +125,7 @@ public partial class Radar : Area2D, IRadar
     public void OnPhysicsProcess(double delta)
     {
         OnAreaEnemies = GetOverlappingAreas()
-            .Where(enemy => enemy.CollisionLayer == CollisionEntity.Enemy)
+            .Where(e => (e.CollisionLayer & TargetMask) != 0)
             .OrderBy(enemy => GlobalPosition.DistanceTo(enemy.GlobalPosition))
             .ToList();
         // ロジックブロックにオーバーラップしている敵のArea2Dノードリストを入力

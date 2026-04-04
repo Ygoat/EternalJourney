@@ -87,7 +87,7 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
     /// </summary>
     public float ElapsedTime { get; set; }
 
-    public virtual void Setup()
+    public override void Setup()
     {
         TopLevel = true;
     }

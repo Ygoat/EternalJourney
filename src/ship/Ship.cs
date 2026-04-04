@@ -33,6 +33,12 @@ public partial class Ship : Area2D, IShip
     [Node]
     public IMarker2D EnemyTargetMarker { get; set; } = default!;
 
+    /// <summary>
+    /// 舟のコリジョンシェイプ
+    /// </summary>
+    [Node]
+    public ICollisionShape2D CollisionShape2D { get; set; } = default!;
+
     #endregion Nodes
 
     #region Dependencies

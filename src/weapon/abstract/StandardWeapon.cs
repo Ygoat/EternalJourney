@@ -16,6 +16,10 @@ using Godot;
 /// </summary>
 public interface IStandardWeapon : IBaseWeapon
 {
+    /// <summary>
+    /// レーダーの検知対象コリジョンマスクを設定する
+    /// </summary>
+    void SetTargetMask(uint mask);
 }
 
 /// <summary>
@@ -165,6 +169,16 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         }
         // 射撃を行う
         Attack();
+    }
+
+    /// <summary>
+    /// レーダーの検知対象コリジョンマスクを設定する
+    /// </summary>
+    public void SetTargetMask(uint mask)
+    {
+        Radar.TargetMask = mask;
+        Radar.CollisionMask = mask;
+        StandardBulletFactory.BulletCollisionMask = mask;
     }
 
     public override void Attack()

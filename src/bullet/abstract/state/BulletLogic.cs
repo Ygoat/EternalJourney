@@ -60,6 +60,11 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
         /// 爆風タイムアウト
         /// </summary>
         public readonly record struct BlastTimerTimeout();
+
+        /// <summary>
+        /// ターゲットヒット（Enemy以外：Shipなど）
+        /// </summary>
+        public readonly record struct TargetHit();
     }
 
     /// <summary>
@@ -128,7 +133,7 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
         /// <summary>
         /// 飛翔
         /// </summary>
-        public record InFlight : State, IGet<Input.PhysicsProcess>, IGet<Input.EnemyHit>, IGet<Input.Miss>
+        public record InFlight : State, IGet<Input.PhysicsProcess>, IGet<Input.EnemyHit>, IGet<Input.TargetHit>, IGet<Input.Miss>
         {
             public Vector2 ShotGlobalPosition { get; set; }
             public float ShotGlobalAngle { get; set; }
@@ -174,6 +179,20 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
                 return CheckUnderZeroDurability(currentDur);
             }
 
+            public Transition On(in Input.TargetHit input)
+            {
+                // EnemyHit と同様に耐久値を減少させる（ステータスエフェクトなし）
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                IBaseBullet baseBullet = Get<IBaseBullet>();
+                IBulletCollisionStrategy collisionStrategy = baseBullet.CollisionStrategy;
+
+                float durabilityCost = collisionStrategy.GetDurabilityCost();
+                float currentDur = battleRepo.ReduceBulletDurability(baseBullet.Status.CurrentDur, durabilityCost);
+
+                Output(new Output.CurrentDurChange(currentDur));
+                return CheckUnderZeroDurability(currentDur);
+            }
+
             public Transition On(in Input.Miss input)
             {
                 // 崩壊を出力して射出待機に遷移
@@ -206,7 +225,7 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
         /// <summary>
         /// 爆風（衝突ストラテジーがBlastを返した場合のみ遷移）
         /// </summary>
-        public record Blast : State, IGet<Input.BlastTimerTimeout>, IGet<Input.EnemyHit>
+        public record Blast : State, IGet<Input.BlastTimerTimeout>, IGet<Input.EnemyHit>, IGet<Input.TargetHit>
         {
             public Blast()
             {
@@ -221,6 +240,11 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
             }
 
             public Transition On(in Input.EnemyHit input)
+            {
+                return ToSelf();
+            }
+
+            public Transition On(in Input.TargetHit input)
             {
                 return ToSelf();
             }
