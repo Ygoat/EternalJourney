@@ -3,6 +3,7 @@ namespace EternalJourney.Bullet.Abstract;
 using System.Data;
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
+using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Common.BaseFactory;
 using EternalJourney.Cores.Consts;
@@ -144,14 +145,31 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         // 武器所有者に応じたコリジョンマスクを適用
         bullet.CollisionMask = BulletCollisionMask;
 
-        // シーンツリーに追加
-        AddChild(bullet);
+        // シーンツリーに追加（エネミー撃破後も弾丸が残るよう、IBattleRepoを提供する祖先ノードに追加）
+        GetBulletContainer().AddChild(bullet);
 
         // 弾丸射出
         bullet.Emit(GlobalPosition, GlobalRotation);
 
         // クールダウン開始
         StartCoolDown();
+    }
+
+    /// <summary>
+    /// IBattleRepoを提供する最も近い祖先ノードを取得する
+    /// 弾丸をエネミーより長生きさせるために、エネミー外のノードに追加する
+    /// </summary>
+    private Node GetBulletContainer()
+    {
+        Node? current = GetParent();
+        while (current != null)
+        {
+            if (current is IProvide<IBattleRepo>)
+                return current;
+            current = current.GetParent();
+        }
+        // フォールバック：自身を返す
+        return this;
     }
 
     /// <summary>
