@@ -61,6 +61,12 @@ public partial class BattleUI : CanvasLayer, IBattleUI
     public ISkillButton SkillButton4 { get; set; } = default!;
 
     /// <summary>
+    /// 残存HPゲージ
+    /// </summary>
+    [Node]
+    public IColorRect LeftHPGauge { get; set; } = default!;
+
+    /// <summary>
     /// バトルUIロジック
     /// </summary>
     public IBattleUILogic BattleUILogic { get; set; } = default!;
@@ -100,10 +106,15 @@ public partial class BattleUI : CanvasLayer, IBattleUI
     {
         BattleUILogic.Set(BattleRepo);
         BattleUIBinding = BattleUILogic.Bind();
-        BattleUIBinding.Handle((in BattleUILogic.Output.ScoreChanged output) =>
-        {
-            SetScoreLabel(output.CurrentScore);
-        });
+        BattleUIBinding
+            .Handle((in BattleUILogic.Output.ScoreChanged output) =>
+            {
+                SetScoreLabel(output.CurrentScore);
+            })
+            .Handle((in BattleUILogic.Output.ShipHpChanged output) =>
+            {
+                UpdateHpGauge(output.CurrentHp, output.MaxHp);
+            });
         BattleUILogic.Start();
 
         // 最初のスキルボタンをステータスアップスキルに接続
@@ -113,6 +124,12 @@ public partial class BattleUI : CanvasLayer, IBattleUI
     public void SetScoreLabel(int score)
     {
         ScoreLabel.Text = $"Score: {score}";
+    }
+
+    public void UpdateHpGauge(float currentHp, float maxHp)
+    {
+        float ratio = maxHp > 0f ? currentHp / maxHp : 0f;
+        LeftHPGauge.AnchorRight = ratio;
     }
 
     public void OnPhysicsProcess(double delta)

@@ -56,6 +56,11 @@ public interface IBattleRepo : IDisposable
     public event Action<IBaseBullet> BulletDestroyed;
 
     /// <summary>
+    /// 船HP変化イベント
+    /// </summary>
+    public event Action<float, float>? ShipHpChanged;
+
+    /// <summary>
     /// スコアカウントアップ
     /// </summary>
     public void ScoreCountUp(int score);
@@ -86,6 +91,11 @@ public interface IBattleRepo : IDisposable
     /// </summary>
     /// <param name="numEnemyDestroyed"></param>
     public void SetNumEnemyDestroyed(int numEnemyDestroyed);
+
+    /// <summary>
+    /// 船HP変化をバトルUIに通知する
+    /// </summary>
+    public void NotifyShipHpChanged(float currentHp, float maxHp);
 
     /// <summary>
     /// 敵耐久値減少処理
@@ -129,9 +139,7 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public IAutoProp<int> Score => _score;
 
-
     private readonly AutoProp<int> _score;
-
 
     /// <summary>
     /// <inheritdoc/>
@@ -160,6 +168,11 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public event Action<IBaseBullet>? BulletDestroyed;
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action<float, float>? ShipHpChanged;
+
     private bool _disposedValue;
 
     /// <summary>
@@ -174,7 +187,6 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// コンストラクタ
     /// </summary>
-    /// <param name="numEnemyDestroyed"></param>
     internal BattleRepo(
       AutoProp<int> numEnemyDestroyed,
       AutoProp<int> score
@@ -203,7 +215,6 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="baseBullet"></param>
     public void StartBulletHitting(IBaseBullet baseBullet)
     {
         BulletHittingStarted?.Invoke(baseBullet);
@@ -212,7 +223,6 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="numEnemyDestroyed"></param>
     public void SetNumEnemyDestroyed(int numEnemyDestroyed)
     {
         _numEnemyDestroyed.OnNext(numEnemyDestroyed);
@@ -221,7 +231,6 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="baseEnemy"></param>
     public void OnEnemyDestroyed(IBaseEnemy baseEnemy)
     {
         EnemyDestroyed?.Invoke(baseEnemy);
@@ -230,10 +239,17 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="baseBullet"></param>
     public void OnBulletDestroyed(IBaseBullet baseBullet)
     {
         BulletDestroyed?.Invoke(baseBullet);
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyShipHpChanged(float currentHp, float maxHp)
+    {
+        ShipHpChanged?.Invoke(currentHp, maxHp);
     }
 
     public float ReduceEnemyDurability(float curDurability, float damage)
@@ -254,7 +270,6 @@ public class BattleRepo : IBattleRepo
         {
             if (disposing)
             {
-                // Dispose managed objects.
                 _numEnemyDestroyed.OnCompleted();
                 _numEnemyDestroyed.Dispose();
             }
@@ -268,7 +283,6 @@ public class BattleRepo : IBattleRepo
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-
 
     #endregion Internals
 }

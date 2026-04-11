@@ -178,6 +178,7 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
                     IBattleRepo battleRepo = Get<IBattleRepo>();
                     IStandardEnemy standardEnemy = Get<IStandardEnemy>();
                     battleRepo.ScoreCountUp(standardEnemy.ScoreValue);
+                    battleRepo.OnEnemyDestroyed(standardEnemy);
 
                     // スポーン待機に遷移する
                     return To<SpawnWait>();

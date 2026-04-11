@@ -57,4 +57,3 @@ unique_name_in_owner = true
 
 [node name="DebugLabel" parent="." index="6"]
 visible = true
-text = "test"

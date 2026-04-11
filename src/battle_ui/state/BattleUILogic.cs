@@ -38,6 +38,11 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
         /// ゲーム終了（ダミー）
         /// </summary>
         public readonly record struct ScoreChanged(int CurrentScore);
+
+        /// <summary>
+        /// 船HP変化
+        /// </summary>
+        public readonly record struct ShipHpChanged(float CurrentHp, float MaxHp);
     }
 
     // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
@@ -59,15 +64,16 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                     {
                         IBattleRepo battleRepo = Get<IBattleRepo>();
                         battleRepo.Score.Sync += OnScoreCountUp;
+                        battleRepo.ShipHpChanged += OnShipHpChanged;
                     }
                 );
 
                 // この状態が非アクティブになった時の処理
                 OnDetach(() =>
                     {
-                        // スプラッシュ画面スキップイベント設定
                         IBattleRepo battleRepo = Get<IBattleRepo>();
                         battleRepo.Score.Sync -= OnScoreCountUp;
+                        battleRepo.ShipHpChanged -= OnShipHpChanged;
                     }
                 );
             }
@@ -75,10 +81,17 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
             /// <summary>
             /// スコアカウントアップイベントファンクション
             /// </summary>
-            /// <param name="currentScore"></param>
             public void OnScoreCountUp(int currentScore)
             {
                 Output(new Output.ScoreChanged(currentScore));
+            }
+
+            /// <summary>
+            /// 船HP変化イベントファンクション
+            /// </summary>
+            public void OnShipHpChanged(float currentHp, float maxHp)
+            {
+                Output(new Output.ShipHpChanged(currentHp, maxHp));
             }
         }
     }
