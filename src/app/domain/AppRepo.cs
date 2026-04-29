@@ -23,6 +23,11 @@ public interface IAppRepo : IDisposable
     event Action? MainMenuEntered;
 
     /// <summary>
+    /// メニューへ戻るリクエストイベント
+    /// </summary>
+    event Action? GoToMenuRequested;
+
+    /// <summary>
     /// スプラッシュ画面スキップイベントファンクション
     /// </summary>
 
@@ -37,6 +42,11 @@ public interface IAppRepo : IDisposable
     /// メインメニュー開始イベントファンクション
     /// </summary>
     void OnMainMenuEntered();
+
+    /// <summary>
+    /// メニューへ戻るリクエストイベントファンクション
+    /// </summary>
+    void RequestGoToMenu();
 
     /// <summary>
     /// デバッグモード状態
@@ -66,6 +76,11 @@ public class AppRepo : IAppRepo
     /// <inheritdoc/>
     /// </summary>
     public event Action? MainMenuEntered;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? GoToMenuRequested;
 
     /// <summary>
     /// <inheritdoc/>
@@ -100,6 +115,14 @@ public class AppRepo : IAppRepo
     /// <inheritdoc/>
     /// </summary>
     public void StartDebugMode() => IsDebugMode = true;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void RequestGoToMenu()
+    {
+        GoToMenuRequested?.Invoke();
+    }
 
     /// <summary>
     /// <inheritdoc/>

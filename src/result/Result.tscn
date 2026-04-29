@@ -11,3 +11,5 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="ResultUI" parent="." instance=ExtResource("1_t8631")]
+unique_name_in_owner = true
+layout_mode = 1

@@ -61,19 +61,16 @@ public partial class App : CanvasLayer, IApp
     /// <summary>
     /// AppRepoプロバイダー
     /// </summary>
-    /// <returns></returns>
     IAppRepo IProvide<IAppRepo>.Value() => AppRepo;
 
     /// <summary>
     /// クルーCSVリーダ
     /// </summary>
-    /// <returns></returns>
     ICrewCsvReader IProvide<ICrewCsvReader>.Value() => CrewCsvReader;
 
     /// <summary>
     /// シーンインスタンス化部品
     /// </summary>
-    /// <returns></returns>
     IInstantiator IProvide<IInstantiator>.Value() => Instantiator;
 
     /// <summary>
@@ -134,47 +131,37 @@ public partial class App : CanvasLayer, IApp
             // ShowSplashScreen（スプラッシュ表示）が出力された時の処理
             .Handle((in AppLogic.Output.ShowSplashScreen _) =>
             {
-                // 表示されているメニューを閉じる
                 HideMenus();
-                // ブランク画面を閉じる（フェードイン用の画面のためいらない）
                 BlankScreen.Hide();
-                // スプラッシュ表示
                 Splash.Show();
             })
             // HideSplashScreen（スプラッシュ非表示）が出力された時の処理
             .Handle((in AppLogic.Output.HideSplashScreen _) =>
             {
-                // SplashFinished（スプラッシュ完了）を入力
                 AppLogic.Input(new AppLogic.Input.SplashFinished());
             })
             // ShowMainMenu（メインメニュー表示）が出力された時の処理
             .Handle((in AppLogic.Output.ShowMainMenu _) =>
             {
-                // 表示されているメニューを閉じる
                 HideMenus();
-                // メニューを表示する
                 Menu.Show();
             })
             // SetupGameScene（ゲームシーンセットアップ）が出力された時の処理
             .Handle((in AppLogic.Output.SetupGameScene _) =>
             {
-                // ゲームシーンをインスタンス化
                 Game = Instantiator.LoadAndInstantiate<Game>(Const.GameNodePath);
             })
             // ShowGame（ゲームシーン表示）が出力された時の処理
             .Handle((in AppLogic.Output.ShowGame _) =>
             {
-                // ビューポートにシーンを表示
                 GameView.AddChildEx(Game);
-                // メニュー非表示
                 HideMenus();
             })
             // RemoveExistingGame（ゲーム終了）が出力された時の処理
             .Handle((in AppLogic.Output.RemoveExistingGame _) =>
             {
-                // 未実装
-                //   Game.QueueFree();
-                //   Game = default!;
+                Game.QueueFree();
+                Game = default!;
             });
 
         // 初期状態（SplashScreen）開始
@@ -186,7 +173,6 @@ public partial class App : CanvasLayer, IApp
     /// </summary>
     public void OnStartGame()
     {
-        // StartGame（ゲームスタート）を入力
         AppLogic.Input(new AppLogic.Input.StartGame());
     }
 
@@ -195,7 +181,6 @@ public partial class App : CanvasLayer, IApp
     /// </summary>
     public void OnStartDebugGame()
     {
-        // デバッグモードを有効にしてからゲームスタート
         AppRepo.StartDebugMode();
         AppLogic.Input(new AppLogic.Input.StartGame());
     }

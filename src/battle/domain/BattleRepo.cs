@@ -61,6 +61,11 @@ public interface IBattleRepo : IDisposable
     public event Action<float, float>? ShipHpChanged;
 
     /// <summary>
+    /// ゲームオーバーイベント
+    /// </summary>
+    public event Action? GameOverOccurred;
+
+    /// <summary>
     /// スコアカウントアップ
     /// </summary>
     public void ScoreCountUp(int score);
@@ -96,6 +101,11 @@ public interface IBattleRepo : IDisposable
     /// 船HP変化をバトルUIに通知する
     /// </summary>
     public void NotifyShipHpChanged(float currentHp, float maxHp);
+
+    /// <summary>
+    /// ゲームオーバーを通知する
+    /// </summary>
+    public void NotifyGameOver();
 
     /// <summary>
     /// 敵耐久値減少処理
@@ -172,6 +182,11 @@ public class BattleRepo : IBattleRepo
     /// <inheritdoc/>
     /// </summary>
     public event Action<float, float>? ShipHpChanged;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? GameOverOccurred;
 
     private bool _disposedValue;
 
@@ -250,6 +265,14 @@ public class BattleRepo : IBattleRepo
     public void NotifyShipHpChanged(float currentHp, float maxHp)
     {
         ShipHpChanged?.Invoke(currentHp, maxHp);
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyGameOver()
+    {
+        GameOverOccurred?.Invoke();
     }
 
     public float ReduceEnemyDurability(float curDurability, float damage)

@@ -101,7 +101,11 @@ public partial class Ship : BaseEntity, IShip
         ShipLogic.Set(BattleRepo);
         ShipBinding
             .Handle((in ShipLogic.Output.HpChanged o) =>
-                BattleRepo.NotifyShipHpChanged(o.CurrentHp, o.MaxHp));
+                BattleRepo.NotifyShipHpChanged(o.CurrentHp, o.MaxHp))
+            .Handle((in ShipLogic.Output.Dead _) =>
+            {
+                BattleRepo.NotifyGameOver();
+            });
 
         ShipLogic.Start();
     }

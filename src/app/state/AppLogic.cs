@@ -46,6 +46,11 @@ public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
         /// フェードアウト完了
         /// </summary>
         public readonly record struct FadeOutFinished;
+
+        /// <summary>
+        /// メニューへ戻る
+        /// </summary>
+        public readonly record struct GoToMenu;
     }
 
     /// <summary>
@@ -82,6 +87,7 @@ public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
         /// ゲーム終了（ダミー）
         /// </summary>
         public readonly record struct RemoveExistingGame;
+
     }
 
     // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
@@ -156,7 +162,7 @@ public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
             public Transition On(in Input.StartGame input) => To<InGame>();
         }
 
-        public partial record InGame : State, IGet<Input.EndGame>
+        public partial record InGame : State, IGet<Input.EndGame>, IGet<Input.GoToMenu>
         {
             public InGame()
             {
@@ -165,18 +171,21 @@ public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
                     Get<IAppRepo>().OnEnterGame();
                     Output(new Output.ShowGame());
                 });
-                // this.OnExit(() => Output(new Output.HideGame()));
-
-                // OnAttach(() => Get<IAppRepo>().GameExited += OnGameExited);
-                // OnDetach(() => Get<IAppRepo>().GameExited -= OnGameExited);
+                OnAttach(() => Get<IAppRepo>().GoToMenuRequested += OnGoToMenuRequested);
+                OnDetach(() => Get<IAppRepo>().GoToMenuRequested -= OnGoToMenuRequested);
             }
 
-            // public void OnGameExited(PostGameAction reason) =>
-            //   Input(new Input.EndGame(reason));
+            private void OnGoToMenuRequested() => Input(new Input.GoToMenu());
 
             public Transition On(in Input.EndGame input)
             {
                 return To<LeavingGame>();
+            }
+
+            public Transition On(in Input.GoToMenu input)
+            {
+                Output(new Output.RemoveExistingGame());
+                return To<MainMenu>();
             }
         }
 

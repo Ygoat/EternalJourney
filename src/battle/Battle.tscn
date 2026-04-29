@@ -25,3 +25,5 @@ Status = SubResource("Resource_qo710")
 [node name="EnemySpawner" parent="." instance=ExtResource("2_sa8tj")]
 
 [node name="BattleUI" parent="." instance=ExtResource("4_tif3r")]
+offset_right = 722.0
+offset_bottom = 1280.0

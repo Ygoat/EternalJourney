@@ -3,6 +3,7 @@ namespace EternalJourney.BattleUI.State;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
+using EternalJourney.Game.Domain;
 using Godot;
 
 /// <summary>
@@ -35,9 +36,14 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
     public static class Output
     {
         /// <summary>
-        /// ゲーム終了（ダミー）
+        /// スコア変化
         /// </summary>
         public readonly record struct ScoreChanged(int CurrentScore);
+
+        /// <summary>
+        /// ゲーム終了
+        /// </summary>
+        public readonly record struct GameOver;
 
         /// <summary>
         /// 船HP変化
@@ -65,6 +71,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                         IBattleRepo battleRepo = Get<IBattleRepo>();
                         battleRepo.Score.Sync += OnScoreCountUp;
                         battleRepo.ShipHpChanged += OnShipHpChanged;
+                        battleRepo.GameOverOccurred += OnGameOver;
                     }
                 );
 
@@ -74,6 +81,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                         IBattleRepo battleRepo = Get<IBattleRepo>();
                         battleRepo.Score.Sync -= OnScoreCountUp;
                         battleRepo.ShipHpChanged -= OnShipHpChanged;
+                        battleRepo.GameOverOccurred -= OnGameOver;
                     }
                 );
             }
@@ -92,6 +100,16 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
             public void OnShipHpChanged(float currentHp, float maxHp)
             {
                 Output(new Output.ShipHpChanged(currentHp, maxHp));
+            }
+
+            /// <summary>
+            /// ゲーム終了イベントファンクション
+            /// </summary>
+            public void OnGameOver()
+            {
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                Get<IGameRepo>().SaveResult(battleRepo.Score.Value, Get<IBattleUI>().Count);
+                Output(new Output.GameOver());
             }
         }
     }

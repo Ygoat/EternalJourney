@@ -11,6 +11,10 @@ using Godot;
 /// </summary>
 public interface IBattle : INode2D, IProvide<IBattleRepo>, IProvide<EntityTable>
 {
+    /// <summary>
+    /// バトルリポジトリ
+    /// </summary>
+    IBattleRepo BattleRepo { get; }
 }
 
 /// <summary>

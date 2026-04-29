@@ -6,7 +6,7 @@ state "ShipLogic State" as EternalJourney_Ship_State_ShipLogic_State {
 EternalJourney_Ship_State_ShipLogic_State_Alive --> EternalJourney_Ship_State_ShipLogic_State_Alive : Damaged
 EternalJourney_Ship_State_ShipLogic_State_Alive --> EternalJourney_Ship_State_ShipLogic_State_Alive : Healed
 
-EternalJourney_Ship_State_ShipLogic_State_Alive : ApplyDamage() → HpChanged
+EternalJourney_Ship_State_ShipLogic_State_Alive : ApplyDamage() → Dead, HpChanged
 EternalJourney_Ship_State_ShipLogic_State_Alive : ApplyHeal() → HpChanged
 
 [*] --> EternalJourney_Ship_State_ShipLogic_State_Alive

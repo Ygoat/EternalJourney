@@ -5,6 +5,7 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.BattleUI.State;
+using EternalJourney.Game.Domain;
 using EternalJourney.StatusUpSkill;
 using EternalJourney.SukillButton;
 using Godot;
@@ -12,15 +13,16 @@ using Godot;
 /// <summary>
 /// バトルUIインターフェース
 /// </summary>
-public interface IBattleUI : ICanvasLayer
+public interface IBattleUI : IControl
 {
+    public float Count { get; }
 }
 
 /// <summary>
 /// バトルUIクラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class BattleUI : CanvasLayer, IBattleUI
+public partial class BattleUI : Control, IBattleUI
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -88,9 +90,15 @@ public partial class BattleUI : CanvasLayer, IBattleUI
     /// </summary>
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
+    /// <summary>
+    /// ゲームリポジトリ
+    /// </summary>
+    [Dependency] public IGameRepo GameRepo => this.DependOn<IGameRepo>();
+
 
     public void OnReady()
     {
+        ZIndex = 100;
         AddChild(StatusUpSkill);
     }
 
@@ -105,6 +113,8 @@ public partial class BattleUI : CanvasLayer, IBattleUI
     public void OnResolved()
     {
         BattleUILogic.Set(BattleRepo);
+        BattleUILogic.Set(GameRepo);
+        BattleUILogic.Set<IBattleUI>(this);
         BattleUIBinding = BattleUILogic.Bind();
         BattleUIBinding
             .Handle((in BattleUILogic.Output.ScoreChanged output) =>
@@ -114,11 +124,26 @@ public partial class BattleUI : CanvasLayer, IBattleUI
             .Handle((in BattleUILogic.Output.ShipHpChanged output) =>
             {
                 UpdateHpGauge(output.CurrentHp, output.MaxHp);
+            })
+            .Handle((in BattleUILogic.Output.GameOver _) =>
+            {
+                OnGameOver();
             });
         BattleUILogic.Start();
 
         // 最初のスキルボタンをステータスアップスキルに接続
         SkillButton1.Activated += StatusUpSkill.Activate;
+    }
+
+    private void OnGameOver()
+    {
+        SetPhysicsProcess(false);
+    }
+
+    public void OnTreeExiting()
+    {
+        BattleUIBinding.Dispose();
+        ((System.IDisposable)BattleUILogic).Dispose();
     }
 
     public void SetScoreLabel(int score)

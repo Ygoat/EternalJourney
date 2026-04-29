@@ -50,6 +50,11 @@ public partial class ShipLogic : LogicBlock<ShipLogic.State>, IShipLogic
         /// HP変化
         /// </summary>
         public readonly record struct HpChanged(float CurrentHp, float MaxHp);
+
+        /// <summary>
+        /// 撃沈
+        /// </summary>
+        public readonly record struct Dead;
     }
 
     /// <summary>
@@ -106,11 +111,18 @@ public partial class ShipLogic : LogicBlock<ShipLogic.State>, IShipLogic
                 ApplyHeal(10f);
             }
 
+            private bool _isDead = false;
+
             private void ApplyDamage(float damage)
             {
                 IShip ship = Get<IShip>();
                 ship.Status.CurrentDur = Math.Max(0f, ship.Status.CurrentDur - damage);
                 Output(new Output.HpChanged(ship.Status.CurrentDur, ship.Status.MaxDur));
+                if (ship.Status.CurrentDur <= 0f && !_isDead)
+                {
+                    _isDead = true;
+                    Output(new Output.Dead());
+                }
             }
 
             private void ApplyHeal(float amount)
