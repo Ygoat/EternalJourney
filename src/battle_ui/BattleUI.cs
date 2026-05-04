@@ -6,6 +6,7 @@ using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.BattleUI.State;
 using EternalJourney.Game.Domain;
+using EternalJourney.HealSkill;
 using EternalJourney.StatusUpSkill;
 using EternalJourney.SukillButton;
 using Godot;
@@ -86,6 +87,11 @@ public partial class BattleUI : Control, IBattleUI
     public StatusUpSkill StatusUpSkill { get; set; } = new StatusUpSkill();
 
     /// <summary>
+    /// 回復スキル
+    /// </summary>
+    public HealSkill HealSkill { get; set; } = new HealSkill();
+
+    /// <summary>
     /// バトルリポジトリ
     /// </summary>
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
@@ -100,6 +106,7 @@ public partial class BattleUI : Control, IBattleUI
     {
         ZIndex = 100;
         AddChild(StatusUpSkill);
+        AddChild(HealSkill);
     }
 
     public void Setup()
@@ -133,6 +140,7 @@ public partial class BattleUI : Control, IBattleUI
 
         // 最初のスキルボタンをステータスアップスキルに接続
         SkillButton1.Activated += StatusUpSkill.Activate;
+        SkillButton2.Activated += HealSkill.Activate;
     }
 
     private void OnGameOver()

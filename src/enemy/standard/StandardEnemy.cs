@@ -138,6 +138,8 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         TargetPosition = EntityTable.Get<IShip>(0)!.EnemyTargetMarker.GlobalPosition;
         // WeaponのターゲットをShipに設定
         StandardWeapon.SetTargetMask(CollisionEntity.Ship);
+        // 敵所有フラグを設定
+        StandardWeapon.SetPlayerOwned(false);
 
         StandardEnemyBinding
             .Handle((in StandardEnemyLogic.Output.StartInvade output) =>

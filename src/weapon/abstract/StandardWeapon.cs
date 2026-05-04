@@ -20,6 +20,11 @@ public interface IStandardWeapon : IBaseWeapon
     /// レーダーの検知対象コリジョンマスクを設定する
     /// </summary>
     void SetTargetMask(uint mask);
+
+    /// <summary>
+    /// プレイヤー所有フラグを設定する
+    /// </summary>
+    void SetPlayerOwned(bool isPlayer);
 }
 
 /// <summary>
@@ -179,6 +184,11 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         Radar.TargetMask = mask;
         Radar.CollisionMask = mask;
         StandardBulletFactory.BulletCollisionMask = mask;
+    }
+
+    public void SetPlayerOwned(bool isPlayer)
+    {
+        StandardBulletFactory.IsPlayerBullet = isPlayer;
     }
 
     public override void Attack()

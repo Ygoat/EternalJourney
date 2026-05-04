@@ -4,6 +4,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
+using EternalJourney.Cores.Models.Skill;
 using EternalJourney.StatusUpSkill.State;
 using Godot;
 
@@ -76,6 +77,8 @@ public partial class StatusUpSkill : Node, IStatusUpSkill
             {
                 BattleRepo.AtkMultiplier = o.AtkMultiplier;
                 BattleRepo.SpdMultiplier = o.SpdMultiplier;
+                BattleRepo.ActiveSkillCategory = SkillCategory.StatusUp;
+                BattleRepo.ActiveSkillTarget = SkillTarget.Ship | SkillTarget.Weapon | SkillTarget.Bullet;
                 // 重ねがけ時はタイマーをリセット
                 BuffTimer.Stop();
                 BuffTimer.Start();
@@ -84,6 +87,8 @@ public partial class StatusUpSkill : Node, IStatusUpSkill
             {
                 BattleRepo.AtkMultiplier = 1.0f;
                 BattleRepo.SpdMultiplier = 1.0f;
+                BattleRepo.ActiveSkillCategory = SkillCategory.None;
+                BattleRepo.ActiveSkillTarget = SkillTarget.None;
             });
         Logic.Start();
     }

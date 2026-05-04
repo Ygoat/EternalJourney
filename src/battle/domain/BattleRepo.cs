@@ -3,6 +3,7 @@ namespace EternalJourney.Battle.Domain;
 using System;
 using Chickensoft.Collections;
 using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Enemy.Base;
 
 /// <summary>
@@ -24,6 +25,16 @@ public interface IBattleRepo : IDisposable
     /// SPD乗数（スキルバフ用）
     /// </summary>
     public float SpdMultiplier { get; set; }
+
+    /// <summary>
+    /// 現在発動中のスキルカテゴリ
+    /// </summary>
+    public SkillCategory ActiveSkillCategory { get; set; }
+
+    /// <summary>
+    /// 現在発動中のスキルターゲット
+    /// </summary>
+    public SkillTarget ActiveSkillTarget { get; set; }
 
     /// <summary>
     /// スコア
@@ -64,6 +75,11 @@ public interface IBattleRepo : IDisposable
     /// ゲームオーバーイベント
     /// </summary>
     public event Action? GameOverOccurred;
+
+    /// <summary>
+    /// 船回復要求イベント
+    /// </summary>
+    public event Action<float>? ShipHealRequested;
 
     /// <summary>
     /// スコアカウントアップ
@@ -108,12 +124,17 @@ public interface IBattleRepo : IDisposable
     public void NotifyGameOver();
 
     /// <summary>
+    /// 船回復を要求する
+    /// </summary>
+    public void RequestShipHeal(float amount);
+
+    /// <summary>
     /// 敵耐久値減少処理
     /// </summary>
     /// <param name="curDurability">現在耐久値</param>
     /// <param name="damage">ダメージ</param>
     /// <returns></returns>
-    public float ReduceEnemyDurability(float curDurability, float damage);
+    public float ReduceEnemyDurability(float curDurability, float damage, bool applyMultiplier = true);
 
     /// <summary>
     /// 弾丸耐久値減少処理
@@ -143,6 +164,16 @@ public class BattleRepo : IBattleRepo
     /// SPD乗数（スキルバフ用）
     /// </summary>
     public float SpdMultiplier { get; set; } = 1.0f;
+
+    /// <summary>
+    /// 現在発動中のスキルカテゴリ
+    /// </summary>
+    public SkillCategory ActiveSkillCategory { get; set; } = SkillCategory.None;
+
+    /// <summary>
+    /// 現在発動中のスキルターゲット
+    /// </summary>
+    public SkillTarget ActiveSkillTarget { get; set; } = SkillTarget.None;
 
     /// <summary>
     /// スコア
@@ -187,6 +218,11 @@ public class BattleRepo : IBattleRepo
     /// <inheritdoc/>
     /// </summary>
     public event Action? GameOverOccurred;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action<float>? ShipHealRequested;
 
     private bool _disposedValue;
 
@@ -275,9 +311,17 @@ public class BattleRepo : IBattleRepo
         GameOverOccurred?.Invoke();
     }
 
-    public float ReduceEnemyDurability(float curDurability, float damage)
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void RequestShipHeal(float amount)
     {
-        return curDurability - damage * AtkMultiplier;
+        ShipHealRequested?.Invoke(amount);
+    }
+
+    public float ReduceEnemyDurability(float curDurability, float damage, bool applyMultiplier = true)
+    {
+        return applyMultiplier ? (curDurability - (damage * AtkMultiplier)) : (curDurability - damage);
     }
 
     public float ReduceBulletDurability(float curDurability, float damage)

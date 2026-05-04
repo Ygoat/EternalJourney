@@ -6,6 +6,7 @@ using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Strategies.Collision;
 using EternalJourney.Bullet.Strategies.Movement;
+using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Enemy.Base;
 using Godot;
 
@@ -117,7 +118,9 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
                 // SPDバフ乗数を適用してOutput
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 IBaseBullet baseBullet = Get<IBaseBullet>();
-                Output(new Output.SpdUpdated(baseBullet.Status.Spd * battleRepo.SpdMultiplier));
+                bool applySpd = baseBullet.ShouldApplySkillEffect(battleRepo.ActiveSkillTarget, SkillTarget.Bullet);
+                float spd = applySpd ? (baseBullet.Status.Spd * battleRepo.SpdMultiplier) : baseBullet.Status.Spd;
+                Output(new Output.SpdUpdated(spd));
 
                 Input.Emit ip = input;
                 return To<InFlight>().With(

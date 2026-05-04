@@ -22,6 +22,11 @@ public interface IStandardBulletFactory
     uint BulletCollisionMask { get; set; }
 
     /// <summary>
+    /// プレイヤー所有の弾丸を生成するか（デフォルト: true）
+    /// </summary>
+    bool IsPlayerBullet { get; set; }
+
+    /// <summary>
     /// 弾丸生成（デフォルトのBulletIdを使用）
     /// </summary>
     public void GenerateBullet();
@@ -64,6 +69,11 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     /// 弾丸のコリジョンマスク（武器所有者に応じて設定される）
     /// </summary>
     public uint BulletCollisionMask { get; set; } = CollisionEntity.Enemy;
+
+    /// <summary>
+    /// プレイヤー所有の弾丸を生成するか（デフォルト: true）
+    /// </summary>
+    public bool IsPlayerBullet { get; set; } = true;
 
     /// <summary>
     /// シーンパスの取得（BaseFactory抽象メソッドの実装）
@@ -144,6 +154,8 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
 
         // 武器所有者に応じたコリジョンマスクを適用
         bullet.CollisionMask = BulletCollisionMask;
+        // プレイヤー所有フラグを適用
+        bullet.IsPlayerOwned = IsPlayerBullet;
 
         // シーンツリーに追加（エネミー撃破後も弾丸が残るよう、IBattleRepoを提供する祖先ノードに追加）
         GetBulletContainer().AddChild(bullet);

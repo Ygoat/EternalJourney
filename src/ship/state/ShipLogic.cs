@@ -75,6 +75,7 @@ public partial class ShipLogic : LogicBlock<ShipLogic.State>, IShipLogic
                     IBattleRepo battleRepo = Get<IBattleRepo>();
                     ship.AreaEntered += OnAreaEntered;
                     battleRepo.EnemyDestroyed += OnEnemyDestroyed;
+                    battleRepo.ShipHealRequested += OnHealRequested;
                 });
 
                 OnDetach(() =>
@@ -83,6 +84,7 @@ public partial class ShipLogic : LogicBlock<ShipLogic.State>, IShipLogic
                     IBattleRepo battleRepo = Get<IBattleRepo>();
                     ship.AreaEntered -= OnAreaEntered;
                     battleRepo.EnemyDestroyed -= OnEnemyDestroyed;
+                    battleRepo.ShipHealRequested -= OnHealRequested;
                 });
             }
 
@@ -109,6 +111,11 @@ public partial class ShipLogic : LogicBlock<ShipLogic.State>, IShipLogic
             private void OnEnemyDestroyed(IBaseEnemy _)
             {
                 ApplyHeal(10f);
+            }
+
+            private void OnHealRequested(float amount)
+            {
+                ApplyHeal(amount);
             }
 
             private bool _isDead = false;
