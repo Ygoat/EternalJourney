@@ -1,8 +1,10 @@
-[gd_scene load_steps=2 format=3 uid="uid://12oabl20kkm1"]
+[gd_scene load_steps=3 format=3 uid="uid://12oabl20kkm1"]
 
 [ext_resource type="PackedScene" uid="uid://b63ajvxh3xyc7" path="res://src/select_ui/SelectSkillUI.tscn" id="1_arby6"]
+[ext_resource type="Script" path="res://src/select/SelectSkill.cs" id="1_hkuos"]
 
 [node name="SelectSkill" type="Node2D"]
+script = ExtResource("1_hkuos")
 
 [node name="SelectUI" parent="." instance=ExtResource("1_arby6")]
 custom_minimum_size = Vector2(100, 100)

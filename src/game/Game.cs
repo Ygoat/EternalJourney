@@ -8,14 +8,18 @@ using EternalJourney.Battle;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Repositories;
 using EternalJourney.Game.Domain;
+using EternalJourney.Game.State;
 using EternalJourney.Result;
+using EternalJourney.SelectSkill;
 using Godot;
 
 
 /// <summary>
 /// ゲームインターフェース
 /// </summary>
-public interface IGame : INode2D, IProvide<EntityTable<int>>, IProvide<IBattleRepo>, IProvide<IGameRepo> { }
+public interface IGame : INode2D, IProvide<EntityTable<int>>, IProvide<IBattleRepo>, IProvide<IGameRepo>
+{
+}
 
 /// <summary>
 /// ゲームクラス
@@ -45,6 +49,12 @@ public partial class Game : Node2D, IGame
     IGameRepo IProvide<IGameRepo>.Value() => GameRepo;
 
     /// <summary>
+    /// スキル選択
+    /// </summary>
+    [Node]
+    public ISelectSkill SelectSkill { get; set; } = default!;
+
+    /// <summary>
     /// バトル
     /// </summary>
     [Node]
@@ -56,8 +66,26 @@ public partial class Game : Node2D, IGame
     [Node]
     public IResult Result { get; set; } = default!;
 
+    /// <summary>
+    /// ゲームロジック
+    /// </summary>
+    public IGameLogic GameLogic { get; set; } = default!;
+
+    /// <summary>
+    /// ゲームロジックバインド
+    /// </summary>
+    public GameLogic.IBinding GameBinding { get; set; } = default!;
+
     [Dependency]
     private ICrewCsvReader crewCsvReader => this.DependOn<ICrewCsvReader>(() => new CrewCsvReader());
+
+    public void Setup()
+    {
+        GameRepo = new GameRepo();
+        GameLogic = new GameLogic();
+        GameLogic.Set(GameRepo);
+        GameBinding = GameLogic.Bind();
+    }
 
     public void OnReady()
     {
@@ -66,16 +94,35 @@ public partial class Game : Node2D, IGame
 
         // Battle は子ノードのため OnReady 時点で初期化済み
         Battle.BattleRepo.GameOverOccurred += OnGameOver;
-    }
 
-    public void Setup()
-    {
-        GameRepo = new GameRepo();
+        GameBinding
+            .Handle((in GameLogic.Output.ShowSelectSkill _) =>
+            {
+                Battle.ProcessMode = ProcessModeEnum.Disabled;
+                SelectSkill.Show();
+                Battle.Hide();
+            })
+            .Handle((in GameLogic.Output.InitializeBattle _) =>
+            {
+                Battle.Initialize();
+                GameRepo.NotifyBattleInitialized();
+            })
+            .Handle((in GameLogic.Output.StartBattle _) =>
+            {
+                Battle.ProcessMode = ProcessModeEnum.Inherit;
+                SelectSkill.Hide();
+                Battle.Show();
+                Battle.StartBattle();
+            });
+
+        GameLogic.Start();
     }
 
     public void OnTreeExiting()
     {
         Battle.BattleRepo.GameOverOccurred -= OnGameOver;
+        GameBinding.Dispose();
+        ((System.IDisposable)GameLogic).Dispose();
     }
 
     private void OnGameOver()

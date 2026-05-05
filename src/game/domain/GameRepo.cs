@@ -1,5 +1,7 @@
 namespace EternalJourney.Game.Domain;
 
+using System;
+
 /// <summary>
 /// ゲームリポジトリインターフェース
 /// </summary>
@@ -19,6 +21,26 @@ public interface IGameRepo
     /// リザルトを保存する
     /// </summary>
     void SaveResult(int score, float time);
+
+    /// <summary>
+    /// スキル選択完了イベント
+    /// </summary>
+    event Action? SkillSelected;
+
+    /// <summary>
+    /// スキル選択完了を通知する
+    /// </summary>
+    void NotifySkillSelected();
+
+    /// <summary>
+    /// バトル初期化完了イベント
+    /// </summary>
+    event Action? BattleInitialized;
+
+    /// <summary>
+    /// バトル初期化完了を通知する
+    /// </summary>
+    void NotifyBattleInitialized();
 }
 
 /// <summary>
@@ -44,4 +66,24 @@ public class GameRepo : IGameRepo
         FinalScore = score;
         FinalTime = time;
     }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? SkillSelected;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifySkillSelected() => SkillSelected?.Invoke();
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? BattleInitialized;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyBattleInitialized() => BattleInitialized?.Invoke();
 }

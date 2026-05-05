@@ -49,6 +49,11 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
         /// 船HP変化
         /// </summary>
         public readonly record struct ShipHpChanged(float CurrentHp, float MaxHp);
+
+        /// <summary>
+        /// バトルUI起動
+        /// </summary>
+        public readonly record struct ActivateBattleUI;
     }
 
     // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
@@ -72,6 +77,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                         battleRepo.Score.Sync += OnScoreCountUp;
                         battleRepo.ShipHpChanged += OnShipHpChanged;
                         battleRepo.GameOverOccurred += OnGameOver;
+                        battleRepo.ActivateBattleUI += OnActivateBattleUI;
                     }
                 );
 
@@ -82,6 +88,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                         battleRepo.Score.Sync -= OnScoreCountUp;
                         battleRepo.ShipHpChanged -= OnShipHpChanged;
                         battleRepo.GameOverOccurred -= OnGameOver;
+                        battleRepo.ActivateBattleUI -= OnActivateBattleUI;
                     }
                 );
             }
@@ -110,6 +117,14 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 Get<IGameRepo>().SaveResult(battleRepo.Score.Value, Get<IBattleUI>().Count);
                 Output(new Output.GameOver());
+            }
+
+            /// <summary>
+            /// バトルUI起動イベントファンクション
+            /// </summary>
+            public void OnActivateBattleUI()
+            {
+                Output(new Output.ActivateBattleUI());
             }
         }
     }

@@ -1,12 +1,17 @@
-[gd_scene load_steps=5 format=3 uid="uid://cywpu6lxdjhuu"]
+[gd_scene load_steps=6 format=3 uid="uid://cywpu6lxdjhuu"]
 
 [ext_resource type="Script" path="res://src/game/Game.cs" id="1_u8fpt"]
+[ext_resource type="PackedScene" uid="uid://12oabl20kkm1" path="res://src/select/SelectSkill.tscn" id="2_pkk6q"]
 [ext_resource type="PackedScene" uid="uid://s6bxnlpb677r" path="res://src/battle/Battle.tscn" id="2_yxavj"]
 [ext_resource type="PackedScene" uid="uid://b5qku1c7fnb1h" path="res://src/result/Result.tscn" id="3_1utn0"]
 [ext_resource type="Script" path="res://src/result/Result.cs" id="4_result"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_u8fpt")
+
+[node name="SelectSkill" parent="." instance=ExtResource("2_pkk6q")]
+unique_name_in_owner = true
+visible = false
 
 [node name="Battle" parent="." instance=ExtResource("2_yxavj")]
 unique_name_in_owner = true

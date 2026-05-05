@@ -113,7 +113,7 @@ public partial class BattleUI : Control, IBattleUI
     {
         TimerLabel.Text = "Timer";
         ScoreLabel.Text = "Score";
-        SetPhysicsProcess(true);
+        SetPhysicsProcess(false);
         BattleUILogic = new BattleUILogic();
     }
 
@@ -135,6 +135,11 @@ public partial class BattleUI : Control, IBattleUI
             .Handle((in BattleUILogic.Output.GameOver _) =>
             {
                 OnGameOver();
+            })
+            .Handle((in BattleUILogic.Output.ActivateBattleUI _) =>
+            {
+                Count = 0;
+                SetPhysicsProcess(true);
             });
         BattleUILogic.Start();
 
