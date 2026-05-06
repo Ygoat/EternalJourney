@@ -6,6 +6,8 @@ namespace EternalJourney.Cores.Models.Skill;
 public enum SkillType
 {
     None = 0,
-    StatusUp,
+    AtkUp,
+    SpdUp,
     Heal,
+    Regen,
 }

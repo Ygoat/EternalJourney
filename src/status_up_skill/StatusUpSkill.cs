@@ -14,6 +14,11 @@ using Godot;
 public interface IStatusUpSkill : INode
 {
     /// <summary>
+    /// バフ対象ステータス
+    /// </summary>
+    public StatusType TargetStatus { get; set; }
+
+    /// <summary>
     /// スキルを発動する
     /// </summary>
     void Activate();
@@ -47,6 +52,11 @@ public partial class StatusUpSkill : Node, IStatusUpSkill
     /// </summary>
     public float BuffDuration { get; set; }
 
+    /// <summary>
+    /// バフ対象ステータス（デフォルトはATK・SPD両方）
+    /// </summary>
+    public StatusType TargetStatus { get; set; } = StatusType.Atk | StatusType.Spd;
+
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
     public void Initialize()
@@ -75,8 +85,8 @@ public partial class StatusUpSkill : Node, IStatusUpSkill
         Binding
             .Handle((in StatusUpSkillLogic.Output.Activated o) =>
             {
-                BattleRepo.AtkMultiplier = o.AtkMultiplier;
-                BattleRepo.SpdMultiplier = o.SpdMultiplier;
+                if ((TargetStatus & StatusType.Atk) != 0) { BattleRepo.AtkMultiplier = o.AtkMultiplier; }
+                if ((TargetStatus & StatusType.Spd) != 0) { BattleRepo.SpdMultiplier = o.SpdMultiplier; }
                 BattleRepo.ActiveSkillCategory = SkillCategory.StatusUp;
                 BattleRepo.ActiveSkillTarget = SkillTarget.Ship | SkillTarget.Weapon | SkillTarget.Bullet;
                 // 重ねがけ時はタイマーをリセット

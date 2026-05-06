@@ -143,11 +143,17 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                 {
                     switch (skills[i])
                     {
-                        case SkillType.StatusUp:
-                            slots[i].Activated += battleUI.StatusUpSkill.Activate;
+                        case SkillType.AtkUp:
+                            slots[i].Activated += battleUI.AtkUpSkill.Activate;
+                            break;
+                        case SkillType.SpdUp:
+                            slots[i].Activated += battleUI.SpdUpSkill.Activate;
                             break;
                         case SkillType.Heal:
                             slots[i].Activated += battleUI.HealSkill.Activate;
+                            break;
+                        case SkillType.Regen:
+                            slots[i].Activated += battleUI.RegenSkill.Activate;
                             break;
                     }
                 }

@@ -5,8 +5,10 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.BattleUI.State;
+using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Game.Domain;
 using EternalJourney.HealSkill;
+using EternalJourney.RegenSkill;
 using EternalJourney.StatusUpSkill;
 using EternalJourney.SukillButton;
 using Godot;
@@ -21,8 +23,10 @@ public interface IBattleUI : IControl
     public ISkillButton SkillButton2 { get; }
     public ISkillButton SkillButton3 { get; }
     public ISkillButton SkillButton4 { get; }
-    public IStatusUpSkill StatusUpSkill { get; }
+    public IStatusUpSkill AtkUpSkill { get; }
+    public IStatusUpSkill SpdUpSkill { get; }
     public IHealSkill HealSkill { get; }
+    public IRegenSkill RegenSkill { get; }
 }
 
 /// <summary>
@@ -33,86 +37,78 @@ public partial class BattleUI : Control, IBattleUI
 {
     public override void _Notification(int what) => this.Notify(what);
 
-    /// <summary>
-    /// タイマーラベル
-    /// </summary>
+    /// <summary>タイマーラベル</summary>
     [Node]
     public ILabel TimerLabel { get; set; } = default!;
 
-    /// <summary>
-    /// スコアラベル
-    /// </summary>
+    /// <summary>スコアラベル</summary>
     [Node]
     public ILabel ScoreLabel { get; set; } = default!;
 
-    /// <summary>
-    /// スキルボタン1
-    /// </summary>
+    /// <summary>スキルボタン1</summary>
     [Node]
     public ISkillButton SkillButton1 { get; set; } = default!;
 
-    /// <summary>
-    /// スキルボタン2
-    /// </summary>
+    /// <summary>スキルボタン2</summary>
     [Node]
     public ISkillButton SkillButton2 { get; set; } = default!;
 
-    /// <summary>
-    /// スキルボタン3
-    /// </summary>
+    /// <summary>スキルボタン3</summary>
     [Node]
     public ISkillButton SkillButton3 { get; set; } = default!;
 
-    /// <summary>
-    /// スキルボタン4
-    /// </summary>
+    /// <summary>スキルボタン4</summary>
     [Node]
     public ISkillButton SkillButton4 { get; set; } = default!;
 
-    /// <summary>
-    /// 残存HPゲージ
-    /// </summary>
+    /// <summary>残存HPゲージ</summary>
     [Node]
     public IColorRect LeftHPGauge { get; set; } = default!;
 
-    /// <summary>
-    /// バトルUIロジック
-    /// </summary>
+    /// <summary>バトルUIロジック</summary>
     public IBattleUILogic BattleUILogic { get; set; } = default!;
 
-    /// <summary>
-    /// バトルUIバインド
-    /// </summary>
+    /// <summary>バトルUIバインド</summary>
     public BattleUILogic.IBinding BattleUIBinding { get; set; } = default!;
 
     public float Count { get; set; } = default!;
 
-    /// <summary>
-    /// ステータスアップスキル
-    /// </summary>
-    public IStatusUpSkill StatusUpSkill { get; set; } = new StatusUpSkill();
+    /// <summary>ATK上昇スキル</summary>
+    public IStatusUpSkill AtkUpSkill { get; set; } = default!;
 
-    /// <summary>
-    /// 回復スキル
-    /// </summary>
+    /// <summary>SPD上昇スキル</summary>
+    public IStatusUpSkill SpdUpSkill { get; set; } = default!;
+
+    /// <summary>回復スキル</summary>
     public IHealSkill HealSkill { get; set; } = new HealSkill();
 
-    /// <summary>
-    /// バトルリポジトリ
-    /// </summary>
+    /// <summary>リジェネスキル</summary>
+    public IRegenSkill RegenSkill { get; set; } = new RegenSkill();
+
+    /// <summary>バトルリポジトリ</summary>
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
-    /// <summary>
-    /// ゲームリポジトリ
-    /// </summary>
+    /// <summary>ゲームリポジトリ</summary>
     [Dependency] public IGameRepo GameRepo => this.DependOn<IGameRepo>();
 
+    public void Initialize()
+    {
+        var atk = new StatusUpSkill();
+        atk.TargetStatus = StatusType.Atk;
+        AtkUpSkill = atk;
+
+        var spd = new StatusUpSkill();
+        spd.TargetStatus = StatusType.Spd;
+        SpdUpSkill = spd;
+    }
 
     public void OnReady()
     {
         ZIndex = 100;
-        AddChild((Node)StatusUpSkill);
+        AddChild((Node)AtkUpSkill);
+        AddChild((Node)SpdUpSkill);
         AddChild((Node)HealSkill);
+        AddChild((Node)RegenSkill);
     }
 
     public void Setup()

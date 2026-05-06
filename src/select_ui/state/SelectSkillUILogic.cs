@@ -23,8 +23,10 @@ public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, 
 
     private static readonly SkillType[] SkillTypeMap =
     {
-        SkillType.StatusUp, SkillType.StatusUp, SkillType.StatusUp, SkillType.StatusUp,
-        SkillType.Heal,     SkillType.Heal,     SkillType.Heal,     SkillType.Heal,
+        SkillType.AtkUp,  SkillType.AtkUp,
+        SkillType.SpdUp,  SkillType.SpdUp,
+        SkillType.Heal,   SkillType.Heal,
+        SkillType.Regen,  SkillType.Regen,
     };
 
     public static class Input
@@ -58,6 +60,14 @@ public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, 
                     {
                         int index = i;
                         buttons[i].ToggleMode = true;
+                        buttons[i].Text = SkillTypeMap[i] switch
+                        {
+                            SkillType.AtkUp => "ATK Up",
+                            SkillType.SpdUp => "SPD Up",
+                            SkillType.Heal  => "Heal",
+                            SkillType.Regen => "Regen",
+                            _               => "",
+                        };
                         buttons[i].Toggled += pressed => Input(new Input.SkillToggled(index, pressed));
                     }
                     ui.SelectButton.Pressed += () => Input(new Input.SelectButtonPressed());
