@@ -2,5 +2,8 @@
 state "SelectSkillUILogic State" as EternalJourney_SelectUI_State_SelectSkillUILogic_State {
   state "Idle" as EternalJourney_SelectUI_State_SelectSkillUILogic_State_Idle
 }
+
+EternalJourney_SelectUI_State_SelectSkillUILogic_State_Idle --> EternalJourney_SelectUI_State_SelectSkillUILogic_State_Idle : SelectButtonPressed
+EternalJourney_SelectUI_State_SelectSkillUILogic_State_Idle --> EternalJourney_SelectUI_State_SelectSkillUILogic_State_Idle : SkillToggled
 [*] --> EternalJourney_SelectUI_State_SelectSkillUILogic_State_Idle
 @enduml

@@ -23,86 +23,89 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 60
 theme_override_constants/margin_bottom = 60
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="GridContainer" type="GridContainer" parent="MarginContainer"]
 layout_mode = 2
 
-[node name="MarginContainer3" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/GridContainer"]
+layout_mode = 2
+
+[node name="MarginContainer3" type="MarginContainer" parent="MarginContainer/GridContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_bottom = 20
 
-[node name="Label" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="MarginContainer/GridContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 80
 text = "Select Skills"
 horizontal_alignment = 1
 
-[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/GridContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_bottom = 100
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/GridContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 70
 alignment = 1
 
-[node name="Skill1" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="Skill1" type="Button" parent="MarginContainer/GridContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 
-[node name="Skill2" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="Skill2" type="Button" parent="MarginContainer/GridContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 
-[node name="Skill3" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="Skill3" type="Button" parent="MarginContainer/GridContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 
-[node name="Skill4" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="Skill4" type="Button" parent="MarginContainer/GridContainer/VBoxContainer/HBoxContainer"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 
-[node name="MarginContainer2" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+[node name="MarginContainer2" type="MarginContainer" parent="MarginContainer/GridContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_bottom = 20
 
-[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/GridContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/separation = 70
 alignment = 1
 
-[node name="Skill5" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+[node name="Skill5" type="Button" parent="MarginContainer/GridContainer/VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 
-[node name="Skill6" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+[node name="Skill6" type="Button" parent="MarginContainer/GridContainer/VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 
-[node name="Skill7" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+[node name="Skill7" type="Button" parent="MarginContainer/GridContainer/VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 
-[node name="Skill8" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2"]
+[node name="Skill8" type="Button" parent="MarginContainer/GridContainer/VBoxContainer/HBoxContainer2"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(100, 100)
 layout_mode = 2
 
-[node name="MarginContainer4" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+[node name="MarginContainer4" type="MarginContainer" parent="MarginContainer/GridContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_bottom = 100
 
-[node name="Panel" type="Panel" parent="MarginContainer/VBoxContainer"]
+[node name="Panel" type="Panel" parent="MarginContainer/GridContainer/VBoxContainer"]
 custom_minimum_size = Vector2(500, 300)
 layout_mode = 2
 
-[node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/VBoxContainer/Panel"]
+[node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/GridContainer/VBoxContainer/Panel"]
 custom_minimum_size = Vector2(500, 200)
 layout_mode = 1
 anchors_preset = 8
@@ -119,21 +122,23 @@ grow_vertical = 2
 theme_override_font_sizes/normal_font_size = 30
 text = "スキル説明文をここに"
 
-[node name="MarginContainer5" type="MarginContainer" parent="MarginContainer/VBoxContainer"]
+[node name="MarginContainer5" type="MarginContainer" parent="MarginContainer/GridContainer/VBoxContainer"]
 layout_mode = 2
 theme_override_constants/margin_bottom = 100
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/GridContainer"]
 layout_mode = 2
+size_flags_vertical = 3
 alignment = 2
 
-[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer2"]
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/GridContainer/VBoxContainer2"]
 layout_mode = 2
 theme_override_constants/separation = 150
 alignment = 1
 
-[node name="SelectButton" type="Button" parent="MarginContainer/VBoxContainer2/HBoxContainer3"]
+[node name="SelectButton" type="Button" parent="MarginContainer/GridContainer/VBoxContainer2/HBoxContainer3"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 50)
 layout_mode = 2
+size_flags_horizontal = 4
 text = "Select"

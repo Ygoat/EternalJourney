@@ -17,6 +17,12 @@ using Godot;
 public interface IBattleUI : IControl
 {
     public float Count { get; }
+    public ISkillButton SkillButton1 { get; }
+    public ISkillButton SkillButton2 { get; }
+    public ISkillButton SkillButton3 { get; }
+    public ISkillButton SkillButton4 { get; }
+    public IStatusUpSkill StatusUpSkill { get; }
+    public IHealSkill HealSkill { get; }
 }
 
 /// <summary>
@@ -84,12 +90,12 @@ public partial class BattleUI : Control, IBattleUI
     /// <summary>
     /// ステータスアップスキル
     /// </summary>
-    public StatusUpSkill StatusUpSkill { get; set; } = new StatusUpSkill();
+    public IStatusUpSkill StatusUpSkill { get; set; } = new StatusUpSkill();
 
     /// <summary>
     /// 回復スキル
     /// </summary>
-    public HealSkill HealSkill { get; set; } = new HealSkill();
+    public IHealSkill HealSkill { get; set; } = new HealSkill();
 
     /// <summary>
     /// バトルリポジトリ
@@ -105,8 +111,8 @@ public partial class BattleUI : Control, IBattleUI
     public void OnReady()
     {
         ZIndex = 100;
-        AddChild(StatusUpSkill);
-        AddChild(HealSkill);
+        AddChild((Node)StatusUpSkill);
+        AddChild((Node)HealSkill);
     }
 
     public void Setup()
@@ -147,10 +153,6 @@ public partial class BattleUI : Control, IBattleUI
                 TimerLabel.Text = $"Time: {Count}";
             });
         BattleUILogic.Start();
-
-        // 最初のスキルボタンをステータスアップスキルに接続
-        SkillButton1.Activated += StatusUpSkill.Activate;
-        SkillButton2.Activated += HealSkill.Activate;
     }
 
     private void OnGameOver()

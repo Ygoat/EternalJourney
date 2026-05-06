@@ -1,12 +1,24 @@
 namespace EternalJourney.Game.Domain;
 
 using System;
+using System.Collections.Generic;
+using EternalJourney.Cores.Models.Skill;
 
 /// <summary>
 /// ゲームリポジトリインターフェース
 /// </summary>
 public interface IGameRepo
 {
+    /// <summary>
+    /// 選択済みスキル一覧
+    /// </summary>
+    IReadOnlyList<SkillType> SelectedSkills { get; }
+
+    /// <summary>
+    /// 選択済みスキルを保存する
+    /// </summary>
+    void SetSelectedSkills(IReadOnlyList<SkillType> skills);
+
     /// <summary>
     /// 最終スコア
     /// </summary>
@@ -68,6 +80,16 @@ public interface IGameRepo
 /// </summary>
 public class GameRepo : IGameRepo
 {
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public IReadOnlyList<SkillType> SelectedSkills { get; private set; } = new List<SkillType>();
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void SetSelectedSkills(IReadOnlyList<SkillType> skills) => SelectedSkills = skills;
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>

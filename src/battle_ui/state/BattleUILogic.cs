@@ -3,7 +3,9 @@ namespace EternalJourney.BattleUI.State;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
+using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Game.Domain;
+using EternalJourney.SukillButton;
 using Godot;
 
 /// <summary>
@@ -134,6 +136,21 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
             /// </summary>
             public void OnActivateBattleUI()
             {
+                IBattleUI battleUI = Get<IBattleUI>();
+                ISkillButton[] slots = { battleUI.SkillButton1, battleUI.SkillButton2, battleUI.SkillButton3, battleUI.SkillButton4 };
+                var skills = Get<IGameRepo>().SelectedSkills;
+                for (int i = 0; i < slots.Length && i < skills.Count; i++)
+                {
+                    switch (skills[i])
+                    {
+                        case SkillType.StatusUp:
+                            slots[i].Activated += battleUI.StatusUpSkill.Activate;
+                            break;
+                        case SkillType.Heal:
+                            slots[i].Activated += battleUI.HealSkill.Activate;
+                            break;
+                    }
+                }
                 Output(new Output.ActivateBattleUI());
             }
 
