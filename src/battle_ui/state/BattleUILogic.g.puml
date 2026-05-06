@@ -2,8 +2,12 @@
 state "BattleUILogic State" as EternalJourney_BattleUI_State_BattleUILogic_State {
   state "BattleUILogic" as EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic
 }
+
+EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic --> EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic : PhysicsProcess
+
 EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic : OnActivateBattleUI() → ActivateBattleUI
 EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic : OnGameOver() → GameOver
+EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic : OnPhysicsProcess → TikCount
 EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic : OnScoreCountUp() → ScoreChanged
 EternalJourney_BattleUI_State_BattleUILogic_State_BattleUILogic : OnShipHpChanged() → ShipHpChanged
 

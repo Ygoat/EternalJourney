@@ -94,7 +94,7 @@ public partial class Battle : Node2D, IBattle
     public void StartBattle()
     {
         SetPhysicsProcess(true);
-        BattleRepo.NotifyActivateBattleUI();
+        BattleRepo.NotifyBattleStarted();
     }
 
     public void OnExitTree() { }

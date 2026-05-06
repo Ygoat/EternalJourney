@@ -3,13 +3,19 @@ state "GameLogic State" as EternalJourney_Game_State_GameLogic_State {
   state "SelectSkillPhase" as EternalJourney_Game_State_GameLogic_State_SelectSkillPhase
   state "BattleInitPhase" as EternalJourney_Game_State_GameLogic_State_BattleInitPhase
   state "BattleRunningPhase" as EternalJourney_Game_State_GameLogic_State_BattleRunningPhase
+  state "BattleEndingPhase" as EternalJourney_Game_State_GameLogic_State_BattleEndingPhase
+  state "ResultPhase" as EternalJourney_Game_State_GameLogic_State_ResultPhase
 }
 
+EternalJourney_Game_State_GameLogic_State_BattleEndingPhase --> EternalJourney_Game_State_GameLogic_State_ResultPhase : BattleEnded
 EternalJourney_Game_State_GameLogic_State_BattleInitPhase --> EternalJourney_Game_State_GameLogic_State_BattleRunningPhase : BattleInitialized
+EternalJourney_Game_State_GameLogic_State_BattleRunningPhase --> EternalJourney_Game_State_GameLogic_State_BattleEndingPhase : GameOver
 EternalJourney_Game_State_GameLogic_State_SelectSkillPhase --> EternalJourney_Game_State_GameLogic_State_BattleInitPhase : SkillSelected
 
+EternalJourney_Game_State_GameLogic_State_BattleEndingPhase : OnEnter → EndBattle
 EternalJourney_Game_State_GameLogic_State_BattleInitPhase : OnEnter → InitializeBattle
 EternalJourney_Game_State_GameLogic_State_BattleRunningPhase : OnEnter → StartBattle
+EternalJourney_Game_State_GameLogic_State_ResultPhase : OnEnter → ShowResult
 EternalJourney_Game_State_GameLogic_State_SelectSkillPhase : OnEnter → ShowSelectSkill
 
 [*] --> EternalJourney_Game_State_GameLogic_State_SelectSkillPhase

@@ -140,6 +140,11 @@ public partial class BattleUI : Control, IBattleUI
             {
                 Count = 0;
                 SetPhysicsProcess(true);
+            })
+            .Handle((in BattleUILogic.Output.TikCount _) =>
+            {
+                Count++;
+                TimerLabel.Text = $"Time: {Count}";
             });
         BattleUILogic.Start();
 
@@ -172,7 +177,6 @@ public partial class BattleUI : Control, IBattleUI
 
     public void OnPhysicsProcess(double delta)
     {
-        Count++;
-        TimerLabel.Text = $"Time: {Count}";
+        BattleUILogic.Input(new BattleUILogic.Input.PhysicsProcess());
     }
 }

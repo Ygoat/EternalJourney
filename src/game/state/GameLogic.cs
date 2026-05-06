@@ -28,6 +28,16 @@ public partial class GameLogic : LogicBlock<GameLogic.State>, IGameLogic
         /// バトル初期化完了
         /// </summary>
         public readonly record struct BattleInitialized;
+
+        /// <summary>
+        /// ゲームオーバー
+        /// </summary>
+        public readonly record struct GameOver;
+
+        /// <summary>
+        /// バトル終了完了
+        /// </summary>
+        public readonly record struct BattleEnded;
     }
 
     public static class Output
@@ -46,6 +56,16 @@ public partial class GameLogic : LogicBlock<GameLogic.State>, IGameLogic
         /// バトル開始
         /// </summary>
         public readonly record struct StartBattle;
+
+        /// <summary>
+        /// バトル終了
+        /// </summary>
+        public readonly record struct EndBattle;
+
+        /// <summary>
+        /// リザルト表示
+        /// </summary>
+        public readonly record struct ShowResult;
     }
 
     public abstract record State : StateLogic<State>
@@ -87,11 +107,45 @@ public partial class GameLogic : LogicBlock<GameLogic.State>, IGameLogic
         /// <summary>
         /// バトル実行フェーズ
         /// </summary>
-        public record BattleRunningPhase : State
+        public record BattleRunningPhase : State, IGet<Input.GameOver>
         {
             public BattleRunningPhase()
             {
                 this.OnEnter(() => Output(new Output.StartBattle()));
+                OnAttach(() => Get<IGameRepo>().GameOver += OnGameOver);
+                OnDetach(() => Get<IGameRepo>().GameOver -= OnGameOver);
+            }
+
+            private void OnGameOver() => Input(new Input.GameOver());
+
+            public Transition On(in Input.GameOver input) => To<BattleEndingPhase>();
+        }
+
+        /// <summary>
+        /// バトル終了フェーズ
+        /// </summary>
+        public record BattleEndingPhase : State, IGet<Input.BattleEnded>
+        {
+            public BattleEndingPhase()
+            {
+                this.OnEnter(() => Output(new Output.EndBattle()));
+                OnAttach(() => Get<IGameRepo>().BattleEnded += OnBattleEnded);
+                OnDetach(() => Get<IGameRepo>().BattleEnded -= OnBattleEnded);
+            }
+
+            private void OnBattleEnded() => Input(new Input.BattleEnded());
+
+            public Transition On(in Input.BattleEnded input) => To<ResultPhase>();
+        }
+
+        /// <summary>
+        /// リザルトフェーズ
+        /// </summary>
+        public record ResultPhase : State
+        {
+            public ResultPhase()
+            {
+                this.OnEnter(() => Output(new Output.ShowResult()));
             }
         }
     }

@@ -28,6 +28,10 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
     /// </summary>
     public static class Input
     {
+        /// <summary>
+        /// 物理プロセス
+        /// </summary>
+        public readonly record struct PhysicsProcess;
     }
 
     /// <summary>
@@ -54,6 +58,11 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
         /// バトルUI起動
         /// </summary>
         public readonly record struct ActivateBattleUI;
+
+        /// <summary>
+        /// タイムカウント
+        /// </summary>
+        public readonly record struct TikCount;
     }
 
     // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
@@ -66,7 +75,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
         /// <summary>
         /// バトルUIロジック
         /// </summary>
-        public record BattleUILogic : State
+        public record BattleUILogic : State, IGet<Input.PhysicsProcess>
         {
             public BattleUILogic()
             {
@@ -77,7 +86,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                         battleRepo.Score.Sync += OnScoreCountUp;
                         battleRepo.ShipHpChanged += OnShipHpChanged;
                         battleRepo.GameOverOccurred += OnGameOver;
-                        battleRepo.ActivateBattleUI += OnActivateBattleUI;
+                        battleRepo.BattleStarted += OnActivateBattleUI;
                     }
                 );
 
@@ -88,7 +97,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                         battleRepo.Score.Sync -= OnScoreCountUp;
                         battleRepo.ShipHpChanged -= OnShipHpChanged;
                         battleRepo.GameOverOccurred -= OnGameOver;
-                        battleRepo.ActivateBattleUI -= OnActivateBattleUI;
+                        battleRepo.BattleStarted -= OnActivateBattleUI;
                     }
                 );
             }
@@ -116,6 +125,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
             {
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 Get<IGameRepo>().SaveResult(battleRepo.Score.Value, Get<IBattleUI>().Count);
+                Get<IGameRepo>().NotifyGameOver();
                 Output(new Output.GameOver());
             }
 
@@ -125,6 +135,12 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
             public void OnActivateBattleUI()
             {
                 Output(new Output.ActivateBattleUI());
+            }
+
+            public Transition On(in Input.PhysicsProcess input)
+            {
+                Output(new Output.TikCount());
+                return ToSelf();
             }
         }
     }

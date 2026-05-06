@@ -87,19 +87,9 @@ public interface IBattleRepo : IDisposable
     public event Action? BattleStarted;
 
     /// <summary>
-    /// バトルUI起動イベント
-    /// </summary>
-    public event Action? ActivateBattleUI;
-
-    /// <summary>
     /// バトル開始を通知する
     /// </summary>
     public void NotifyBattleStarted();
-
-    /// <summary>
-    /// バトルUI起動を通知する
-    /// </summary>
-    public void NotifyActivateBattleUI();
 
     /// <summary>
     /// スコアカウントアップ
@@ -252,17 +242,7 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public event Action? ActivateBattleUI;
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
     public void NotifyBattleStarted() => BattleStarted?.Invoke();
-
-    /// <summary>
-    /// <inheritdoc/>
-    /// </summary>
-    public void NotifyActivateBattleUI() => ActivateBattleUI?.Invoke();
 
     private bool _disposedValue;
 

@@ -41,6 +41,26 @@ public interface IGameRepo
     /// バトル初期化完了を通知する
     /// </summary>
     void NotifyBattleInitialized();
+
+    /// <summary>
+    /// ゲームオーバーイベント
+    /// </summary>
+    event Action? GameOver;
+
+    /// <summary>
+    /// ゲームオーバーを通知する
+    /// </summary>
+    void NotifyGameOver();
+
+    /// <summary>
+    /// バトル終了イベント
+    /// </summary>
+    event Action? BattleEnded;
+
+    /// <summary>
+    /// バトル終了を通知する
+    /// </summary>
+    void NotifyBattleEnded();
 }
 
 /// <summary>
@@ -86,4 +106,24 @@ public class GameRepo : IGameRepo
     /// <inheritdoc/>
     /// </summary>
     public void NotifyBattleInitialized() => BattleInitialized?.Invoke();
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? GameOver;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyGameOver() => GameOver?.Invoke();
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? BattleEnded;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyBattleEnded() => BattleEnded?.Invoke();
 }

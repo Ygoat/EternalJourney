@@ -92,9 +92,6 @@ public partial class Game : Node2D, IGame
         // Provide()を呼び出して依存関係を提供
         this.Provide();
 
-        // Battle は子ノードのため OnReady 時点で初期化済み
-        Battle.BattleRepo.GameOverOccurred += OnGameOver;
-
         GameBinding
             .Handle((in GameLogic.Output.ShowSelectSkill _) =>
             {
@@ -113,6 +110,15 @@ public partial class Game : Node2D, IGame
                 SelectSkill.Hide();
                 Battle.Show();
                 Battle.StartBattle();
+            })
+            .Handle((in GameLogic.Output.EndBattle _) =>
+            {
+                Battle.Hide();
+                GameRepo.NotifyBattleEnded();
+            })
+            .Handle((in GameLogic.Output.ShowResult _) =>
+            {
+                Result.Show();
             });
 
         GameLogic.Start();
@@ -120,14 +126,7 @@ public partial class Game : Node2D, IGame
 
     public void OnTreeExiting()
     {
-        Battle.BattleRepo.GameOverOccurred -= OnGameOver;
         GameBinding.Dispose();
         ((System.IDisposable)GameLogic).Dispose();
-    }
-
-    private void OnGameOver()
-    {
-        Battle.Hide();
-        Result.Show();
     }
 }
