@@ -141,13 +141,32 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                 var skills = Get<IGameRepo>().SelectedSkills;
                 for (int i = 0; i < slots.Length && i < skills.Count; i++)
                 {
+                    slots[i].SetLabel(SkillInfo.GetName(skills[i]));
                     switch (skills[i])
                     {
-                        case SkillType.AtkUp:
-                            slots[i].Activated += battleUI.AtkUpSkill.Activate;
+                        case SkillType.ShipAtkUp:
+                            slots[i].Activated += battleUI.ShipAtkUpSkill.Activate;
                             break;
-                        case SkillType.SpdUp:
-                            slots[i].Activated += battleUI.SpdUpSkill.Activate;
+                        case SkillType.ShipSpdUp:
+                            slots[i].Activated += battleUI.ShipSpdUpSkill.Activate;
+                            break;
+                        case SkillType.ShipDefUp:
+                            slots[i].Activated += battleUI.ShipDefUpSkill.Activate;
+                            break;
+                        case SkillType.WeaponAtkUp:
+                            slots[i].Activated += battleUI.WeaponAtkUpSkill.Activate;
+                            break;
+                        case SkillType.WeaponSpdUp:
+                            slots[i].Activated += battleUI.WeaponSpdUpSkill.Activate;
+                            break;
+                        case SkillType.BulletAtkUp:
+                            slots[i].Activated += battleUI.BulletAtkUpSkill.Activate;
+                            break;
+                        case SkillType.BulletSpdUp:
+                            slots[i].Activated += battleUI.BulletSpdUpSkill.Activate;
+                            break;
+                        case SkillType.BulletDefUp:
+                            slots[i].Activated += battleUI.BulletDefUpSkill.Activate;
                             break;
                         case SkillType.Heal:
                             slots[i].Activated += battleUI.HealSkill.Activate;

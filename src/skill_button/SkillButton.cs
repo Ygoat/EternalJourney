@@ -11,6 +11,8 @@ public interface ISkillButton : IControl
     /// スキルボタン押下シグナル
     /// </summary>
     public event SkillButton.ActivatedEventHandler Activated;
+
+    void SetLabel(string text);
 }
 
 [Meta(typeof(IAutoNode))]
@@ -80,6 +82,8 @@ public partial class SkillButton : Control, ISkillButton
         Control.Hide();
         SetPhysicsProcess(false);
     }
+
+    public void SetLabel(string text) => ButtonLabel.Text = text;
 
     private float CalcRectHeightRatio(double waitTime, double timeLeft)
     {

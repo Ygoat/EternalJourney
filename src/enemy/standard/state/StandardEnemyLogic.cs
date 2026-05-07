@@ -4,7 +4,6 @@ using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Enemy.Base;
 using EternalJourney.Enemy.Standard;
 using EternalJourney.Enemy.Strategies.Movement;
@@ -153,8 +152,12 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
             {
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 IStandardEnemy standardEnemy = Get<IStandardEnemy>();
-                bool applyAtk = input.BaseBullet.ShouldApplySkillEffect(battleRepo.ActiveSkillTarget, SkillTarget.Bullet);
-                float currentDur = battleRepo.ReduceEnemyDurability(standardEnemy.Status.CurrentDur, input.BaseBullet.Status.Atk, applyAtk);
+                float currentDur = battleRepo.ReduceEnemyDurability(
+                    standardEnemy.Status.CurrentDur,
+                    input.BaseBullet.Status.Atk,
+                    input.BaseBullet.Status.Def,
+                    standardEnemy.Status.Def
+                );
                 Output(new Output.CurrentDurChange(currentDur));
                 UpdateColor(currentDur, standardEnemy.Status.MaxDur);
                 return CheckUnderZeroDurability(currentDur);

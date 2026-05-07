@@ -3,7 +3,6 @@ namespace EternalJourney.Battle.Domain;
 using System;
 using Chickensoft.Collections;
 using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Enemy.Base;
 
 /// <summary>
@@ -16,25 +15,16 @@ public interface IBattleRepo : IDisposable
     /// </summary>
     public float PoisonDamage { get; set; }
 
-    /// <summary>
-    /// ATK乗数（スキルバフ用）
-    /// </summary>
-    public float AtkMultiplier { get; set; }
+    public float ShipAtkBonus { get; set; }
+    public float ShipSpdMultiplier { get; set; }
+    public float ShipDefBonus { get; set; }
 
-    /// <summary>
-    /// SPD乗数（スキルバフ用）
-    /// </summary>
-    public float SpdMultiplier { get; set; }
+    public float WeaponAtkMultiplier { get; set; }
+    public float WeaponSpdMultiplier { get; set; }
 
-    /// <summary>
-    /// 現在発動中のスキルカテゴリ
-    /// </summary>
-    public SkillCategory ActiveSkillCategory { get; set; }
-
-    /// <summary>
-    /// 現在発動中のスキルターゲット
-    /// </summary>
-    public SkillTarget ActiveSkillTarget { get; set; }
+    public float BulletAtkMultiplier { get; set; }
+    public float BulletSpdMultiplier { get; set; }
+    public float BulletDefBonus { get; set; }
 
     /// <summary>
     /// スコア
@@ -141,10 +131,7 @@ public interface IBattleRepo : IDisposable
     /// <summary>
     /// 敵耐久値減少処理
     /// </summary>
-    /// <param name="curDurability">現在耐久値</param>
-    /// <param name="damage">ダメージ</param>
-    /// <returns></returns>
-    public float ReduceEnemyDurability(float curDurability, float damage, bool applyMultiplier = true);
+    public float ReduceEnemyDurability(float curDurability, float bulletAtk, float bulletDef, float enemyDef);
 
     /// <summary>
     /// 弾丸耐久値減少処理
@@ -165,25 +152,16 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public float PoisonDamage { get; set; } = 2.5f;
 
-    /// <summary>
-    /// ATK乗数（スキルバフ用）
-    /// </summary>
-    public float AtkMultiplier { get; set; } = 1.0f;
+    public float ShipAtkBonus { get; set; } = 0.0f;
+    public float ShipSpdMultiplier { get; set; } = 1.0f;
+    public float ShipDefBonus { get; set; } = 0.0f;
 
-    /// <summary>
-    /// SPD乗数（スキルバフ用）
-    /// </summary>
-    public float SpdMultiplier { get; set; } = 1.0f;
+    public float WeaponAtkMultiplier { get; set; } = 1.0f;
+    public float WeaponSpdMultiplier { get; set; } = 1.0f;
 
-    /// <summary>
-    /// 現在発動中のスキルカテゴリ
-    /// </summary>
-    public SkillCategory ActiveSkillCategory { get; set; } = SkillCategory.None;
-
-    /// <summary>
-    /// 現在発動中のスキルターゲット
-    /// </summary>
-    public SkillTarget ActiveSkillTarget { get; set; } = SkillTarget.None;
+    public float BulletAtkMultiplier { get; set; } = 1.0f;
+    public float BulletSpdMultiplier { get; set; } = 1.0f;
+    public float BulletDefBonus { get; set; } = 0.0f;
 
     /// <summary>
     /// スコア
@@ -339,9 +317,13 @@ public class BattleRepo : IBattleRepo
         ShipHealRequested?.Invoke(amount);
     }
 
-    public float ReduceEnemyDurability(float curDurability, float damage, bool applyMultiplier = true)
+    public float ReduceEnemyDurability(float curDurability, float bulletAtk, float bulletDef, float enemyDef)
     {
-        return applyMultiplier ? (curDurability - (damage * AtkMultiplier)) : (curDurability - damage);
+        float baseDamage = (bulletAtk * BulletAtkMultiplier) * WeaponAtkMultiplier;
+        float shipCorrected = baseDamage * (1f + ShipAtkBonus);
+        float effectiveDef = Math.Max(0f, enemyDef - (bulletDef + BulletDefBonus));
+        float finalDamage = shipCorrected * (100f / (100f + effectiveDef));
+        return curDurability - finalDamage;
     }
 
     public float ReduceBulletDurability(float curDurability, float damage)

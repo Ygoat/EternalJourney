@@ -23,10 +23,14 @@ public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, 
 
     private static readonly SkillType[] SkillTypeMap =
     {
-        SkillType.AtkUp,  SkillType.AtkUp,
-        SkillType.SpdUp,  SkillType.SpdUp,
-        SkillType.Heal,   SkillType.Heal,
-        SkillType.Regen,  SkillType.Regen,
+        SkillType.ShipAtkUp,
+        SkillType.ShipSpdUp,
+        SkillType.ShipDefUp,
+        SkillType.WeaponAtkUp,
+        SkillType.WeaponSpdUp,
+        SkillType.BulletAtkUp,
+        SkillType.BulletSpdUp,
+        SkillType.BulletDefUp,
     };
 
     public static class Input
@@ -62,11 +66,15 @@ public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, 
                         buttons[i].ToggleMode = true;
                         buttons[i].Text = SkillTypeMap[i] switch
                         {
-                            SkillType.AtkUp => "ATK Up",
-                            SkillType.SpdUp => "SPD Up",
-                            SkillType.Heal  => "Heal",
-                            SkillType.Regen => "Regen",
-                            _               => "",
+                            SkillType.ShipAtkUp    => "Ship ATK Up",
+                            SkillType.ShipSpdUp    => "Ship SPD Up",
+                            SkillType.ShipDefUp    => "Ship DEF Up",
+                            SkillType.WeaponAtkUp  => "Weapon ATK Up",
+                            SkillType.WeaponSpdUp  => "Weapon SPD Up",
+                            SkillType.BulletAtkUp  => "Bullet ATK Up",
+                            SkillType.BulletSpdUp  => "Bullet SPD Up",
+                            SkillType.BulletDefUp  => "Bullet DEF Up",
+                            _                      => "",
                         };
                         buttons[i].Toggled += pressed => Input(new Input.SkillToggled(index, pressed));
                     }
@@ -86,6 +94,7 @@ public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, 
                         return ToSelf();
                     }
                     selected.Add(input.Index);
+                    Get<ISelectSkillUI>().SkillDescription.Text = SkillInfo.GetDescription(SkillTypeMap[input.Index]);
                 }
                 else
                 {

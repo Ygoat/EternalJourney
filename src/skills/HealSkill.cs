@@ -1,39 +1,22 @@
-namespace EternalJourney.HealSkill;
+namespace EternalJourney.Skills;
 
 using Chickensoft.AutoInject;
-using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
+using EternalJourney.Cores.Models.Skill;
 using EternalJourney.HealSkill.State;
 using Godot;
 
-/// <summary>
-/// 回復スキルインターフェース
-/// </summary>
-public interface IHealSkill : INode
-{
-    /// <summary>
-    /// スキルを発動する
-    /// </summary>
-    void Activate();
-}
+public interface IHealSkill : ISkillNode { }
 
-/// <summary>
-/// 回復スキルクラス（自機HPを即時回復する）
-/// </summary>
 [Meta(typeof(IAutoNode))]
 public partial class HealSkill : Node, IHealSkill
 {
     public override void _Notification(int what) => this.Notify(what);
 
-    /// <summary>
-    /// スキルロジック
-    /// </summary>
-    public HealSkillLogic Logic { get; set; } = default!;
+    public string Description => SkillInfo.GetDescription(SkillType.Heal);
 
-    /// <summary>
-    /// スキルバインド
-    /// </summary>
+    public HealSkillLogic Logic { get; set; } = default!;
     public HealSkillLogic.IBinding Binding { get; set; } = default!;
 
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
@@ -54,13 +37,7 @@ public partial class HealSkill : Node, IHealSkill
         Logic.Start();
     }
 
-    /// <summary>
-    /// スキルを発動する
-    /// </summary>
-    public void Activate()
-    {
-        Logic?.Input(new HealSkillLogic.Input.Apply());
-    }
+    public void Activate() => Logic?.Input(new HealSkillLogic.Input.Apply());
 
     public void OnTreeExiting()
     {

@@ -5,11 +5,8 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.BattleUI.State;
-using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Game.Domain;
-using EternalJourney.HealSkill;
-using EternalJourney.RegenSkill;
-using EternalJourney.StatusUpSkill;
+using EternalJourney.Skills;
 using EternalJourney.SukillButton;
 using Godot;
 
@@ -23,8 +20,14 @@ public interface IBattleUI : IControl
     public ISkillButton SkillButton2 { get; }
     public ISkillButton SkillButton3 { get; }
     public ISkillButton SkillButton4 { get; }
-    public IStatusUpSkill AtkUpSkill { get; }
-    public IStatusUpSkill SpdUpSkill { get; }
+    public IShipAtkUpSkill ShipAtkUpSkill { get; }
+    public IShipSpdUpSkill ShipSpdUpSkill { get; }
+    public IShipDefUpSkill ShipDefUpSkill { get; }
+    public IWeaponAtkUpSkill WeaponAtkUpSkill { get; }
+    public IWeaponSpdUpSkill WeaponSpdUpSkill { get; }
+    public IBulletAtkUpSkill BulletAtkUpSkill { get; }
+    public IBulletSpdUpSkill BulletSpdUpSkill { get; }
+    public IBulletDefUpSkill BulletDefUpSkill { get; }
     public IHealSkill HealSkill { get; }
     public IRegenSkill RegenSkill { get; }
 }
@@ -73,16 +76,15 @@ public partial class BattleUI : Control, IBattleUI
 
     public float Count { get; set; } = default!;
 
-    /// <summary>ATK上昇スキル</summary>
-    public IStatusUpSkill AtkUpSkill { get; set; } = default!;
-
-    /// <summary>SPD上昇スキル</summary>
-    public IStatusUpSkill SpdUpSkill { get; set; } = default!;
-
-    /// <summary>回復スキル</summary>
+    public IShipAtkUpSkill ShipAtkUpSkill { get; set; } = default!;
+    public IShipSpdUpSkill ShipSpdUpSkill { get; set; } = default!;
+    public IShipDefUpSkill ShipDefUpSkill { get; set; } = default!;
+    public IWeaponAtkUpSkill WeaponAtkUpSkill { get; set; } = default!;
+    public IWeaponSpdUpSkill WeaponSpdUpSkill { get; set; } = default!;
+    public IBulletAtkUpSkill BulletAtkUpSkill { get; set; } = default!;
+    public IBulletSpdUpSkill BulletSpdUpSkill { get; set; } = default!;
+    public IBulletDefUpSkill BulletDefUpSkill { get; set; } = default!;
     public IHealSkill HealSkill { get; set; } = new HealSkill();
-
-    /// <summary>リジェネスキル</summary>
     public IRegenSkill RegenSkill { get; set; } = new RegenSkill();
 
     /// <summary>バトルリポジトリ</summary>
@@ -93,20 +95,27 @@ public partial class BattleUI : Control, IBattleUI
 
     public void Initialize()
     {
-        var atk = new StatusUpSkill();
-        atk.TargetStatus = StatusType.Atk;
-        AtkUpSkill = atk;
-
-        var spd = new StatusUpSkill();
-        spd.TargetStatus = StatusType.Spd;
-        SpdUpSkill = spd;
+        ShipAtkUpSkill = new ShipAtkUpSkill();
+        ShipSpdUpSkill = new ShipSpdUpSkill();
+        ShipDefUpSkill = new ShipDefUpSkill();
+        WeaponAtkUpSkill = new WeaponAtkUpSkill();
+        WeaponSpdUpSkill = new WeaponSpdUpSkill();
+        BulletAtkUpSkill = new BulletAtkUpSkill();
+        BulletSpdUpSkill = new BulletSpdUpSkill();
+        BulletDefUpSkill = new BulletDefUpSkill();
     }
 
     public void OnReady()
     {
         ZIndex = 100;
-        AddChild((Node)AtkUpSkill);
-        AddChild((Node)SpdUpSkill);
+        AddChild((Node)ShipAtkUpSkill);
+        AddChild((Node)ShipSpdUpSkill);
+        AddChild((Node)ShipDefUpSkill);
+        AddChild((Node)WeaponAtkUpSkill);
+        AddChild((Node)WeaponSpdUpSkill);
+        AddChild((Node)BulletAtkUpSkill);
+        AddChild((Node)BulletSpdUpSkill);
+        AddChild((Node)BulletDefUpSkill);
         AddChild((Node)HealSkill);
         AddChild((Node)RegenSkill);
     }

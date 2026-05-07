@@ -19,6 +19,7 @@ public interface ISelectSkillUI : IControl
     public IButton Skill7 { get; }
     public IButton Skill8 { get; }
     public IButton SelectButton { get; }
+    public IRichTextLabel SkillDescription { get; }
 }
 
 [Meta(typeof(IAutoNode))]
@@ -58,6 +59,9 @@ public partial class SelectSkillUI : Control, ISelectSkillUI
 
     [Node]
     public IButton SelectButton { get; set; } = default!;
+
+    [Node]
+    public IRichTextLabel SkillDescription { get; set; } = default!;
     #endregion Nodes
 
     #region Dependencies

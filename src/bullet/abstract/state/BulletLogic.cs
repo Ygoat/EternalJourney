@@ -118,8 +118,7 @@ public partial class BulletLogic : LogicBlock<BulletLogic.State>, IBulletLogic
                 // SPDバフ乗数を適用してOutput
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 IBaseBullet baseBullet = Get<IBaseBullet>();
-                bool applySpd = baseBullet.ShouldApplySkillEffect(battleRepo.ActiveSkillTarget, SkillTarget.Bullet);
-                float spd = applySpd ? (baseBullet.Status.Spd * battleRepo.SpdMultiplier) : baseBullet.Status.Spd;
+                float spd = baseBullet.Status.Spd * battleRepo.BulletSpdMultiplier;
                 Output(new Output.SpdUpdated(spd));
 
                 Input.Emit ip = input;

@@ -105,7 +105,8 @@ theme_override_constants/margin_bottom = 100
 custom_minimum_size = Vector2(500, 300)
 layout_mode = 2
 
-[node name="RichTextLabel" type="RichTextLabel" parent="MarginContainer/GridContainer/VBoxContainer/Panel"]
+[node name="SkillDescription" type="RichTextLabel" parent="MarginContainer/GridContainer/VBoxContainer/Panel"]
+unique_name_in_owner = true
 custom_minimum_size = Vector2(500, 200)
 layout_mode = 1
 anchors_preset = 8

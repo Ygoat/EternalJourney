@@ -1,4 +1,4 @@
-namespace EternalJourney.StatusUpSkill;
+namespace EternalJourney.BulletStatusUpSkill;
 
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
@@ -8,19 +8,19 @@ using EternalJourney.StatusUpSkill.State;
 using Godot;
 
 /// <summary>
-/// ステータスアップスキルインターフェース（Ship専用）
+/// 弾丸ステータスアップスキルインターフェース
 /// </summary>
-public interface IStatusUpSkill : INode
+public interface IBulletStatusUpSkill : INode
 {
     /// <summary>スキルを発動する</summary>
     void Activate();
 }
 
 /// <summary>
-/// Ship ステータスアップスキル（ATK・SPD・DEFを一定時間バフする）
+/// Bullet ステータスアップスキル（ATK・SPD・DEFを一定時間バフする）
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class StatusUpSkill : Node, IStatusUpSkill
+public partial class BulletStatusUpSkill : Node, IBulletStatusUpSkill
 {
     public override void _Notification(int what) => this.Notify(what);
 
@@ -60,17 +60,17 @@ public partial class StatusUpSkill : Node, IStatusUpSkill
         Binding
             .Handle((in StatusUpSkillLogic.Output.Activated o) =>
             {
-                BattleRepo.ShipAtkBonus = o.StackCount * 0.3f;
-                BattleRepo.ShipSpdMultiplier = 1.0f + o.StackCount * 0.2f;
-                BattleRepo.ShipDefBonus = o.StackCount * 5.0f;
+                BattleRepo.BulletAtkMultiplier = 1.0f + o.StackCount * 0.25f;
+                BattleRepo.BulletSpdMultiplier = 1.0f + o.StackCount * 0.15f;
+                BattleRepo.BulletDefBonus = o.StackCount * 3.0f;
                 BuffTimer.Stop();
                 BuffTimer.Start();
             })
             .Handle((in StatusUpSkillLogic.Output.Deactivated _) =>
             {
-                BattleRepo.ShipAtkBonus = 0.0f;
-                BattleRepo.ShipSpdMultiplier = 1.0f;
-                BattleRepo.ShipDefBonus = 0.0f;
+                BattleRepo.BulletAtkMultiplier = 1.0f;
+                BattleRepo.BulletSpdMultiplier = 1.0f;
+                BattleRepo.BulletDefBonus = 0.0f;
             });
         Logic.Start();
     }

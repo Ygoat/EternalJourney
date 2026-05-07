@@ -104,7 +104,11 @@ public partial class ShipLogic : LogicBlock<ShipLogic.State>, IShipLogic
             {
                 if (area is IBaseBullet bullet)
                 {
-                    ApplyDamage(bullet.Status.Atk);
+                    IBattleRepo battleRepo = Get<IBattleRepo>();
+                    IShip ship = Get<IShip>();
+                    float shipDef = ship.Status.Def + battleRepo.ShipDefBonus;
+                    float reducedDamage = bullet.Status.Atk * (100f / (100f + shipDef));
+                    ApplyDamage(reducedDamage);
                 }
             }
 
