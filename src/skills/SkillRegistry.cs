@@ -13,7 +13,7 @@ public static class SkillRegistry
         SkillType.WeaponSpdUp,
         SkillType.BulletAtkUp,
         SkillType.BulletSpdUp,
-        SkillType.BulletDefUp,
+        SkillType.Regen,
     };
 
     public static ISkillNode CreateNode(SkillType type) => type switch
