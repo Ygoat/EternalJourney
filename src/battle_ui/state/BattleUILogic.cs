@@ -58,7 +58,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
         /// <summary>
         /// 船HP変化
         /// </summary>
-        public readonly record struct ShipHpChanged(float CurrentHp, float MaxHp);
+        public readonly record struct ShipHpChanged(float Ratio);
 
         /// <summary>
         /// バトルUI起動
@@ -133,7 +133,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                 Output(new Output.ScoreChanged(currentScore));
 
             public void OnShipHpChanged(float currentHp, float maxHp) =>
-                Output(new Output.ShipHpChanged(currentHp, maxHp));
+                Output(new Output.ShipHpChanged(CalcHpGaugeRatio(currentHp, maxHp)));
 
             public void OnGameOver()
             {
@@ -147,6 +147,12 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
             {
                 Output(new Output.TikCount());
                 return ToSelf();
+            }
+
+            public float CalcHpGaugeRatio(float currentHp, float maxHp)
+            {
+                float ratio = maxHp > 0f ? currentHp / maxHp : 0f;
+                return ratio;
             }
         }
     }
