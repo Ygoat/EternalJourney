@@ -1,6 +1,5 @@
 namespace EternalJourney.Enemy.Standard;
 
-using System;
 using Chickensoft.AutoInject;
 using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
@@ -226,9 +225,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         if (ship != null)
         {
             Vector2 dir = GlobalPosition.DirectionTo(ship.EnemyTargetMarker.GlobalPosition);
-            float angle = Transform.X.AngleTo(dir);
-            float cross = Transform.X.Cross(dir);
-            Rotate(Math.Sign(cross) * BodyRotationSpeed * Sigmoid(1, Math.Abs(angle)));
+            GlobalRotation = Mathf.LerpAngle(GlobalRotation, dir.Angle(), BodyRotationSpeed);
         }
 
         // PhysicsProcess入力（移動戦略を使用）
@@ -238,11 +235,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
             _elapsedTime,
             _movementStrategy,
             GlobalPosition));
-    }
-
-    private static float Sigmoid(double k, double x)
-    {
-        return (float)(2 * ((1 / (1 + Math.Pow(2.7, -k * x))) - (1 / 2)));
     }
 
     /// <summary>

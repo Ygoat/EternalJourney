@@ -199,17 +199,8 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         {
             // 敵の方向を取得
             TargetDirection = CenterMarker.GlobalPosition.DirectionTo(enemy.GlobalPosition);
-            // 敵方向の角度を計算
-            float AngleToTarget = Math.Abs(WeaponDirection.AngleTo(TargetDirection));
-            // 外積計算
-            float OuterProduct = WeaponDirection.Cross(TargetDirection);
-
-            // 外積・敵方向の角度・ローテーションスピード・シグモイド関数から
-            // 回転角度を計算
-            float rotation = Math.Sign(OuterProduct) * Math.Sign(AngleToTarget) * RotationSpeed * Sigmoid(1, AngleToTarget);
-
-            // 回転する
-            Rotate(rotation);
+            // LerpAngleで最短経路を補間（微振動なし）
+            GlobalRotation = Mathf.LerpAngle(GlobalRotation, TargetDirection.Angle(), RotationSpeed);
         }
         // 射撃を行う
         Attack();
