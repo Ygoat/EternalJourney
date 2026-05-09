@@ -5,7 +5,9 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Common.BaseFactory;
+using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Cores.Models.Bullet;
 using EternalJourney.Cores.Repositories;
@@ -25,6 +27,11 @@ public interface IStandardBulletFactory
     /// プレイヤー所有の弾丸を生成するか（デフォルト: true）
     /// </summary>
     bool IsPlayerBullet { get; set; }
+
+    /// <summary>
+    /// 発射間隔（秒）
+    /// </summary>
+    public float WaitTime { get; set; }
 
     /// <summary>
     /// 弾丸生成（デフォルトのBulletIdを使用）
@@ -61,6 +68,16 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     public string BulletName { get; set; } = default!;
 
     #endregion Exports
+
+    #region Dependencies
+    [Dependency]
+    public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
+    #endregion Dependencies
+
+    #region State
+    public StandardBulletFactoryLogic BulletFactoryLogic { get; set; } = default!;
+    public StandardBulletFactoryLogic.IBinding BulletFactoryBind { get; set; } = default!;
+    #endregion State
 
     private readonly BulletConfigReader _bulletConfigReader = new();
     private BulletConfig? _bulletConfig;
@@ -100,11 +117,40 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     /// </summary>
     public override void Setup()
     {
-        // 基底クラスの初期化を呼び出す
-        base.Initialize();
-
-        // 基底クラスのセットアップ（プール生成）
         base.Setup();
+        BulletFactoryLogic = new StandardBulletFactoryLogic();
+        BulletFactoryBind = BulletFactoryLogic.Bind();
+    }
+
+    /// <summary>
+    /// 解決後処理（タイマー設定とロジックバインド）
+    /// </summary>
+    public override void OnResolved()
+    {
+        Timer.OneShot = true;
+        Timer.WaitTime = WaitTime;
+        Timer.Timeout += OnTimeout;
+
+        BulletFactoryBind
+            .Handle((in StandardBulletFactoryLogic.Output.Fire _) =>
+            {
+                CallDeferred(nameof(BulletEmit));
+            })
+            .Handle((in StandardBulletFactoryLogic.Output.StartCoolDown _) =>
+            {
+                StartTimer();
+            });
+
+        BulletFactoryLogic.Start();
+    }
+
+    /// <summary>
+    /// タイマー開始
+    /// </summary>
+    protected override void StartTimer()
+    {
+        Timer.WaitTime = WaitTime;
+        base.StartTimer();
     }
 
     /// <summary>
@@ -112,7 +158,7 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     /// </summary>
     public void GenerateBullet()
     {
-        RequestGenerate();
+        BulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.FireRequested());
     }
 
     /// <summary>
@@ -121,18 +167,16 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     /// <param name="bulletId">弾丸設定ID（BulletConfig.jsonのidと対応）</param>
     public void GenerateBullet(string bulletId)
     {
-        // 指定されたIDの弾丸設定を取得
         _bulletConfig = _bulletConfigReader.GetById(bulletId);
-        RequestGenerate();
+        BulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.FireRequested());
     }
 
     /// <summary>
-    /// 生成完了時の処理（BaseFactoryのオーバーライド）
+    /// タイムアウト時の処理（クールダウン完了をロジックに通知）
     /// </summary>
-    protected override void OnGenerated()
+    protected override void OnTimeout()
     {
-        // 弾丸生成（遅延実行）
-        CallDeferred(nameof(BulletEmit));
+        BulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.CoolDownComplete());
     }
 
     /// <summary>
@@ -162,9 +206,6 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
 
         // 弾丸射出
         bullet.Emit(GlobalPosition, GlobalRotation);
-
-        // クールダウン開始
-        StartCoolDown();
     }
 
     /// <summary>

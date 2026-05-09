@@ -22,6 +22,11 @@ public interface IBattleRepo : IDisposable
     public float WeaponAtkMultiplier { get; set; }
     public float WeaponSpdMultiplier { get; set; }
 
+    /// <summary>
+    /// 武器速度乗数変更イベント
+    /// </summary>
+    public event Action? WeaponSpdMultiplierChanged;
+
     public float BulletAtkMultiplier { get; set; }
     public float BulletSpdMultiplier { get; set; }
     public float BulletDefBonus { get; set; }
@@ -157,7 +162,14 @@ public class BattleRepo : IBattleRepo
     public float ShipDefBonus { get; set; } = 0.0f;
 
     public float WeaponAtkMultiplier { get; set; } = 1.0f;
-    public float WeaponSpdMultiplier { get; set; } = 1.0f;
+
+    private float _weaponSpdMultiplier = 1.0f;
+    public float WeaponSpdMultiplier
+    {
+        get => _weaponSpdMultiplier;
+        set { _weaponSpdMultiplier = value; WeaponSpdMultiplierChanged?.Invoke(); }
+    }
+    public event Action? WeaponSpdMultiplierChanged;
 
     public float BulletAtkMultiplier { get; set; } = 1.0f;
     public float BulletSpdMultiplier { get; set; } = 1.0f;

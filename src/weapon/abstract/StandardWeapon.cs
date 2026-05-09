@@ -5,7 +5,10 @@ using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract;
+using EternalJourney.Common.Traits;
+using EternalJourney.Cores.Repositories;
 using EternalJourney.Radar;
 using EternalJourney.Weapon.Abstract.Base;
 using EternalJourney.Weapon.Abstract.State;
@@ -47,7 +50,15 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     public StandardWeaponLogic.IBinding WeaponBind { get; set; } = default!;
     #endregion State
 
+    private readonly WeaponConfigReader _weaponConfigReader = new();
+
     #region Exports
+    /// <summary>
+    /// 武器設定ID（WeaponConfig.jsonのidと対応）
+    /// </summary>
+    [Export]
+    public string WeaponId { get; set; } = string.Empty;
+
     /// <summary>
     /// ターゲット方向
     /// </summary>
@@ -96,6 +107,11 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     public IRadar Radar { get; set; } = default!;
     #endregion Nodes
 
+    #region Dependencies
+    [Dependency]
+    public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
+    #endregion Dependencies
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
@@ -103,6 +119,16 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     {
         // 依存性提供
         this.Provide();
+        Status = new Status { Spd = 0.1f, MaxDur = 10.0f, CurrentDur = 10.0f };
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public override void OnReady()
+    {
+        base.OnReady();
+        StandardBulletFactory.WaitTime = Status.Spd;
     }
 
     /// <summary>
@@ -142,6 +168,19 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         Radar.NotSearched += OnNotSearched;
         // 武器ロジック初期状態開始
         StandardWeaponLogic.Start();
+
+        BattleRepo.WeaponSpdMultiplierChanged += UpdateWaitTime;
+        UpdateWaitTime();
+
+        // WeaponConfig.jsonから武器設定を読み込み
+        if (!string.IsNullOrEmpty(WeaponId))
+        {
+            var entry = _weaponConfigReader.GetById(WeaponId);
+            if (entry != null)
+            {
+                RotationSpeed = entry.Status.RotationSpeed;
+            }
+        }
     }
 
     /// <summary>
@@ -188,7 +227,22 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
 
     public void SetPlayerOwned(bool isPlayer)
     {
+        IsPlayerOwned = isPlayer;
         StandardBulletFactory.IsPlayerBullet = isPlayer;
+    }
+
+    private void UpdateWaitTime()
+    {
+        StandardBulletFactory.WaitTime = IsPlayerOwned
+            ? Status.Spd / BattleRepo.WeaponSpdMultiplier
+            : Status.Spd;
+    }
+
+    public void OnTreeExiting()
+    {
+        BattleRepo.WeaponSpdMultiplierChanged -= UpdateWaitTime;
+        WeaponBind.Dispose();
+        ((IDisposable)StandardWeaponLogic).Dispose();
     }
 
     public override void Attack()

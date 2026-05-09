@@ -15,7 +15,7 @@ Def = 0.0
 Size = 0.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_s7ltu"]
-size = Vector2(40, 40)
+size = Vector2(66, 40)
 
 [node name="StandardEnemy" instance=ExtResource("1_ammup")]
 script = ExtResource("2_ccaoi")
@@ -43,7 +43,7 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -20.0
+offset_left = -46.0
 offset_top = -20.0
 offset_right = 20.0
 offset_bottom = 20.0
@@ -55,6 +55,7 @@ color = Color(1, 0.18, 0.18, 1)
 unique_name_in_owner = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." index="2"]
+position = Vector2(-13, 0)
 shape = SubResource("RectangleShape2D_s7ltu")
 
 [node name="DebugLabel" parent="." index="3"]
@@ -63,3 +64,4 @@ visible = true
 [node name="StandardWeapon" parent="." index="4" instance=ExtResource("4_tvl6g")]
 unique_name_in_owner = true
 position = Vector2(34, 2)
+WeaponId = ""
