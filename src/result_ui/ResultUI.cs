@@ -73,11 +73,6 @@ public partial class ResultUI : Control, IResultUI
     [Dependency]
     public IGameRepo GameRepo => this.DependOn<IGameRepo>();
 
-    /// <summary>
-    /// バトルリポジトリ
-    /// </summary>
-    [Dependency]
-    public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
     #endregion Dependencies
 
     public void Setup()
@@ -91,7 +86,6 @@ public partial class ResultUI : Control, IResultUI
     {
         ResultUILogic.Set(AppRepo);
         ResultUILogic.Set(GameRepo);
-        ResultUILogic.Set(BattleRepo);
         ResultUIBinding
             .Handle((in ResultUILogic.Output.UpdateDisplay o) =>
             {

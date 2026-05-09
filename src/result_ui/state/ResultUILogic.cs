@@ -3,7 +3,6 @@ namespace EternalJourney.ResultUI.State;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.App.Domain;
-using EternalJourney.Battle.Domain;
 using EternalJourney.Game.Domain;
 
 /// <summary>
@@ -47,17 +46,15 @@ public partial class ResultUILogic : LogicBlock<ResultUILogic.State>, IResultUIL
             {
                 OnAttach(() =>
                 {
-                    IBattleRepo battleRepo = Get<IBattleRepo>();
                     IResultUI resultUI = Get<IResultUI>();
-                    battleRepo.GameOverOccurred += OnGameOver;
+                    Get<IGameRepo>().GameOver += OnGameOver;
                     resultUI.EndButton.Pressed += OnEndButtonPressed;
                 });
 
                 OnDetach(() =>
                 {
-                    IBattleRepo battleRepo = Get<IBattleRepo>();
                     IResultUI resultUI = Get<IResultUI>();
-                    battleRepo.GameOverOccurred -= OnGameOver;
+                    Get<IGameRepo>().GameOver -= OnGameOver;
                     resultUI.EndButton.Pressed -= OnEndButtonPressed;
                 });
             }
