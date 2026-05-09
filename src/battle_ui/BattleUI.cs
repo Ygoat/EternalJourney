@@ -84,7 +84,7 @@ public partial class BattleUI : Control, IBattleUI
         _skills = new Dictionary<SkillType, ISkillNode>();
         foreach (var type in SkillRegistry.SelectableSkills)
             _skills[type] = SkillRegistry.CreateNode(type);
-        _skills[SkillType.Heal]  = SkillRegistry.CreateNode(SkillType.Heal);
+        _skills[SkillType.Heal] = SkillRegistry.CreateNode(SkillType.Heal);
         _skills[SkillType.Regen] = SkillRegistry.CreateNode(SkillType.Regen);
     }
 
@@ -116,7 +116,7 @@ public partial class BattleUI : Control, IBattleUI
             })
             .Handle((in BattleUILogic.Output.ShipHpChanged output) =>
             {
-                UpdateHpGauge(output.CurrentHp, output.MaxHp);
+                LeftHPGauge.AnchorRight = output.Ratio;
             })
             .Handle((in BattleUILogic.Output.GameOver _) =>
             {
@@ -135,6 +135,16 @@ public partial class BattleUI : Control, IBattleUI
         BattleUILogic.Start();
     }
 
+    public void OnPhysicsProcess(double delta)
+    {
+        BattleUILogic.Input(new BattleUILogic.Input.PhysicsProcess());
+    }
+
+    public void SetScoreLabel(int score)
+    {
+        ScoreLabel.Text = $"Score: {score}";
+    }
+
     private void OnGameOver()
     {
         SetPhysicsProcess(false);
@@ -144,21 +154,5 @@ public partial class BattleUI : Control, IBattleUI
     {
         BattleUIBinding.Dispose();
         ((System.IDisposable)BattleUILogic).Dispose();
-    }
-
-    public void SetScoreLabel(int score)
-    {
-        ScoreLabel.Text = $"Score: {score}";
-    }
-
-    public void UpdateHpGauge(float currentHp, float maxHp)
-    {
-        float ratio = maxHp > 0f ? currentHp / maxHp : 0f;
-        LeftHPGauge.AnchorRight = ratio;
-    }
-
-    public void OnPhysicsProcess(double delta)
-    {
-        BattleUILogic.Input(new BattleUILogic.Input.PhysicsProcess());
     }
 }
