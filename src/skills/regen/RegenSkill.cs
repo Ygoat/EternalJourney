@@ -4,7 +4,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Skill;
-using EternalJourney.RegenSkill.State;
+using EternalJourney.Skills.Regen.State;
 using Godot;
 
 public interface IRegenSkill : ISkillNode { }

@@ -7,6 +7,7 @@ using Chickensoft.LogicBlocks;
 using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Game.Domain;
 using EternalJourney.SelectUI;
+using EternalJourney.Skills;
 
 /// <summary>
 /// スキル選択UIロジックインターフェース
@@ -20,18 +21,6 @@ public interface ISelectSkillUILogic : ILogicBlock<SelectSkillUILogic.State>;
 public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, ISelectSkillUILogic
 {
     public override Transition GetInitialState() => To<State.Idle>();
-
-    private static readonly SkillType[] SkillTypeMap =
-    {
-        SkillType.ShipAtkUp,
-        SkillType.ShipSpdUp,
-        SkillType.ShipDefUp,
-        SkillType.WeaponAtkUp,
-        SkillType.WeaponSpdUp,
-        SkillType.BulletAtkUp,
-        SkillType.BulletSpdUp,
-        SkillType.BulletDefUp,
-    };
 
     public static class Input
     {
@@ -64,18 +53,7 @@ public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, 
                     {
                         int index = i;
                         buttons[i].ToggleMode = true;
-                        buttons[i].Text = SkillTypeMap[i] switch
-                        {
-                            SkillType.ShipAtkUp    => "Ship ATK Up",
-                            SkillType.ShipSpdUp    => "Ship SPD Up",
-                            SkillType.ShipDefUp    => "Ship DEF Up",
-                            SkillType.WeaponAtkUp  => "Weapon ATK Up",
-                            SkillType.WeaponSpdUp  => "Weapon SPD Up",
-                            SkillType.BulletAtkUp  => "Bullet ATK Up",
-                            SkillType.BulletSpdUp  => "Bullet SPD Up",
-                            SkillType.BulletDefUp  => "Bullet DEF Up",
-                            _                      => "",
-                        };
+                        buttons[i].Text = SkillInfo.GetName(SkillRegistry.SelectableSkills[i]);
                         buttons[i].Toggled += pressed => Input(new Input.SkillToggled(index, pressed));
                     }
                     ui.SelectButton.Pressed += () => Input(new Input.SelectButtonPressed());
@@ -94,7 +72,7 @@ public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, 
                         return ToSelf();
                     }
                     selected.Add(input.Index);
-                    Get<ISelectSkillUI>().SkillDescription.Text = SkillInfo.GetDescription(SkillTypeMap[input.Index]);
+                    Get<ISelectSkillUI>().SkillDescription.Text = SkillInfo.GetDescription(SkillRegistry.SelectableSkills[input.Index]);
                 }
                 else
                 {
@@ -109,7 +87,7 @@ public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, 
                 var selected = Get<HashSet<int>>();
                 var skills = new List<SkillType>();
                 foreach (int i in selected)
-                    skills.Add(SkillTypeMap[i]);
+                    skills.Add(SkillRegistry.SelectableSkills[i]);
                 IGameRepo gameRepo = Get<IGameRepo>();
                 gameRepo.SetSelectedSkills(skills);
                 gameRepo.NotifySkillSelected();

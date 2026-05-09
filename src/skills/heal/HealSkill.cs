@@ -4,7 +4,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Skill;
-using EternalJourney.HealSkill.State;
+using EternalJourney.Skills.Heal.State;
 using Godot;
 
 public interface IHealSkill : ISkillNode { }

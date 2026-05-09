@@ -1,10 +1,12 @@
 namespace EternalJourney.BattleUI;
 
+using System.Collections.Generic;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.BattleUI.State;
+using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Game.Domain;
 using EternalJourney.Skills;
 using EternalJourney.SukillButton;
@@ -20,16 +22,7 @@ public interface IBattleUI : IControl
     public ISkillButton SkillButton2 { get; }
     public ISkillButton SkillButton3 { get; }
     public ISkillButton SkillButton4 { get; }
-    public IShipAtkUpSkill ShipAtkUpSkill { get; }
-    public IShipSpdUpSkill ShipSpdUpSkill { get; }
-    public IShipDefUpSkill ShipDefUpSkill { get; }
-    public IWeaponAtkUpSkill WeaponAtkUpSkill { get; }
-    public IWeaponSpdUpSkill WeaponSpdUpSkill { get; }
-    public IBulletAtkUpSkill BulletAtkUpSkill { get; }
-    public IBulletSpdUpSkill BulletSpdUpSkill { get; }
-    public IBulletDefUpSkill BulletDefUpSkill { get; }
-    public IHealSkill HealSkill { get; }
-    public IRegenSkill RegenSkill { get; }
+    ISkillNode GetSkill(SkillType type);
 }
 
 /// <summary>
@@ -76,16 +69,9 @@ public partial class BattleUI : Control, IBattleUI
 
     public float Count { get; set; } = default!;
 
-    public IShipAtkUpSkill ShipAtkUpSkill { get; set; } = default!;
-    public IShipSpdUpSkill ShipSpdUpSkill { get; set; } = default!;
-    public IShipDefUpSkill ShipDefUpSkill { get; set; } = default!;
-    public IWeaponAtkUpSkill WeaponAtkUpSkill { get; set; } = default!;
-    public IWeaponSpdUpSkill WeaponSpdUpSkill { get; set; } = default!;
-    public IBulletAtkUpSkill BulletAtkUpSkill { get; set; } = default!;
-    public IBulletSpdUpSkill BulletSpdUpSkill { get; set; } = default!;
-    public IBulletDefUpSkill BulletDefUpSkill { get; set; } = default!;
-    public IHealSkill HealSkill { get; set; } = new HealSkill();
-    public IRegenSkill RegenSkill { get; set; } = new RegenSkill();
+    private Dictionary<SkillType, ISkillNode> _skills = default!;
+
+    public ISkillNode GetSkill(SkillType type) => _skills[type];
 
     /// <summary>バトルリポジトリ</summary>
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
@@ -95,29 +81,18 @@ public partial class BattleUI : Control, IBattleUI
 
     public void Initialize()
     {
-        ShipAtkUpSkill = new ShipAtkUpSkill();
-        ShipSpdUpSkill = new ShipSpdUpSkill();
-        ShipDefUpSkill = new ShipDefUpSkill();
-        WeaponAtkUpSkill = new WeaponAtkUpSkill();
-        WeaponSpdUpSkill = new WeaponSpdUpSkill();
-        BulletAtkUpSkill = new BulletAtkUpSkill();
-        BulletSpdUpSkill = new BulletSpdUpSkill();
-        BulletDefUpSkill = new BulletDefUpSkill();
+        _skills = new Dictionary<SkillType, ISkillNode>();
+        foreach (var type in SkillRegistry.SelectableSkills)
+            _skills[type] = SkillRegistry.CreateNode(type);
+        _skills[SkillType.Heal]  = SkillRegistry.CreateNode(SkillType.Heal);
+        _skills[SkillType.Regen] = SkillRegistry.CreateNode(SkillType.Regen);
     }
 
     public void OnReady()
     {
         ZIndex = 100;
-        AddChild((Node)ShipAtkUpSkill);
-        AddChild((Node)ShipSpdUpSkill);
-        AddChild((Node)ShipDefUpSkill);
-        AddChild((Node)WeaponAtkUpSkill);
-        AddChild((Node)WeaponSpdUpSkill);
-        AddChild((Node)BulletAtkUpSkill);
-        AddChild((Node)BulletSpdUpSkill);
-        AddChild((Node)BulletDefUpSkill);
-        AddChild((Node)HealSkill);
-        AddChild((Node)RegenSkill);
+        foreach (var skill in _skills.Values)
+            AddChild((Node)skill);
     }
 
     public void Setup()

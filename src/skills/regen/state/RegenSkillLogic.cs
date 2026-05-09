@@ -1,4 +1,4 @@
-namespace EternalJourney.RegenSkill.State;
+namespace EternalJourney.Skills.Regen.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;

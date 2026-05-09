@@ -1,4 +1,4 @@
-namespace EternalJourney.StatusUpSkill.State;
+namespace EternalJourney.Skills.StatusUp.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;

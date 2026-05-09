@@ -1,4 +1,4 @@
-namespace EternalJourney.HealSkill.State;
+namespace EternalJourney.Skills.Heal.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;

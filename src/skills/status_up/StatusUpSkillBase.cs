@@ -4,17 +4,16 @@ using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Skill;
-using EternalJourney.StatusUpSkill.State;
+using EternalJourney.Skills.StatusUp.State;
 using Godot;
 
-public interface IBulletDefUpSkill : ISkillNode { }
-
 [Meta(typeof(IAutoNode))]
-public partial class BulletDefUpSkill : Node, IBulletDefUpSkill
+public abstract partial class StatusUpSkillBase : Node, ISkillNode
 {
     public override void _Notification(int what) => this.Notify(what);
 
-    public string Description => SkillInfo.GetDescription(SkillType.BulletDefUp);
+    protected abstract SkillType SkillKind { get; }
+    public string Description => SkillInfo.GetDescription(SkillKind);
 
     public StatusUpSkillLogic Logic { get; set; } = default!;
     public StatusUpSkillLogic.IBinding Binding { get; set; } = default!;
@@ -31,6 +30,9 @@ public partial class BulletDefUpSkill : Node, IBulletDefUpSkill
         Binding = Logic.Bind();
     }
 
+    protected abstract void ApplyEffect(int stackCount);
+    protected abstract void ResetEffect();
+
     public void OnResolved()
     {
         BuffTimer.WaitTime = 10.0f;
@@ -40,14 +42,11 @@ public partial class BulletDefUpSkill : Node, IBulletDefUpSkill
         Binding
             .Handle((in StatusUpSkillLogic.Output.Activated o) =>
             {
-                BattleRepo.BulletDefBonus = o.StackCount * 3.0f;
+                ApplyEffect(o.StackCount);
                 BuffTimer.Stop();
                 BuffTimer.Start();
             })
-            .Handle((in StatusUpSkillLogic.Output.Deactivated _) =>
-            {
-                BattleRepo.BulletDefBonus = 0.0f;
-            });
+            .Handle((in StatusUpSkillLogic.Output.Deactivated _) => ResetEffect());
         Logic.Start();
     }
 

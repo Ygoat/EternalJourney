@@ -6,7 +6,6 @@ using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Game.Domain;
 using EternalJourney.SukillButton;
-using Godot;
 
 /// <summary>
 /// バトルUIロジック
@@ -23,7 +22,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
     /// 初期状態
     /// </summary>
     /// <returns></returns>
-    public override Transition GetInitialState() => To<State.BattleUILogic>();
+    public override Transition GetInitialState() => To<State.InActive>();
 
     /// <summary>
     /// 入力定義
@@ -34,6 +33,11 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
         /// 物理プロセス
         /// </summary>
         public readonly record struct PhysicsProcess;
+
+        /// <summary>
+        /// バトル開始
+        /// </summary>
+        public readonly record struct BattleStarted;
     }
 
     /// <summary>
@@ -75,66 +79,19 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
     public abstract record State : StateLogic<State>
     {
         /// <summary>
-        /// バトルUIロジック
+        /// 非アクティブ（バトル開始待ち）
         /// </summary>
-        public record BattleUILogic : State, IGet<Input.PhysicsProcess>
+        public record InActive : State, IGet<Input.BattleStarted>
         {
-            public BattleUILogic()
+            public InActive()
             {
-                // この状態がアクティブになった時の処理
-                OnAttach(() =>
-                    {
-                        IBattleRepo battleRepo = Get<IBattleRepo>();
-                        battleRepo.Score.Sync += OnScoreCountUp;
-                        battleRepo.ShipHpChanged += OnShipHpChanged;
-                        battleRepo.GameOverOccurred += OnGameOver;
-                        battleRepo.BattleStarted += OnActivateBattleUI;
-                    }
-                );
-
-                // この状態が非アクティブになった時の処理
-                OnDetach(() =>
-                    {
-                        IBattleRepo battleRepo = Get<IBattleRepo>();
-                        battleRepo.Score.Sync -= OnScoreCountUp;
-                        battleRepo.ShipHpChanged -= OnShipHpChanged;
-                        battleRepo.GameOverOccurred -= OnGameOver;
-                        battleRepo.BattleStarted -= OnActivateBattleUI;
-                    }
-                );
+                OnAttach(() => Get<IBattleRepo>().BattleStarted += OnBattleStarted);
+                OnDetach(() => Get<IBattleRepo>().BattleStarted -= OnBattleStarted);
             }
 
-            /// <summary>
-            /// スコアカウントアップイベントファンクション
-            /// </summary>
-            public void OnScoreCountUp(int currentScore)
-            {
-                Output(new Output.ScoreChanged(currentScore));
-            }
+            private void OnBattleStarted() => Input(new Input.BattleStarted());
 
-            /// <summary>
-            /// 船HP変化イベントファンクション
-            /// </summary>
-            public void OnShipHpChanged(float currentHp, float maxHp)
-            {
-                Output(new Output.ShipHpChanged(currentHp, maxHp));
-            }
-
-            /// <summary>
-            /// ゲーム終了イベントファンクション
-            /// </summary>
-            public void OnGameOver()
-            {
-                IBattleRepo battleRepo = Get<IBattleRepo>();
-                Get<IGameRepo>().SaveResult(battleRepo.Score.Value, Get<IBattleUI>().Count);
-                Get<IGameRepo>().NotifyGameOver();
-                Output(new Output.GameOver());
-            }
-
-            /// <summary>
-            /// バトルUI起動イベントファンクション
-            /// </summary>
-            public void OnActivateBattleUI()
+            public Transition On(in Input.BattleStarted input)
             {
                 IBattleUI battleUI = Get<IBattleUI>();
                 ISkillButton[] slots = { battleUI.SkillButton1, battleUI.SkillButton2, battleUI.SkillButton3, battleUI.SkillButton4 };
@@ -142,41 +99,48 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                 for (int i = 0; i < slots.Length && i < skills.Count; i++)
                 {
                     slots[i].SetLabel(SkillInfo.GetName(skills[i]));
-                    switch (skills[i])
-                    {
-                        case SkillType.ShipAtkUp:
-                            slots[i].Activated += battleUI.ShipAtkUpSkill.Activate;
-                            break;
-                        case SkillType.ShipSpdUp:
-                            slots[i].Activated += battleUI.ShipSpdUpSkill.Activate;
-                            break;
-                        case SkillType.ShipDefUp:
-                            slots[i].Activated += battleUI.ShipDefUpSkill.Activate;
-                            break;
-                        case SkillType.WeaponAtkUp:
-                            slots[i].Activated += battleUI.WeaponAtkUpSkill.Activate;
-                            break;
-                        case SkillType.WeaponSpdUp:
-                            slots[i].Activated += battleUI.WeaponSpdUpSkill.Activate;
-                            break;
-                        case SkillType.BulletAtkUp:
-                            slots[i].Activated += battleUI.BulletAtkUpSkill.Activate;
-                            break;
-                        case SkillType.BulletSpdUp:
-                            slots[i].Activated += battleUI.BulletSpdUpSkill.Activate;
-                            break;
-                        case SkillType.BulletDefUp:
-                            slots[i].Activated += battleUI.BulletDefUpSkill.Activate;
-                            break;
-                        case SkillType.Heal:
-                            slots[i].Activated += battleUI.HealSkill.Activate;
-                            break;
-                        case SkillType.Regen:
-                            slots[i].Activated += battleUI.RegenSkill.Activate;
-                            break;
-                    }
+                    slots[i].Activated += battleUI.GetSkill(skills[i]).Activate;
                 }
                 Output(new Output.ActivateBattleUI());
+                return To<Active>();
+            }
+        }
+
+        /// <summary>
+        /// アクティブ（バトル中）
+        /// </summary>
+        public record Active : State, IGet<Input.PhysicsProcess>
+        {
+            public Active()
+            {
+                OnAttach(() =>
+                {
+                    IBattleRepo battleRepo = Get<IBattleRepo>();
+                    battleRepo.Score.Sync += OnScoreCountUp;
+                    battleRepo.ShipHpChanged += OnShipHpChanged;
+                    battleRepo.GameOverOccurred += OnGameOver;
+                });
+                OnDetach(() =>
+                {
+                    IBattleRepo battleRepo = Get<IBattleRepo>();
+                    battleRepo.Score.Sync -= OnScoreCountUp;
+                    battleRepo.ShipHpChanged -= OnShipHpChanged;
+                    battleRepo.GameOverOccurred -= OnGameOver;
+                });
+            }
+
+            public void OnScoreCountUp(int currentScore) =>
+                Output(new Output.ScoreChanged(currentScore));
+
+            public void OnShipHpChanged(float currentHp, float maxHp) =>
+                Output(new Output.ShipHpChanged(currentHp, maxHp));
+
+            public void OnGameOver()
+            {
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                Get<IGameRepo>().SaveResult(battleRepo.Score.Value, Get<IBattleUI>().Count);
+                Get<IGameRepo>().NotifyGameOver();
+                Output(new Output.GameOver());
             }
 
             public Transition On(in Input.PhysicsProcess input)
