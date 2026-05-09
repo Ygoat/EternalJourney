@@ -7,6 +7,7 @@ using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Enemy.Base;
 using EternalJourney.Enemy.Standard;
 using EternalJourney.Enemy.Strategies.Movement;
+using EternalJourney.Ship;
 using Godot;
 
 
@@ -120,7 +121,9 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
 
             public Transition On(in Input.Spawn input)
             {
-                Output(new Output.StartInvade(input.SpawnGlobalPosition, input.SpawnGlobalAngle));
+                IShip ship = Get<IShip>();
+                Vector2 dir = input.SpawnGlobalPosition.DirectionTo(ship.EnemyTargetMarker.GlobalPosition);
+                Output(new Output.StartInvade(input.SpawnGlobalPosition, dir.Angle()));
                 return To<Invading>();
             }
         }
