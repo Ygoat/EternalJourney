@@ -6,6 +6,8 @@
 
 EternalJourneyは **Godot 4.3.0（バージョン固定）** と **C#（.NET 8.0）** で開発された放置型オートシューティングゲームです。[Chickensoft](https://chickensoft.games/) エコシステムを多用しています。
 
+設計判断・コードレビュー時は `docs/ARCHITECTURE_REFERENCE.md`（Chickensoft GameDemo流アーキテクチャ・リファレンス）を正とします。現状の準拠状況と改善事項は `docs/PROJECT_REVIEW.md` を参照してください。
+
 ## ビルドコマンド
 
 ```bash
@@ -350,7 +352,9 @@ public partial class Foo : Node2D, IFoo
 
 ### ステートマシンの配置場所
 
-`src/` 配下の各エンティティフォルダは次の規則に従います: `src/{entity}/abstract/state/{Name}Logic.cs`
+`src/` 配下の各エンティティフォルダは次の規則に従います: `src/{entity}/state/{Name}Logic.cs`
+
+抽象基底クラスを持つエンティティ（weapon / bullet / bullet_factory）のみ `src/{entity}/abstract/state/{Name}Logic.cs` に配置します。
 
 ### コーディング規約
 
