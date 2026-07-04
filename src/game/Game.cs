@@ -128,5 +128,6 @@ public partial class Game : Node2D, IGame
     {
         GameBinding.Dispose();
         ((System.IDisposable)GameLogic).Dispose();
+        GameRepo.Dispose();
     }
 }

@@ -193,4 +193,16 @@ public partial class App : CanvasLayer, IApp
         Splash.Hide();
         Menu.Hide();
     }
+
+    /// <summary>
+    /// ノードがツリーから離脱する時の後始末
+    /// </summary>
+    public void OnTreeExiting()
+    {
+        Menu.StartGame -= OnStartGame;
+        Menu.StartDebugGame -= OnStartDebugGame;
+        AppBinding.Dispose();
+        ((System.IDisposable)AppLogic).Dispose();
+        AppRepo.Dispose();
+    }
 }

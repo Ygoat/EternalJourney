@@ -386,6 +386,8 @@ public class BattleRepo : IBattleRepo
         {
             if (disposing)
             {
+                _score.OnCompleted();
+                _score.Dispose();
                 _numEnemyDestroyed.OnCompleted();
                 _numEnemyDestroyed.Dispose();
             }

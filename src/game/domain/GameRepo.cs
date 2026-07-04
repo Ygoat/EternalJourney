@@ -7,7 +7,7 @@ using EternalJourney.Cores.Models.Skill;
 /// <summary>
 /// ゲームリポジトリインターフェース
 /// </summary>
-public interface IGameRepo
+public interface IGameRepo : IDisposable
 {
     /// <summary>
     /// 選択済みスキル一覧
@@ -149,4 +149,9 @@ public class GameRepo : IGameRepo
     /// <inheritdoc/>
     /// </summary>
     public void NotifyBattleEnded() => BattleEnded?.Invoke();
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void Dispose() => GC.SuppressFinalize(this);
 }

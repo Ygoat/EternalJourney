@@ -89,11 +89,7 @@ public partial class Battle : Node2D, IBattle
         // バトルレポジトリインタスタンス化
         BattleRepo = new BattleRepo();
 
-        // ロジックブロックステートで共有できるデータテーブル
-        Blackboard upgradeDpendencies = new Blackboard();
-
         SetPhysicsProcess(false);
-
     }
 
     public void OnResolved()
@@ -109,5 +105,8 @@ public partial class Battle : Node2D, IBattle
         BattleRepo.NotifyBattleStarted();
     }
 
-    public void OnExitTree() { }
+    public void OnExitTree()
+    {
+        BattleRepo.Dispose();
+    }
 }
