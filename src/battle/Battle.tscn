@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://s6bxnlpb677r"]
+[gd_scene load_steps=8 format=3 uid="uid://s6bxnlpb677r"]
 
 [ext_resource type="PackedScene" uid="uid://cdjgcgidbt7sd" path="res://src/ship/Ship.tscn" id="1_md3ja"]
 [ext_resource type="Script" path="res://src/battle/Battle.cs" id="1_u2sv4"]
 [ext_resource type="PackedScene" uid="uid://gn6847olc4gf" path="res://src/enemy_spawner/EnemySpawner.tscn" id="2_sa8tj"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="3_60dyw"]
 [ext_resource type="PackedScene" uid="uid://xb0mx0074pvs" path="res://src/battle_ui/BattleUI.tscn" id="4_tif3r"]
+[ext_resource type="PackedScene" uid="uid://bgnf65li06qc2" path="res://src/sp_skill_effect_area/SPSkillEffectArea.tscn" id="6_ck23s"]
 
 [sub_resource type="Resource" id="Resource_qo710"]
 script = ExtResource("3_60dyw")
@@ -21,6 +22,10 @@ script = ExtResource("1_u2sv4")
 [node name="Ship" parent="." instance=ExtResource("1_md3ja")]
 position = Vector2(357, 637)
 Status = SubResource("Resource_qo710")
+
+[node name="SPSkillEffectArea" parent="." instance=ExtResource("6_ck23s")]
+unique_name_in_owner = true
+position = Vector2(357, 639)
 
 [node name="EnemySpawner" parent="." instance=ExtResource("2_sa8tj")]
 

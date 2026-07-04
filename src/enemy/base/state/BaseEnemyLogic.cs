@@ -41,6 +41,11 @@ public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEne
         /// スタン終了
         /// </summary>
         public readonly record struct StunEnd;
+
+        /// <summary>
+        /// SPダメージ
+        /// </summary>
+        public readonly record struct SPDamage(float Damage);
     }
 
     /// <summary>
@@ -72,7 +77,7 @@ public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEne
         /// <summary>
         /// スポーン待機
         /// </summary>
-        public record DummyState : State, IGet<Input.PoisonDamage>, IGet<Input.StunStart>, IGet<Input.StunEnd>
+        public record DummyState : State, IGet<Input.PoisonDamage>, IGet<Input.StunStart>, IGet<Input.StunEnd>, IGet<Input.SPDamage>
         {
             public DummyState()
             {
@@ -96,6 +101,15 @@ public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEne
             public Transition On(in Input.StunEnd input)
             {
                 Output(new Output.StunEnd());
+                return ToSelf();
+            }
+
+            public Transition On(in Input.SPDamage input)
+            {
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                IBaseEnemy baseEnemy = Get<IBaseEnemy>();
+                float reduced = battleRepo.ReduceEnemyDurability(baseEnemy.Status.CurrentDur, input.Damage, 0f, 0f);
+                Output(new Output.ReduceDurability(reduced));
                 return ToSelf();
             }
         }

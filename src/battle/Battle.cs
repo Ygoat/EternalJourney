@@ -6,6 +6,7 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.BattleUI;
+using EternalJourney.SpSkillEffectArea;
 using Godot;
 /// <summary>
 /// バトルインターフェース
@@ -16,6 +17,11 @@ public interface IBattle : INode2D, IProvide<IBattleRepo>, IProvide<EntityTable>
     /// バトルリポジトリ
     /// </summary>
     IBattleRepo BattleRepo { get; }
+
+    /// <summary>
+    /// SPSスキルエリア
+    /// </summary>
+    ISpSkillEffectArea SPSkillEffectArea { get; }
 
     /// <summary>
     /// バトルを初期化し完了を通知する
@@ -55,6 +61,12 @@ public partial class Battle : Node2D, IBattle
     /// </summary>
     [Node]
     public IBattleUI BattleUI { get; set; } = default!;
+
+    /// <summary>
+    /// SPスキルエリア
+    /// </summary>
+    [Node]
+    public ISpSkillEffectArea SPSkillEffectArea { get; set; } = default!;
     #endregion Nodes
 
     #region State

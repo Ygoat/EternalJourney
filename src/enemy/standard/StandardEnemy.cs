@@ -295,6 +295,12 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         EmitSignal(BaseEnemy.SignalName.Removed, this);
     }
 
+    public void OnTreeExiting()
+    {
+        StandardEnemyBinding.Dispose();
+        ((System.IDisposable)StandardEnemyLogic).Dispose();
+    }
+
     /// <summary>
     /// エネミー初期化
     /// </summary>

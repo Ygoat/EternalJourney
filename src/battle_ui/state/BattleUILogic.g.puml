@@ -5,12 +5,14 @@ state "BattleUILogic State" as EternalJourney_BattleUI_State_BattleUILogic_State
 }
 
 EternalJourney_BattleUI_State_BattleUILogic_State_Active --> EternalJourney_BattleUI_State_BattleUILogic_State_Active : PhysicsProcess
+EternalJourney_BattleUI_State_BattleUILogic_State_Active --> EternalJourney_BattleUI_State_BattleUILogic_State_Active : SPButtonPressed
 EternalJourney_BattleUI_State_BattleUILogic_State_InActive --> EternalJourney_BattleUI_State_BattleUILogic_State_Active : BattleStarted
 
 EternalJourney_BattleUI_State_BattleUILogic_State_Active : OnGameOver() → GameOver
 EternalJourney_BattleUI_State_BattleUILogic_State_Active : OnPhysicsProcess → TikCount
 EternalJourney_BattleUI_State_BattleUILogic_State_Active : OnScoreCountUp() → ScoreChanged
 EternalJourney_BattleUI_State_BattleUILogic_State_Active : OnShipHpChanged() → ShipHpChanged
+EternalJourney_BattleUI_State_BattleUILogic_State_Active : OnSpPercentChanged() → SpPercentChanged
 EternalJourney_BattleUI_State_BattleUILogic_State_InActive : OnBattleStarted → ActivateBattleUI
 
 [*] --> EternalJourney_BattleUI_State_BattleUILogic_State_InActive

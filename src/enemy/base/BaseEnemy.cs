@@ -31,6 +31,11 @@ public interface IBaseEnemy : IBaseEntity, IStatusEffectTarget
     /// <param name="shotGlobalPosition"></param>
     /// <param name="shotGlobalAngle"></param>
     public void Spawn(Vector2 spawnGlobalPosition, float spawnGlobalAngle);
+
+    /// <summary>
+    /// ダメージを受ける
+    /// </summary>
+    public void TakeDamage(float damage);
 }
 
 /// <summary>
@@ -128,6 +133,9 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
     {
         throw new NotImplementedException();
     }
+
+    public void TakeDamage(float damage) =>
+        BaseEnemyLogic.Input(new BaseEnemyLogic.Input.SPDamage(damage));
 
     private void OnPoisonDamaged(float damage)
     {

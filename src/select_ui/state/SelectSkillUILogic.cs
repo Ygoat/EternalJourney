@@ -56,6 +56,7 @@ public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, 
                         buttons[i].Text = SkillInfo.GetName(SkillRegistry.SelectableSkills[i]);
                         buttons[i].Toggled += pressed => Input(new Input.SkillToggled(index, pressed));
                     }
+
                     ui.SelectButton.Pressed += () => Input(new Input.SelectButtonPressed());
                 });
             }
@@ -96,6 +97,7 @@ public partial class SelectSkillUILogic : LogicBlock<SelectSkillUILogic.State>, 
 
             private static IButton[] GetButtons(ISelectSkillUI ui) =>
                 new[] { ui.Skill1, ui.Skill2, ui.Skill3, ui.Skill4, ui.Skill5, ui.Skill6, ui.Skill7, ui.Skill8 };
+
         }
     }
 }

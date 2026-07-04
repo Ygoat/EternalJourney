@@ -54,6 +54,7 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
         /// </summary>
         public readonly record struct OutOfArea;
 
+
         /// <summary>
         /// 物理処理
         /// </summary>

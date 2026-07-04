@@ -14,6 +14,7 @@ public interface IGameRepo
     /// </summary>
     IReadOnlyList<SkillType> SelectedSkills { get; }
 
+
     /// <summary>
     /// 選択済みスキルを保存する
     /// </summary>

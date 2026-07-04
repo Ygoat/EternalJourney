@@ -77,6 +77,26 @@ public interface IBattleRepo : IDisposable
     public event Action<float>? ShipHealRequested;
 
     /// <summary>
+    /// SPパーセント（0〜100）
+    /// </summary>
+    public float SpPercent { get; }
+
+    /// <summary>
+    /// SPパーセント変化イベント
+    /// </summary>
+    public event Action<float>? SpPercentChanged;
+
+    /// <summary>
+    /// SP発動イベント
+    /// </summary>
+    public event Action? SPActivated;
+
+    /// <summary>
+    /// SPを発動する（SP100%時のみ有効）
+    /// </summary>
+    public void ActivateSP();
+
+    /// <summary>
     /// バトル開始イベント
     /// </summary>
     public event Action? BattleStarted;
@@ -174,6 +194,11 @@ public class BattleRepo : IBattleRepo
     public float BulletAtkMultiplier { get; set; } = 1.0f;
     public float BulletSpdMultiplier { get; set; } = 1.0f;
     public float BulletDefBonus { get; set; } = 0.0f;
+
+    private float _spPercent = 0f;
+    public float SpPercent => _spPercent;
+    public event Action<float>? SpPercentChanged;
+    public event Action? SPActivated;
 
     /// <summary>
     /// スコア
@@ -294,7 +319,17 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public void OnEnemyDestroyed(IBaseEnemy baseEnemy)
     {
+        _spPercent = Math.Min(100f, _spPercent + 5f);
+        SpPercentChanged?.Invoke(_spPercent);
         EnemyDestroyed?.Invoke(baseEnemy);
+    }
+
+    public void ActivateSP()
+    {
+        if (_spPercent < 100f) return;
+        SPActivated?.Invoke();
+        _spPercent = 0f;
+        SpPercentChanged?.Invoke(_spPercent);
     }
 
     /// <summary>

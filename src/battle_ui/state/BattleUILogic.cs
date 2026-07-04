@@ -38,6 +38,11 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
         /// バトル開始
         /// </summary>
         public readonly record struct BattleStarted;
+
+        /// <summary>
+        /// SPボタン押下
+        /// </summary>
+        public readonly record struct SPButtonPressed;
     }
 
     /// <summary>
@@ -69,6 +74,11 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
         /// タイムカウント
         /// </summary>
         public readonly record struct TikCount;
+
+        /// <summary>
+        /// SPパーセント変化
+        /// </summary>
+        public readonly record struct SpPercentChanged(float Ratio);
     }
 
     // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
@@ -109,7 +119,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
         /// <summary>
         /// アクティブ（バトル中）
         /// </summary>
-        public record Active : State, IGet<Input.PhysicsProcess>
+        public record Active : State, IGet<Input.PhysicsProcess>, IGet<Input.SPButtonPressed>
         {
             public Active()
             {
@@ -119,6 +129,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                     battleRepo.Score.Sync += OnScoreCountUp;
                     battleRepo.ShipHpChanged += OnShipHpChanged;
                     battleRepo.GameOverOccurred += OnGameOver;
+                    battleRepo.SpPercentChanged += OnSpPercentChanged;
                 });
                 OnDetach(() =>
                 {
@@ -126,6 +137,7 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                     battleRepo.Score.Sync -= OnScoreCountUp;
                     battleRepo.ShipHpChanged -= OnShipHpChanged;
                     battleRepo.GameOverOccurred -= OnGameOver;
+                    battleRepo.SpPercentChanged -= OnSpPercentChanged;
                 });
             }
 
@@ -148,6 +160,15 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                 Output(new Output.TikCount());
                 return ToSelf();
             }
+
+            public Transition On(in Input.SPButtonPressed input)
+            {
+                Get<IBattleRepo>().ActivateSP();
+                return ToSelf();
+            }
+
+            public void OnSpPercentChanged(float spPercent) =>
+                Output(new Output.SpPercentChanged(spPercent / 100f));
 
             public float CalcHpGaugeRatio(float currentHp, float maxHp)
             {

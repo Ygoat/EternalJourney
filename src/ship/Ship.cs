@@ -19,6 +19,11 @@ public interface IShip : IBaseEntity
     /// 敵ターゲットマーカ―
     /// </summary>
     public IMarker2D EnemyTargetMarker { get; set; }
+
+    /// <summary>
+    /// 宇宙船の中心マーカー
+    /// </summary>
+    public IMarker2D CenterMarker { get; set; }
 };
 
 /// <summary>
@@ -47,6 +52,12 @@ public partial class Ship : BaseEntity, IShip
     /// </summary>
     [Node]
     public IMarker2D EnemyTargetMarker { get; set; } = default!;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    [Node]
+    public IMarker2D CenterMarker { get; set; } = default!;
 
     /// <summary>
     /// 舟のコリジョンシェイプ

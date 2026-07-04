@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://bgnf65li06qc2"]
+
+[ext_resource type="Script" path="res://src/sp_skill_effect_area/SpSkillEffectArea.cs" id="1_yxa0s"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_tq2gr"]
+
+[node name="SPSkillEffectArea" type="Area2D"]
+script = ExtResource("1_yxa0s")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+unique_name_in_owner = true
+shape = SubResource("CircleShape2D_tq2gr")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+offset_left = -21.0
+offset_top = -19.0
+offset_right = 19.0
+offset_bottom = 21.0

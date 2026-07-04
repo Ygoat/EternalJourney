@@ -61,6 +61,18 @@ public partial class BattleUI : Control, IBattleUI
     [Node]
     public IColorRect LeftHPGauge { get; set; } = default!;
 
+    /// <summary>
+    /// 残存SPゲージ
+    /// </summary>
+    [Node]
+    public IColorRect LeftSPGauge { get; set; } = default!;
+
+    /// <summary>
+    /// SPボタン（SPが一定以上で押せるようになる）
+    /// </summary>
+    [Node]
+    public IButton SPButton { get; set; } = default!;
+
     /// <summary>バトルUIロジック</summary>
     public IBattleUILogic BattleUILogic { get; set; } = default!;
 
@@ -131,7 +143,14 @@ public partial class BattleUI : Control, IBattleUI
             {
                 Count++;
                 TimerLabel.Text = $"Time: {Count}";
+            })
+            .Handle((in BattleUILogic.Output.SpPercentChanged output) =>
+            {
+                LeftSPGauge.AnchorRight = output.Ratio;
+                SPButton.Disabled = output.Ratio < 1.0f;
             });
+        SPButton.Pressed += OnSPButtonPressed;
+        SPButton.Disabled = true;
         BattleUILogic.Start();
     }
 
@@ -144,6 +163,9 @@ public partial class BattleUI : Control, IBattleUI
     {
         ScoreLabel.Text = $"Score: {score}";
     }
+
+    private void OnSPButtonPressed() =>
+        BattleUILogic.Input(new BattleUILogic.Input.SPButtonPressed());
 
     private void OnGameOver()
     {
