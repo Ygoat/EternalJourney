@@ -1,19 +1,30 @@
-[gd_scene load_steps=4 format=3 uid="uid://moj0xo0e2b7a"]
+[gd_scene load_steps=8 format=3 uid="uid://moj0xo0e2b7a"]
 
 [ext_resource type="PackedScene" uid="uid://2s531ojpmkia" path="res://src/bullet/abstract/StandardBullet.tscn" id="1_4tikl"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_s3lmy"]
+[ext_resource type="Script" path="res://src/bullet/strategies/movement/LinearBulletMovementStrategyResource.cs" id="3_lnmov"]
+[ext_resource type="Script" path="res://src/bullet/strategies/collision/NormalCollisionStrategyResource.cs" id="4_nmcol"]
+
+[sub_resource type="Resource" id="Resource_nmmov"]
+script = ExtResource("3_lnmov")
+
+[sub_resource type="Resource" id="Resource_nmcol"]
+script = ExtResource("4_nmcol")
 
 [sub_resource type="Resource" id="Resource_nheul"]
 resource_local_to_scene = true
 script = ExtResource("2_s3lmy")
 MaxDur = 1.0
 CurrentDur = 1.0
-Atk = 2.0
+Atk = 1.0
 Spd = 10.0
 Def = 0.0
-Size = 0.0
+Size = 1.0
 
 [node name="01_NormalBullet" instance=ExtResource("1_4tikl")]
+MovementStrategyResource = SubResource("Resource_nmmov")
+CollisionStrategyResource = SubResource("Resource_nmcol")
+PoisonEnabled = true
 Status = SubResource("Resource_nheul")
 
 [node name="BlastCollisionShape2D" parent="." index="3"]

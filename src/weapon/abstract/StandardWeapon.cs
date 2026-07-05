@@ -73,12 +73,6 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// 回転速度
     /// </summary>
     public float RotationSpeed { get; set; } = 0.05f;
-
-    /// <summary>
-    /// 弾丸設定ID（BulletConfig.jsonのidと対応）
-    /// </summary>
-    [Export(PropertyHint.Enum, "normal_bullet,penetrate_bullet,explosion_bullet")]
-    public string BulletId { get; set; } = string.Empty;
     #endregion Exports
 
     #region Nodes
@@ -236,16 +230,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
 
     public override void Attack()
     {
-        if (!string.IsNullOrEmpty(BulletId))
-        {
-            // 武器側で指定された弾丸IDで射出
-            StandardBulletFactory.GenerateBullet(BulletId);
-        }
-        else
-        {
-            // デフォルトの弾丸IDで射出
-            StandardBulletFactory.GenerateBullet();
-        }
+        StandardBulletFactory.GenerateBullet();
     }
 
     /// <summary>

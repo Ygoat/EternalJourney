@@ -1,7 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://gyffxcgk8skr"]
+[gd_scene load_steps=8 format=3 uid="uid://gyffxcgk8skr"]
 
 [ext_resource type="PackedScene" uid="uid://dx3yib7f7sbck" path="res://src/bullet/abstract/ExplosionBullet.tscn" id="1_j4j0d"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_57gw2"]
+[ext_resource type="Script" path="res://src/bullet/strategies/movement/LinearBulletMovementStrategyResource.cs" id="3_lnmov"]
+[ext_resource type="Script" path="res://src/bullet/strategies/collision/ExplosionCollisionStrategyResource.cs" id="4_expcol"]
 
 [sub_resource type="Resource" id="Resource_dy1c8"]
 resource_local_to_scene = true
@@ -9,9 +11,18 @@ script = ExtResource("2_57gw2")
 MaxDur = 1.0
 CurrentDur = 1.0
 Atk = 4.0
-Spd = 8.0
+Spd = 6.0
 Def = 0.0
-Size = 0.0
+Size = 1.0
+
+[sub_resource type="Resource" id="Resource_nmmov"]
+script = ExtResource("3_lnmov")
+
+[sub_resource type="Resource" id="Resource_expcol"]
+script = ExtResource("4_expcol")
+BlastDuration = 1.0
 
 [node name="01_ExplosionBullet" instance=ExtResource("1_j4j0d")]
 Status = SubResource("Resource_dy1c8")
+MovementStrategyResource = SubResource("Resource_nmmov")
+CollisionStrategyResource = SubResource("Resource_expcol")

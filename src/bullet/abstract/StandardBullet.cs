@@ -8,7 +8,6 @@ using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Bullet.Strategies.Collision;
 using EternalJourney.Cores.Consts;
-using EternalJourney.Cores.Models.Bullet;
 using EternalJourney.Enemy.Base;
 using Godot;
 
@@ -206,11 +205,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         BulletLogic.Input(new BulletLogic.Input.PhysicsProcess(
             Direction, Status.Spd, ElapsedTime, MovementStrategy, GlobalPosition
         ));
-    }
-
-    public override void Configure(BulletConfig config)
-    {
-        base.Configure(config);
     }
 
     /// <summary>

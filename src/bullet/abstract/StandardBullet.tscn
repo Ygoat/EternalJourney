@@ -20,6 +20,10 @@ size = Vector2(172, 164)
 
 [node name="StandardBullet" instance=ExtResource("1_04t2q")]
 script = ExtResource("2_c4dpx")
+MovementStrategyResource = null
+CollisionStrategyResource = null
+PoisonEnabled = false
+StunEnabled = false
 Status = SubResource("Resource_suwpi")
 
 [node name="BulletCollisionShape2D" type="CollisionShape2D" parent="." index="0"]

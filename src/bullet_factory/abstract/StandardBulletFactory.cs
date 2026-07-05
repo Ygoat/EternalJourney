@@ -9,8 +9,6 @@ using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Common.BaseFactory;
 using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
-using EternalJourney.Cores.Models.Bullet;
-using EternalJourney.Cores.Repositories;
 using Godot;
 
 /// <summary>
@@ -34,15 +32,9 @@ public interface IStandardBulletFactory
     public float WaitTime { get; set; }
 
     /// <summary>
-    /// 弾丸生成（デフォルトのBulletIdを使用）
+    /// 弾丸生成
     /// </summary>
     public void GenerateBullet();
-
-    /// <summary>
-    /// 弾丸生成（弾丸IDを指定）
-    /// </summary>
-    /// <param name="bulletId">弾丸設定ID（BulletConfig.jsonのidと対応）</param>
-    public void GenerateBullet(string bulletId);
 }
 
 /// <summary>
@@ -78,9 +70,6 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     public StandardBulletFactoryLogic BulletFactoryLogic { get; set; } = default!;
     public StandardBulletFactoryLogic.IBinding BulletFactoryBind { get; set; } = default!;
     #endregion State
-
-    private readonly BulletConfigReader _bulletConfigReader = new();
-    private BulletConfig? _bulletConfig;
 
     /// <summary>
     /// 弾丸のコリジョンマスク（武器所有者に応じて設定される）
@@ -154,20 +143,10 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     }
 
     /// <summary>
-    /// 弾丸生成（デフォルトのBulletIdを使用）
+    /// 弾丸生成
     /// </summary>
     public void GenerateBullet()
     {
-        BulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.FireRequested());
-    }
-
-    /// <summary>
-    /// 弾丸生成（弾丸IDを指定）
-    /// </summary>
-    /// <param name="bulletId">弾丸設定ID（BulletConfig.jsonのidと対応）</param>
-    public void GenerateBullet(string bulletId)
-    {
-        _bulletConfig = _bulletConfigReader.GetById(bulletId);
         BulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.FireRequested());
     }
 
@@ -189,12 +168,6 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         StandardBullet? bullet = AcquireFromPool();
         if (bullet == null)
             return;
-
-        // 弾丸設定を適用（Setup()の後に呼び出すことでJSONの値が反映される）
-        if (_bulletConfig != null)
-        {
-            bullet.Configure(_bulletConfig);
-        }
 
         // 武器所有者に応じたコリジョンマスクを適用
         bullet.CollisionMask = BulletCollisionMask;

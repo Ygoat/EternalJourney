@@ -5,7 +5,8 @@
       "Bash(while read:*)",
       "Bash(do echo:*)",
       "Bash(done)",
-      "Bash(dotnet build:*)"
+      "Bash(dotnet build:*)",
+      "Bash(dotnet build *)"
     ]
   }
 }

@@ -1,7 +1,5 @@
 namespace EternalJourney.Bullet.Strategies.Collision;
 
-using EternalJourney.Cores.Models.Bullet;
-
 /// <summary>
 /// 耐久値枯渇時のアクション
 /// </summary>
@@ -24,10 +22,9 @@ public enum OnDepletedAction
 public interface IBulletCollisionStrategy
 {
     /// <summary>
-    /// 設定で初期化
+    /// 初期化
     /// </summary>
-    /// <param name="config">衝突設定</param>
-    void Initialize(BulletCollisionConfig config);
+    void Initialize();
 
     /// <summary>
     /// 1ヒットあたりの耐久コスト

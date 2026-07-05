@@ -1,6 +1,5 @@
 namespace EternalJourney.Bullet.Strategies.Movement;
 
-using EternalJourney.Cores.Models.Bullet;
 using Godot;
 
 /// <summary>
@@ -11,7 +10,7 @@ public class LinearBulletMovement : IBulletMovementStrategy
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize(BulletMovementConfig config)
+    public void Initialize()
     {
     }
 

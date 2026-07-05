@@ -1,7 +1,5 @@
 namespace EternalJourney.Bullet.Strategies.Collision;
 
-using EternalJourney.Cores.Models.Bullet;
-
 /// <summary>
 /// 通常衝突戦略（耐久値0で崩壊、ステータスエフェクト適用）
 /// </summary>
@@ -10,7 +8,7 @@ public class NormalCollisionStrategy : IBulletCollisionStrategy
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize(BulletCollisionConfig config)
+    public void Initialize()
     {
     }
 

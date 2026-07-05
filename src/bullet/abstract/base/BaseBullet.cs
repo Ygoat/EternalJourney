@@ -8,7 +8,6 @@ using EternalJourney.Bullet.Strategies.Movement;
 using EternalJourney.Common.BaseEntity;
 using EternalJourney.Common.StatusEffect;
 using EternalJourney.Common.Traits;
-using EternalJourney.Cores.Models.Bullet;
 using EternalJourney.Cores.Pooling;
 using Godot;
 
@@ -87,6 +86,30 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
     /// </summary>
     public float ElapsedTime { get; set; }
 
+    /// <summary>
+    /// 移動戦略リソース
+    /// </summary>
+    [Export]
+    public BulletMovementStrategyResource? MovementStrategyResource { get; set; }
+
+    /// <summary>
+    /// 衝突戦略リソース
+    /// </summary>
+    [Export]
+    public BulletCollisionStrategyResource? CollisionStrategyResource { get; set; }
+
+    /// <summary>
+    /// 毒状態異常の有効・無効
+    /// </summary>
+    [Export]
+    public bool PoisonEnabled { get; set; }
+
+    /// <summary>
+    /// スタン状態異常の有効・無効
+    /// </summary>
+    [Export]
+    public bool StunEnabled { get; set; }
+
     public override void Setup()
     {
         TopLevel = true;
@@ -124,59 +147,6 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
     }
 
     /// <summary>
-    /// 弾丸設定を適用
-    /// </summary>
-    /// <param name="config">弾丸設定</param>
-    public virtual void Configure(BulletConfig config)
-    {
-        // ステータスを設定から適用
-        Status = new Status
-        {
-            MaxDur = config.Status.MaxDur,
-            CurrentDur = config.Status.MaxDur,
-            Atk = config.Status.Atk,
-            Spd = config.Status.Spd,
-            Def = config.Status.Def,
-            Size = config.Status.Size
-        };
-
-        // 状態異常をJSONから設定
-        foreach (var effectConfig in config.StatusEffects)
-        {
-            ConfigureStatusEffect(effectConfig);
-        }
-
-        // 移動ストラテジーを生成・初期化
-        MovementStrategy = BulletMovementStrategyFactory.Create(config.Movement.Type);
-        MovementStrategy.Initialize(config.Movement);
-
-        // 衝突ストラテジーを生成・初期化
-        CollisionStrategy = BulletCollisionStrategyFactory.Create(config.Collision.Type);
-        CollisionStrategy.Initialize(config.Collision);
-    }
-
-    /// <summary>
-    /// 状態異常の設定を適用
-    /// </summary>
-    /// <param name="effectConfig">状態異常設定</param>
-    private void ConfigureStatusEffect(BulletStatusEffectConfig effectConfig)
-    {
-        // 状態異常タイプに応じてConfigureを呼び出す
-        // 状態異常が増えたらcaseを追加する
-        switch (effectConfig.Type)
-        {
-            case BulletStatusEffectType.Poison:
-                StatusEffectServerManager.Configure<PoisonEffect>(effectConfig.Enabled);
-                break;
-            case BulletStatusEffectType.Stun:
-                StatusEffectServerManager.Configure<StunEffect>(effectConfig.Enabled);
-                break;
-            default:
-                break;
-        }
-    }
-
-    /// <summary>
     /// 弾丸初期化
     /// </summary>
     public virtual void InitializeBullet()
@@ -206,6 +176,16 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
         }
         // 表示状態を有効化
         Visible = true;
+
+        // 移動・衝突ストラテジーを毎回新規生成（プール内での状態共有を避けるため）
+        MovementStrategy = MovementStrategyResource?.CreateStrategy() ?? new LinearBulletMovement();
+        MovementStrategy.Initialize();
+        CollisionStrategy = CollisionStrategyResource?.CreateStrategy() ?? new NormalCollisionStrategy();
+        CollisionStrategy.Initialize();
+
+        // 状態異常設定を適用
+        StatusEffectServerManager.Configure<PoisonEffect>(PoisonEnabled);
+        StatusEffectServerManager.Configure<StunEffect>(StunEnabled);
     }
 
     /// <summary>
