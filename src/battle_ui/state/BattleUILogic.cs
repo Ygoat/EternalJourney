@@ -5,7 +5,7 @@ using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Game.Domain;
-using EternalJourney.SukillButton;
+using EternalJourney.SkillButton;
 
 /// <summary>
 /// バトルUIロジック

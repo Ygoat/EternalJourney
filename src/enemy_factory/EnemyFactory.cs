@@ -44,7 +44,7 @@ public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
     /// <returns>エネミーシーンのパス</returns>
     protected override string GetScenePath()
     {
-        return Const.EnemyNodePath;
+        return Const.ENEMY_NODE_PATH;
     }
 
     /// <summary>

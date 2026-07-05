@@ -18,15 +18,15 @@ public static class Const
     /// <summary>
     /// ゲームシーンファイルパス
     /// </summary>
-    public const string GameNodePath = "res://src/game/Game.tscn";
+    public const string GAME_NODE_PATH = "res://src/game/Game.tscn";
 
     /// <summary>
     /// 弾丸シーンファイルパス
     /// </summary>
-    public const string BulletNodePath = "res://src/bullet/Bullet.tscn";
+    public const string BULLET_NODE_PATH = "res://src/bullet/Bullet.tscn";
 
     /// <summary>
     /// エネミーシーンファイルパス
     /// </summary>
-    public const string EnemyNodePath = "res://src/enemy/standard/StandardEnemy.tscn";
+    public const string ENEMY_NODE_PATH = "res://src/enemy/standard/StandardEnemy.tscn";
 }

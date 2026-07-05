@@ -149,7 +149,7 @@ public partial class App : CanvasLayer, IApp
             // SetupGameScene（ゲームシーンセットアップ）が出力された時の処理
             .Handle((in AppLogic.Output.SetupGameScene _) =>
             {
-                Game = Instantiator.LoadAndInstantiate<Game>(Const.GameNodePath);
+                Game = Instantiator.LoadAndInstantiate<Game>(Const.GAME_NODE_PATH);
             })
             // ShowGame（ゲームシーン表示）が出力された時の処理
             .Handle((in AppLogic.Output.ShowGame _) =>

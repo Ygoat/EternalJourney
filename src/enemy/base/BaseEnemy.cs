@@ -49,7 +49,7 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
     /// <summary>
     /// ベースエネミーロジック
     /// </summary>
-    public BaseEnemyLogic BaseEnemyLogic { get; set; } = default!;
+    public IBaseEnemyLogic BaseEnemyLogic { get; set; } = default!;
 
     /// <summary>
     /// ベースエネミーバインド

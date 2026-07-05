@@ -11,7 +11,7 @@ public class BulletStatusEffectConfig
     /// 状態異常タイプ（poison等）
     /// </summary>
     [JsonPropertyName("type")]
-    public string Type { get; set; } = string.Empty;
+    public BulletStatusEffectType Type { get; set; }
 
     /// <summary>
     /// 有効・無効

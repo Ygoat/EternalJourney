@@ -42,7 +42,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// <summary>
     /// 武器ロジック
     /// </summary>
-    public StandardWeaponLogic StandardWeaponLogic { get; set; } = default!;
+    public IStandardWeaponLogic StandardWeaponLogic { get; set; } = default!;
 
     /// <summary>
     /// 武器ロジックバインド
@@ -117,8 +117,6 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// </summary>
     public void Initialize()
     {
-        // 依存性提供
-        this.Provide();
         Status = new Status { Spd = 0.1f, MaxDur = 10.0f, CurrentDur = 10.0f };
     }
 

@@ -1,6 +1,6 @@
 namespace EternalJourney.Cores.Models.Skill;
 
-public enum SPSkillType
+public enum SpSkillType
 {
     Stun,
     BigDamage,
@@ -8,14 +8,14 @@ public enum SPSkillType
     FireRateDown,
 }
 
-public static class SPSkillInfo
+public static class SpSkillInfo
 {
-    public static string GetName(SPSkillType type) => type switch
+    public static string GetName(SpSkillType type) => type switch
     {
-        SPSkillType.Stun         => "スタン",
-        SPSkillType.BigDamage    => "大ダメージ",
-        SPSkillType.AttackDown   => "攻撃力減少",
-        SPSkillType.FireRateDown => "発射間隔増大",
+        SpSkillType.Stun         => "スタン",
+        SpSkillType.BigDamage    => "大ダメージ",
+        SpSkillType.AttackDown   => "攻撃力減少",
+        SpSkillType.FireRateDown => "発射間隔増大",
         _                        => string.Empty,
     };
 }

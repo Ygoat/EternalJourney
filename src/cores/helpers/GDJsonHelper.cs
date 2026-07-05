@@ -2,6 +2,7 @@ namespace EternalJourney.Cores.Helpers;
 
 using System;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Chickensoft.GoDotLog;
 using EternalJourney.Cores.Consts;
 using Godot;
@@ -11,6 +12,13 @@ using Godot;
 /// </summary>
 public static class GDJsonHelper
 {
+    /// <summary>
+    /// enumを文字列（camelCase）として扱うためのシリアライズオプション
+    /// </summary>
+    private static readonly JsonSerializerOptions Options = new()
+    {
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+    };
 
     /// <summary>
     /// JSONからクラスにマッピングする
@@ -28,7 +36,7 @@ public static class GDJsonHelper
         // ファイルクローズ
         file.Close();
         // Jsonパース
-        T? parseModel = JsonSerializer.Deserialize<T>(jsonText);
+        T? parseModel = JsonSerializer.Deserialize<T>(jsonText, Options);
 
         file.Close();
 

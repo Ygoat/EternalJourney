@@ -165,11 +165,13 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
         // 状態異常が増えたらcaseを追加する
         switch (effectConfig.Type)
         {
-            case "poison":
+            case BulletStatusEffectType.Poison:
                 StatusEffectServerManager.Configure<PoisonEffect>(effectConfig.Enabled);
                 break;
-            case "stun":
+            case BulletStatusEffectType.Stun:
                 StatusEffectServerManager.Configure<StunEffect>(effectConfig.Enabled);
+                break;
+            default:
                 break;
         }
     }

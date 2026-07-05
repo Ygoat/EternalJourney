@@ -15,7 +15,7 @@ public abstract partial class StatusUpSkillBase : Node, ISkillNode
     protected abstract SkillType SkillKind { get; }
     public string Description => SkillInfo.GetDescription(SkillKind);
 
-    public StatusUpSkillLogic Logic { get; set; } = default!;
+    public IStatusUpSkillLogic Logic { get; set; } = default!;
     public StatusUpSkillLogic.IBinding Binding { get; set; } = default!;
     public Timer BuffTimer { get; set; } = default!;
 

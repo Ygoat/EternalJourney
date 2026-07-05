@@ -9,10 +9,11 @@
     <!-- godotengine/godot/issues/42271#issuecomment-751423827 -->
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <!-- To show generated files -->
-    <!-- <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles> -->
-    <!--
-      <CompilerGeneratedFilesOutputPath>.generated</CompilerGeneratedFilesOutputPath>
-    -->
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>.generated</CompilerGeneratedFilesOutputPath>
+    <!-- ソースジェネレータのコンパイラ不整合を即エラーにする -->
+    <WarningsAsErrors>CS9057</WarningsAsErrors>
+    <CodeAnalysisRuleSet>CodeAnalyzers.ruleset</CodeAnalysisRuleSet>
     <DebugType>portable</DebugType>
     <DebugSymbols>true</DebugSymbols>
     <Title>EternalJourney</Title>

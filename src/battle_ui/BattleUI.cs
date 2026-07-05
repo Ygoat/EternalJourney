@@ -8,8 +8,8 @@ using EternalJourney.Battle.Domain;
 using EternalJourney.BattleUI.State;
 using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Game.Domain;
+using EternalJourney.SkillButton;
 using EternalJourney.Skills;
-using EternalJourney.SukillButton;
 using Godot;
 
 /// <summary>

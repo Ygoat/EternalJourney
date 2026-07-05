@@ -39,7 +39,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// <summary>
     /// エネミーロジック
     /// </summary>
-    public StandardEnemyLogic StandardEnemyLogic { get; set; } = default!;
+    public IStandardEnemyLogic StandardEnemyLogic { get; set; } = default!;
 
     /// <summary>
     /// エネミーロジックバインド

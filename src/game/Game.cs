@@ -87,7 +87,7 @@ public partial class Game : Node2D, IGame
         GameBinding = GameLogic.Bind();
     }
 
-    public void OnReady()
+    public void OnResolved()
     {
         // Provide()を呼び出して依存関係を提供
         this.Provide();

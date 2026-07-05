@@ -1,4 +1,4 @@
-namespace EternalJourney.SukillButton;
+namespace EternalJourney.SkillButton;
 
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;

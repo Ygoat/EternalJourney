@@ -15,7 +15,7 @@ EternalJourney の規約に沿って新機能一式を作成する手順。詳�
    - LogicBlock: `src/{feature}/state/{Feature}Logic.cs`（本プロジェクトは全状態を単一ファイルに定義。抽象基底を持つ場合のみ `abstract/state/`）
    - ドメイン横断ルールがあるなら: `src/{feature}/domain/{Feature}Repo.cs`
 
-2. **View を作る**: `docs/ScriptTempate.md` のテンプレートに従う。必須事項:
+2. **View を作る**: `docs/ScriptTemplate.md` のテンプレートに従う。必須事項:
    - `public interface I{Feature} : INode2D { }` を必ず定義（I プレフィックス）
    - `[Meta(typeof(IAutoNode))]` + `public override void _Notification(int what) => this.Notify(what);`
    - `#region` は `Signals / State / Exports / Nodes / Provisions / Dependencies` の定型区分のみ
