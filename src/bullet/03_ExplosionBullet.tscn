@@ -1,9 +1,16 @@
-[gd_scene load_steps=8 format=3 uid="uid://gyffxcgk8skr"]
+[gd_scene load_steps=10 format=3 uid="uid://gyffxcgk8skr"]
 
-[ext_resource type="PackedScene" uid="uid://dx3yib7f7sbck" path="res://src/bullet/abstract/ExplosionBullet.tscn" id="1_j4j0d"]
+[ext_resource type="PackedScene" uid="uid://2s531ojpmkia" path="res://src/bullet/abstract/StandardBullet.tscn" id="1_j4j0d"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_57gw2"]
 [ext_resource type="Script" path="res://src/bullet/strategies/movement/LinearBulletMovementStrategyResource.cs" id="3_lnmov"]
 [ext_resource type="Script" path="res://src/bullet/strategies/collision/ExplosionCollisionStrategyResource.cs" id="4_expcol"]
+
+[sub_resource type="Resource" id="Resource_nmmov"]
+script = ExtResource("3_lnmov")
+
+[sub_resource type="Resource" id="Resource_expcol"]
+script = ExtResource("4_expcol")
+BlastDuration = 1.0
 
 [sub_resource type="Resource" id="Resource_dy1c8"]
 resource_local_to_scene = true
@@ -15,14 +22,29 @@ Spd = 6.0
 Def = 0.0
 Size = 1.0
 
-[sub_resource type="Resource" id="Resource_nmmov"]
-script = ExtResource("3_lnmov")
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_utpp0"]
 
-[sub_resource type="Resource" id="Resource_expcol"]
-script = ExtResource("4_expcol")
-BlastDuration = 1.0
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xejuu"]
+size = Vector2(180, 180)
 
 [node name="01_ExplosionBullet" instance=ExtResource("1_j4j0d")]
-Status = SubResource("Resource_dy1c8")
 MovementStrategyResource = SubResource("Resource_nmmov")
 CollisionStrategyResource = SubResource("Resource_expcol")
+Status = SubResource("Resource_dy1c8")
+
+[node name="BulletCollisionShape2D" parent="." index="0"]
+shape = SubResource("RectangleShape2D_utpp0")
+
+[node name="BulletColorRect" parent="." index="1"]
+color = Color(0.956863, 1, 0.635294, 1)
+
+[node name="BlastCollisionShape2D" parent="." index="3"]
+position = Vector2(0, 0)
+shape = SubResource("RectangleShape2D_xejuu")
+
+[node name="BlastColorRect" parent="." index="4"]
+offset_left = -90.0
+offset_top = -90.0
+offset_right = 90.0
+offset_bottom = 90.0
+color = Color(1, 0.654902, 0, 1)
