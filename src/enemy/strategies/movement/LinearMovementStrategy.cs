@@ -1,6 +1,5 @@
 namespace EternalJourney.Enemy.Strategies.Movement;
 
-using EternalJourney.Cores.Models.Enemy;
 using Godot;
 
 /// <summary>
@@ -11,7 +10,7 @@ public class LinearMovementStrategy : IMovementStrategy
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize(MovementConfig config, Vector2 targetPosition)
+    public void Initialize(Vector2 targetPosition)
     {
     }
 

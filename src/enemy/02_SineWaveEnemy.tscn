@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" uid="uid://bw8kc5hwarjxw" path="res://src/enemy/standard/StandardEnemy.tscn" id="1_swenm"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_swsts"]
+[ext_resource type="Script" path="res://src/enemy/strategies/movement/SineWaveMovementStrategyResource.cs" id="3_swmov"]
+
+[sub_resource type="Resource" id="Resource_swenm_status"]
+resource_local_to_scene = true
+script = ExtResource("2_swsts")
+MaxDur = 15.0
+CurrentDur = 15.0
+Atk = 2.0
+Spd = 0.1
+Def = 1.0
+Size = 1.2
+
+[sub_resource type="Resource" id="Resource_swenm_move"]
+script = ExtResource("3_swmov")
+Amplitude = 50.0
+Frequency = 2.0
+
+[node name="02_SineWaveEnemy" instance=ExtResource("1_swenm")]
+Status = SubResource("Resource_swenm_status")
+MovementStrategyResource = SubResource("Resource_swenm_move")
+ScoreValue = 25

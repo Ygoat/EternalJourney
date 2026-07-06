@@ -8,7 +8,6 @@ using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract;
 using EternalJourney.Common.Traits;
-using EternalJourney.Cores.Repositories;
 using EternalJourney.Radar;
 using EternalJourney.Weapon.Abstract.Base;
 using EternalJourney.Weapon.Abstract.State;
@@ -50,15 +49,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     public StandardWeaponLogic.IBinding WeaponBind { get; set; } = default!;
     #endregion State
 
-    private readonly WeaponConfigReader _weaponConfigReader = new();
-
     #region Exports
-    /// <summary>
-    /// 武器設定ID（WeaponConfig.jsonのidと対応）
-    /// </summary>
-    [Export]
-    public string WeaponId { get; set; } = string.Empty;
-
     /// <summary>
     /// ターゲット方向
     /// </summary>
@@ -72,6 +63,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// <summary>
     /// 回転速度
     /// </summary>
+    [Export]
     public float RotationSpeed { get; set; } = 0.05f;
     #endregion Exports
 
@@ -163,16 +155,6 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
 
         BattleRepo.WeaponSpdMultiplierChanged += UpdateWaitTime;
         UpdateWaitTime();
-
-        // WeaponConfig.jsonから武器設定を読み込み
-        if (!string.IsNullOrEmpty(WeaponId))
-        {
-            var entry = _weaponConfigReader.GetById(WeaponId);
-            if (entry != null)
-            {
-                RotationSpeed = entry.Status.RotationSpeed;
-            }
-        }
     }
 
     /// <summary>

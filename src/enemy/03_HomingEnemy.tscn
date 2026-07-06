@@ -1,0 +1,25 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" uid="uid://bw8kc5hwarjxw" path="res://src/enemy/standard/StandardEnemy.tscn" id="1_hmenm"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_hmsts"]
+[ext_resource type="Script" path="res://src/enemy/strategies/movement/HomingMovementStrategyResource.cs" id="3_hmmov"]
+
+[sub_resource type="Resource" id="Resource_hmenm_status"]
+resource_local_to_scene = true
+script = ExtResource("2_hmsts")
+MaxDur = 8.0
+CurrentDur = 8.0
+Atk = 3.0
+Spd = 0.4
+Def = 0.5
+Size = 0.8
+
+[sub_resource type="Resource" id="Resource_hmenm_move"]
+script = ExtResource("3_hmmov")
+TurnSpeed = 1.5
+MaxTurnAngle = 45.0
+
+[node name="03_HomingEnemy" instance=ExtResource("1_hmenm")]
+Status = SubResource("Resource_hmenm_status")
+MovementStrategyResource = SubResource("Resource_hmenm_move")
+ScoreValue = 30

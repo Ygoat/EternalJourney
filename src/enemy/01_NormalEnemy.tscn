@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" uid="uid://bw8kc5hwarjxw" path="res://src/enemy/standard/StandardEnemy.tscn" id="1_nmenm"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_nmsts"]
+[ext_resource type="Script" path="res://src/enemy/strategies/movement/LinearMovementStrategyResource.cs" id="3_nmmov"]
+
+[sub_resource type="Resource" id="Resource_nmenm_status"]
+resource_local_to_scene = true
+script = ExtResource("2_nmsts")
+MaxDur = 10.0
+CurrentDur = 10.0
+Atk = 1.0
+Spd = 1.0
+Def = 0.0
+Size = 1.0
+
+[sub_resource type="Resource" id="Resource_nmenm_move"]
+script = ExtResource("3_nmmov")
+
+[node name="01_NormalEnemy" instance=ExtResource("1_nmenm")]
+Status = SubResource("Resource_nmenm_status")
+MovementStrategyResource = SubResource("Resource_nmenm_move")
+ScoreValue = 10

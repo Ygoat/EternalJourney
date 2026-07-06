@@ -6,9 +6,7 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
-using EternalJourney.Cores.Models.Enemy;
 using EternalJourney.Enemy.Base;
 using EternalJourney.Enemy.Standard.State;
 using EternalJourney.Enemy.Strategies.Movement;
@@ -49,11 +47,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     [Dependency] public EntityTable<int> EntityTable => this.DependOn<EntityTable<int>>();
 
     /// <summary>
-    /// エネミー設定
-    /// </summary>
-    private EnemyConfig? _config;
-
-    /// <summary>
     /// 移動戦略
     /// </summary>
     private IMovementStrategy _movementStrategy = new LinearMovementStrategy();
@@ -68,10 +61,17 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// <summary>
     /// スコア値
     /// </summary>
-    public int ScoreValue { get; private set; } = 10;
+    [Export]
+    public int ScoreValue { get; set; } = 10;
     #endregion State
 
     #region Exports
+    /// <summary>
+    /// 移動戦略リソース
+    /// </summary>
+    [Export]
+    public EnemyMovementStrategyResource? MovementStrategyResource { get; set; }
+
     /// <summary>
     /// 標的対象位置
     /// </summary>
@@ -121,8 +121,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         CollisionLayer = CollisionEntity.Enemy;
         // コリジョンマスクを船と弾丸に設定
         CollisionMask = CollisionEntity.Ship | CollisionEntity.Bullet;
-        // ステータスセット
-        Status = new Status { Spd = 0.7f, MaxDur = 10.0f, CurrentDur = 10.0f };
 
         TopLevel = true;
     }
@@ -180,33 +178,18 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     }
 
     /// <summary>
-    /// エネミー設定を適用
+    /// プールから取得された時のコールバック（IPoolable実装）
     /// </summary>
-    /// <param name="config">エネミー設定</param>
-    public void Configure(EnemyConfig config)
+    public override void OnAcquired()
     {
-        _config = config;
-
-        // ステータスを設定から適用
-        Status = new Status
-        {
-            MaxDur = config.Status.MaxDur,
-            CurrentDur = config.Status.MaxDur,
-            Atk = config.Status.Atk,
-            Spd = config.Status.Spd,
-            Def = config.Status.Def,
-            Size = config.Status.Size
-        };
-
-        // スコア値を設定
-        ScoreValue = config.ScoreValue;
-
-        // 移動戦略を生成・初期化
-        _movementStrategy = MovementStrategyFactory.Create(config.Movement.Type);
-        _movementStrategy.Initialize(config.Movement, TargetPosition);
+        base.OnAcquired();
 
         // 経過時間をリセット
         _elapsedTime = 0f;
+
+        // 移動戦略を毎回新規生成（プール内での状態共有を避けるため）
+        _movementStrategy = MovementStrategyResource?.CreateStrategy() ?? new LinearMovementStrategy();
+        _movementStrategy.Initialize(TargetPosition);
     }
 
     /// <summary>

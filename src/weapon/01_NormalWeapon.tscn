@@ -13,4 +13,5 @@ Def = 0.0
 Size = 0.0
 
 [node name="01_NormalWeapon" instance=ExtResource("1_rjxij")]
+RotationSpeed = 0.05
 Status = SubResource("Resource_h210x")

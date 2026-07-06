@@ -1,7 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://gn6847olc4gf"]
+[gd_scene load_steps=8 format=3 uid="uid://gn6847olc4gf"]
 
 [ext_resource type="Script" path="res://src/enemy_spawner/EnemySpawner.cs" id="1_pjyhy"]
 [ext_resource type="PackedScene" uid="uid://jdok4gype0dg" path="res://src/enemy_factory/EnemyFactory.tscn" id="2_1ihsb"]
+[ext_resource type="PackedScene" path="res://src/enemy/01_NormalEnemy.tscn" id="3_nmenm"]
+[ext_resource type="PackedScene" path="res://src/enemy/02_SineWaveEnemy.tscn" id="4_swenm"]
+[ext_resource type="PackedScene" path="res://src/enemy/03_HomingEnemy.tscn" id="5_hmenm"]
+[ext_resource type="PackedScene" path="res://src/enemy/04_StopAndGoEnemy.tscn" id="6_sgenm"]
 
 [sub_resource type="Curve2D" id="Curve2D_na73r"]
 _data = {
@@ -21,5 +25,18 @@ position = Vector2(720, 66.5103)
 rotation = 1.5708
 progress = 786.52
 
-[node name="EnemyFactory" parent="Path2D/PathFollow2D" instance=ExtResource("2_1ihsb")]
+[node name="NormalEnemyFactory" parent="Path2D/PathFollow2D" instance=ExtResource("2_1ihsb")]
 unique_name_in_owner = true
+EnemyScene = ExtResource("3_nmenm")
+
+[node name="SineWaveEnemyFactory" parent="Path2D/PathFollow2D" instance=ExtResource("2_1ihsb")]
+unique_name_in_owner = true
+EnemyScene = ExtResource("4_swenm")
+
+[node name="HomingEnemyFactory" parent="Path2D/PathFollow2D" instance=ExtResource("2_1ihsb")]
+unique_name_in_owner = true
+EnemyScene = ExtResource("5_hmenm")
+
+[node name="StopAndGoEnemyFactory" parent="Path2D/PathFollow2D" instance=ExtResource("2_1ihsb")]
+unique_name_in_owner = true
+EnemyScene = ExtResource("6_sgenm")

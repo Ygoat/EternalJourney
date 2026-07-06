@@ -19,6 +19,8 @@ size = Vector2(66, 40)
 
 [node name="StandardEnemy" instance=ExtResource("1_ammup")]
 script = ExtResource("2_ccaoi")
+ScoreValue = 10
+MovementStrategyResource = null
 Status = SubResource("Resource_nhkqy")
 
 [node name="Control" type="Control" parent="." index="0"]
@@ -64,4 +66,4 @@ visible = true
 [node name="StandardWeapon" parent="." index="4" instance=ExtResource("4_tvl6g")]
 unique_name_in_owner = true
 position = Vector2(34, 2)
-WeaponId = ""
+RotationSpeed = 0.05
