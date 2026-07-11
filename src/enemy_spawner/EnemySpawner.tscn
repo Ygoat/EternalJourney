@@ -3,9 +3,9 @@
 [ext_resource type="Script" path="res://src/enemy_spawner/EnemySpawner.cs" id="1_pjyhy"]
 [ext_resource type="PackedScene" uid="uid://jdok4gype0dg" path="res://src/enemy_factory/EnemyFactory.tscn" id="2_1ihsb"]
 [ext_resource type="PackedScene" path="res://src/enemy/01_NormalEnemy.tscn" id="3_nmenm"]
-[ext_resource type="PackedScene" path="res://src/enemy/02_SineWaveEnemy.tscn" id="4_swenm"]
+[ext_resource type="PackedScene" uid="uid://cm857nw2uc4w0" path="res://src/enemy/02_SineWaveEnemy.tscn" id="4_swenm"]
 [ext_resource type="PackedScene" path="res://src/enemy/03_HomingEnemy.tscn" id="5_hmenm"]
-[ext_resource type="PackedScene" path="res://src/enemy/04_StopAndGoEnemy.tscn" id="6_sgenm"]
+[ext_resource type="PackedScene" uid="uid://bof0uts1i6te" path="res://src/enemy/04_StopAndGoEnemy.tscn" id="6_sgenm"]
 
 [sub_resource type="Curve2D" id="Curve2D_na73r"]
 _data = {

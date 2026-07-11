@@ -1,8 +1,13 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3 uid="uid://bof0uts1i6te"]
 
 [ext_resource type="PackedScene" uid="uid://bw8kc5hwarjxw" path="res://src/enemy/standard/StandardEnemy.tscn" id="1_sgenm"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_sgsts"]
 [ext_resource type="Script" path="res://src/enemy/strategies/movement/StopAndGoMovementStrategyResource.cs" id="3_sgmov"]
+
+[sub_resource type="Resource" id="Resource_sgenm_move"]
+script = ExtResource("3_sgmov")
+MoveDuration = 1.0
+StopDuration = 0.5
 
 [sub_resource type="Resource" id="Resource_sgenm_status"]
 resource_local_to_scene = true
@@ -14,12 +19,7 @@ Spd = 1.0
 Def = 2.0
 Size = 1.5
 
-[sub_resource type="Resource" id="Resource_sgenm_move"]
-script = ExtResource("3_sgmov")
-MoveDuration = 1.0
-StopDuration = 0.5
-
 [node name="04_StopAndGoEnemy" instance=ExtResource("1_sgenm")]
-Status = SubResource("Resource_sgenm_status")
-MovementStrategyResource = SubResource("Resource_sgenm_move")
 ScoreValue = 50
+MovementStrategyResource = SubResource("Resource_sgenm_move")
+Status = SubResource("Resource_sgenm_status")

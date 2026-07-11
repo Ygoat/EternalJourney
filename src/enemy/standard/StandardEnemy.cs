@@ -90,8 +90,11 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     [Node]
     public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
 
+    /// <summary>
+    /// エネミー画像
+    /// </summary>
     [Node]
-    public IColorRect ColorRect { get; set; } = default!;
+    public ISprite2D Sprite2D { get; set; } = default!;
 
     [Node]
     public IStandardWeapon StandardWeapon { get; set; } = default!;
@@ -163,7 +166,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
             })
             .Handle((in StandardEnemyLogic.Output.UpdateColor output) =>
             {
-                ColorRect.Color = output.Color;
+                Sprite2D.Modulate = output.Color;
             })
             .Handle((in StandardEnemyLogic.Output.Destroyed _) =>
             {
