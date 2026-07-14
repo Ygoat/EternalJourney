@@ -35,16 +35,12 @@ Status = SubResource("Resource_dy1c8")
 [node name="BulletCollisionShape2D" parent="." index="0"]
 shape = SubResource("RectangleShape2D_utpp0")
 
-[node name="BulletColorRect" parent="." index="1"]
-color = Color(0.956863, 1, 0.635294, 1)
+[node name="BulletSprite2D" parent="." index="1"]
+modulate = Color(0.956863, 1, 0.635294, 1)
 
 [node name="BlastCollisionShape2D" parent="." index="3"]
 position = Vector2(0, 0)
 shape = SubResource("RectangleShape2D_xejuu")
 
-[node name="BlastColorRect" parent="." index="4"]
-offset_left = -90.0
-offset_top = -90.0
-offset_right = 90.0
-offset_bottom = 90.0
-color = Color(1, 0.654902, 0, 1)
+[node name="BlastSprite2D" parent="." index="4"]
+modulate = Color(1, 0.654902, 0, 1)

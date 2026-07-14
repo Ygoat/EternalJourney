@@ -43,5 +43,4 @@ visible = true
 
 [node name="StandardWeapon" parent="." index="4" instance=ExtResource("4_tvl6g")]
 unique_name_in_owner = true
-position = Vector2(34, 2)
-RotationSpeed = 0.05
+position = Vector2(23, 0)

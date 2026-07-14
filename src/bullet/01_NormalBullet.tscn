@@ -30,8 +30,4 @@ Status = SubResource("Resource_nheul")
 [node name="BlastCollisionShape2D" parent="." index="3"]
 position = Vector2(0, 1)
 
-[node name="BlastColorRect" parent="." index="4"]
-offset_left = -84.0
-offset_top = -83.0
-offset_right = 85.0
-offset_bottom = 83.0
+[node name="BlastSprite2D" parent="." index="4"]

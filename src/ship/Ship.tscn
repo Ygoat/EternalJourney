@@ -46,7 +46,6 @@ shape = SubResource("RectangleShape2D_q2p4j")
 
 [node name="01_NormalWeapon" parent="." index="5" instance=ExtResource("2_ceogd")]
 position = Vector2(-90, -154)
-RotationSpeed = 0.05
 
 [node name="02_PenetrateWeapon" parent="." index="6" instance=ExtResource("4_pntrw")]
 position = Vector2(-90, 154)
@@ -58,4 +57,3 @@ RotationSpeed = 0.05
 
 [node name="01_NormalWeapon4" parent="." index="8" instance=ExtResource("2_ceogd")]
 position = Vector2(90, 154)
-RotationSpeed = 0.05

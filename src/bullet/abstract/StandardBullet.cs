@@ -67,10 +67,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     public ICollisionShape2D BulletCollisionShape2D { get; set; } = default!;
 
     /// <summary>
-    /// 弾丸カラーレクト（爆風弾シーンのみ存在）
+    /// 弾丸画像（爆風弾シーンのみ存在）
     /// </summary>
     [Node]
-    public IColorRect BulletColorRect { get; set; } = default!;
+    public ISprite2D BulletSprite2D { get; set; } = default!;
 
     /// <summary>
     /// 爆風コリジョンシェイプ（爆風弾シーンのみ存在）
@@ -79,10 +79,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     public ICollisionShape2D BlastCollisionShape2D { get; set; } = default!;
 
     /// <summary>
-    /// 爆風カラーレクト（爆風弾シーンのみ存在）
+    /// 爆風画像（爆風弾シーンのみ存在）
     /// </summary>
     [Node]
-    public IColorRect BlastColorRect { get; set; } = default!;
+    public ISprite2D BlastSprite2D { get; set; } = default!;
 
     #endregion OptionalBlastNodes
 
@@ -256,19 +256,19 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <param name="flag">有効化フラグ</param>
     private void SetBulletBodyEnabled(bool flag)
     {
-        if (BulletColorRect == null || BulletCollisionShape2D == null)
+        if (BulletSprite2D == null || BulletCollisionShape2D == null)
         {
             return;
         }
 
         if (flag)
         {
-            BulletColorRect.Show();
+            BulletSprite2D.Show();
             BulletCollisionShape2D.Disabled = false;
         }
         else
         {
-            BulletColorRect.Hide();
+            BulletSprite2D.Hide();
             BulletCollisionShape2D.Disabled = true;
         }
     }
@@ -281,12 +281,12 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     {
         if (flag)
         {
-            BlastColorRect.Show();
+            BlastSprite2D.Show();
             BlastCollisionShape2D.Disabled = false;
         }
         else
         {
-            BlastColorRect.Hide();
+            BlastSprite2D.Hide();
             BlastCollisionShape2D.Disabled = true;
         }
     }
