@@ -1,8 +1,12 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=7 format=3 uid="uid://cujps80a6f00i"]
 
 [ext_resource type="PackedScene" uid="uid://bw8kc5hwarjxw" path="res://src/enemy/standard/StandardEnemy.tscn" id="1_nmenm"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_nmsts"]
 [ext_resource type="Script" path="res://src/enemy/strategies/movement/LinearMovementStrategyResource.cs" id="3_nmmov"]
+[ext_resource type="PackedScene" uid="uid://bf7204x00kgdy" path="res://src/weapon/01_NormalWeapon.tscn" id="4_g7uu2"]
+
+[sub_resource type="Resource" id="Resource_nmenm_move"]
+script = ExtResource("3_nmmov")
 
 [sub_resource type="Resource" id="Resource_nmenm_status"]
 resource_local_to_scene = true
@@ -14,10 +18,9 @@ Spd = 1.0
 Def = 0.0
 Size = 1.0
 
-[sub_resource type="Resource" id="Resource_nmenm_move"]
-script = ExtResource("3_nmmov")
-
 [node name="01_NormalEnemy" instance=ExtResource("1_nmenm")]
-Status = SubResource("Resource_nmenm_status")
 MovementStrategyResource = SubResource("Resource_nmenm_move")
-ScoreValue = 10
+Status = SubResource("Resource_nmenm_status")
+
+[node name="01_NormalWeapon" parent="." index="4" instance=ExtResource("4_g7uu2")]
+BulletScale = 1.0

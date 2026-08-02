@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://brbkk7msm1p13"]
+[gd_scene load_steps=6 format=3 uid="uid://ddt5sn5cogaem"]
 
 [ext_resource type="Script" path="res://src/ship/Ship.cs" id="1_nt3ax"]
 [ext_resource type="PackedScene" uid="uid://bf7204x00kgdy" path="res://src/weapon/01_NormalWeapon.tscn" id="2_dxfdo"]

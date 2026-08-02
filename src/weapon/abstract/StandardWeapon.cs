@@ -65,6 +65,12 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// </summary>
     [Export]
     public float RotationSpeed { get; set; } = 0.05f;
+
+    /// <summary>
+    /// 弾丸の拡大率（見た目・当たり判定の両方に反映される）
+    /// </summary>
+    [Export]
+    public float BulletScale { get; set; } = 1.0f;
     #endregion Exports
 
     #region Nodes
@@ -133,6 +139,8 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     public override void OnResolved()
     {
         base.OnResolved();
+        // 弾丸サイズを弾丸ファクトリへ橋渡し
+        StandardBulletFactory.BulletScale = BulletScale;
         WeaponBind
             // Idling出力時
             .Handle((in StandardWeaponLogic.Output.Idling _) =>

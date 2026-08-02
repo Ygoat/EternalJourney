@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://cdjgcgidbt7sd"]
+[gd_scene load_steps=10 format=3 uid="uid://brbkk7msm1p13"]
 
 [ext_resource type="Script" path="res://src/ship/Ship.cs" id="1_78rl6"]
 [ext_resource type="PackedScene" uid="uid://hce48dum5bam" path="res://src/common/base_entity/BaseEntity.tscn" id="1_y0q76"]
@@ -46,14 +46,22 @@ shape = SubResource("RectangleShape2D_q2p4j")
 
 [node name="01_NormalWeapon" parent="." index="5" instance=ExtResource("2_ceogd")]
 position = Vector2(-90, -154)
+scale = Vector2(2, 2)
+BulletScale = 1.0
 
 [node name="02_PenetrateWeapon" parent="." index="6" instance=ExtResource("4_pntrw")]
 position = Vector2(-90, 154)
+scale = Vector2(2, 2)
 RotationSpeed = 0.05
+BulletScale = 1.0
 
 [node name="03_ExplosionWeapon" parent="." index="7" instance=ExtResource("4_expwp")]
 position = Vector2(91, -154)
+scale = Vector2(2, 2)
 RotationSpeed = 0.05
+BulletScale = 1.0
 
 [node name="01_NormalWeapon4" parent="." index="8" instance=ExtResource("2_ceogd")]
 position = Vector2(90, 154)
+scale = Vector2(2, 2)
+BulletScale = 1.0

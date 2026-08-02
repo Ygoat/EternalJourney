@@ -1,10 +1,9 @@
-[gd_scene load_steps=8 format=3 uid="uid://bw8kc5hwarjxw"]
+[gd_scene load_steps=7 format=3 uid="uid://bw8kc5hwarjxw"]
 
 [ext_resource type="PackedScene" uid="uid://dtymbdwgg4tmh" path="res://src/enemy/base/BaseEnemy.tscn" id="1_ammup"]
 [ext_resource type="Script" path="res://src/enemy/standard/StandardEnemy.cs" id="2_ccaoi"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="3_e1a3m"]
 [ext_resource type="Texture2D" uid="uid://drcrsiah206r5" path="res://assets/enemies/enemyBlack1.png" id="4_jjrwg"]
-[ext_resource type="PackedScene" uid="uid://dd0kb5g3fa2xx" path="res://src/weapon/abstract/StandardWeapon.tscn" id="4_tvl6g"]
 
 [sub_resource type="Resource" id="Resource_nhkqy"]
 script = ExtResource("3_e1a3m")
@@ -40,7 +39,3 @@ shape = SubResource("RectangleShape2D_s7ltu")
 
 [node name="DebugLabel" parent="." index="3"]
 visible = true
-
-[node name="StandardWeapon" parent="." index="4" instance=ExtResource("4_tvl6g")]
-unique_name_in_owner = true
-position = Vector2(23, 0)

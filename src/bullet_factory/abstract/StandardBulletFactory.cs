@@ -32,6 +32,11 @@ public interface IStandardBulletFactory
     public float WaitTime { get; set; }
 
     /// <summary>
+    /// 弾丸の拡大率（見た目・当たり判定の両方に反映される）
+    /// </summary>
+    public float BulletScale { get; set; }
+
+    /// <summary>
     /// 弾丸生成
     /// </summary>
     public void GenerateBullet();
@@ -58,6 +63,12 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     /// </summary>
     [Export]
     public string BulletName { get; set; } = default!;
+
+    /// <summary>
+    /// 弾丸の拡大率（見た目・当たり判定の両方に反映される）
+    /// </summary>
+    [Export]
+    public float BulletScale { get; set; } = 1.0f;
 
     #endregion Exports
 
@@ -173,6 +184,8 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         bullet.CollisionMask = BulletCollisionMask;
         // プレイヤー所有フラグを適用
         bullet.IsPlayerOwned = IsPlayerBullet;
+        // 弾丸サイズを適用（見た目・当たり判定の両方に反映される）
+        bullet.Scale = Vector2.One * BulletScale;
 
         // シーンツリーに追加（エネミー撃破後も弾丸が残るよう、IBattleRepoを提供する祖先ノードに追加）
         GetBulletContainer().AddChild(bullet);

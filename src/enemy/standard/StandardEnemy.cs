@@ -1,5 +1,7 @@
 namespace EternalJourney.Enemy.Standard;
 
+using System.Collections.Generic;
+using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
@@ -63,6 +65,11 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// </summary>
     [Export]
     public int ScoreValue { get; set; } = 10;
+
+    /// <summary>
+    /// 搭載武器一覧（子ノードから動的に検出する。名前・数は自由）
+    /// </summary>
+    private List<IStandardWeapon> _weapons = new();
     #endregion State
 
     #region Exports
@@ -95,9 +102,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// </summary>
     [Node]
     public ISprite2D Sprite2D { get; set; } = default!;
-
-    [Node]
-    public IStandardWeapon StandardWeapon { get; set; } = default!;
     #endregion Nodes
 
     /// <summary>
@@ -140,10 +144,15 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         StandardEnemyLogic.Set(EntityTable.Get<IShip>(0)!);
         // ターゲット位置を設定（Configure呼び出し時点でShipは登録済み）
         TargetPosition = EntityTable.Get<IShip>(0)!.EnemyTargetMarker.GlobalPosition;
-        // WeaponのターゲットをShipに設定
-        StandardWeapon.SetTargetMask(CollisionEntity.Ship);
-        // 敵所有フラグを設定
-        StandardWeapon.SetPlayerOwned(false);
+        // 子ノードから武器を動的検出（名前・数は自由）
+        _weapons = GetChildren().OfType<IStandardWeapon>().ToList();
+        foreach (var weapon in _weapons)
+        {
+            // WeaponのターゲットをShipに設定
+            weapon.SetTargetMask(CollisionEntity.Ship);
+            // 敵所有フラグを設定
+            weapon.SetPlayerOwned(false);
+        }
 
         StandardEnemyBinding
             .Handle((in StandardEnemyLogic.Output.StartInvade output) =>

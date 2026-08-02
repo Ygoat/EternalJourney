@@ -1,8 +1,9 @@
-[gd_scene load_steps=6 format=3 uid="uid://bof0uts1i6te"]
+[gd_scene load_steps=7 format=3 uid="uid://c4mxkmhjyhc1y"]
 
 [ext_resource type="PackedScene" uid="uid://bw8kc5hwarjxw" path="res://src/enemy/standard/StandardEnemy.tscn" id="1_sgenm"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_sgsts"]
 [ext_resource type="Script" path="res://src/enemy/strategies/movement/StopAndGoMovementStrategyResource.cs" id="3_sgmov"]
+[ext_resource type="PackedScene" uid="uid://bf7204x00kgdy" path="res://src/weapon/01_NormalWeapon.tscn" id="4_55tm1"]
 
 [sub_resource type="Resource" id="Resource_sgenm_move"]
 script = ExtResource("3_sgmov")
@@ -23,3 +24,7 @@ Size = 1.5
 ScoreValue = 50
 MovementStrategyResource = SubResource("Resource_sgenm_move")
 Status = SubResource("Resource_sgenm_status")
+
+[node name="01_NormalWeapon" parent="." index="4" instance=ExtResource("4_55tm1")]
+position = Vector2(27, 0)
+BulletScale = 1.0

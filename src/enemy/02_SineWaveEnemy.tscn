@@ -1,9 +1,10 @@
-[gd_scene load_steps=7 format=3 uid="uid://cm857nw2uc4w0"]
+[gd_scene load_steps=8 format=3 uid="uid://bxu3efccc7dgf"]
 
 [ext_resource type="PackedScene" uid="uid://bw8kc5hwarjxw" path="res://src/enemy/standard/StandardEnemy.tscn" id="1_swenm"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_swsts"]
 [ext_resource type="Script" path="res://src/enemy/strategies/movement/SineWaveMovementStrategyResource.cs" id="3_swmov"]
 [ext_resource type="Texture2D" uid="uid://c25vcigxrql36" path="res://assets/enemies/enemyBlack2.png" id="4_qh71e"]
+[ext_resource type="PackedScene" uid="uid://cfpsts638espo" path="res://src/weapon/02_PenetrateWeapon.tscn" id="5_1o1gm"]
 
 [sub_resource type="Resource" id="Resource_swenm_move"]
 script = ExtResource("3_swmov")
@@ -28,3 +29,7 @@ Status = SubResource("Resource_swenm_status")
 [node name="Sprite2D" parent="." index="0"]
 scale = Vector2(0.399356, 0.399356)
 texture = ExtResource("4_qh71e")
+
+[node name="02_PenetrateWeapon" parent="." index="4" instance=ExtResource("5_1o1gm")]
+position = Vector2(26, 0)
+BulletScale = 0.5

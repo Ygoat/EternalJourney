@@ -5,6 +5,8 @@
 
 [node name="03_ExplosionWeapon" instance=ExtResource("1_fcx7l")]
 RotationSpeed = 0.03
+BulletScale = 1.0
 
 [node name="StandardBulletFactory" parent="." index="4"]
 BulletScene = ExtResource("2_f3gwh")
+BulletScale = 1.0
