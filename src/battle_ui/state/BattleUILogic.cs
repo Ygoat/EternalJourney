@@ -2,6 +2,7 @@ namespace EternalJourney.BattleUI.State;
 
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
+using Chickensoft.Sync.Primitives;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Game.Domain;
@@ -121,12 +122,19 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
         /// </summary>
         public record Active : State, IGet<Input.PhysicsProcess>, IGet<Input.SPButtonPressed>
         {
+            /// <summary>
+            /// スコア購読用バインディング
+            /// </summary>
+            private AutoValue<int>.Binding? _scoreBinding;
+
             public Active()
             {
                 OnAttach(() =>
                 {
                     IBattleRepo battleRepo = Get<IBattleRepo>();
-                    battleRepo.Score.Sync += OnScoreCountUp;
+                    // 購読登録時に現在値が即時通知される
+                    _scoreBinding = battleRepo.Score.Bind();
+                    _scoreBinding.OnValue(OnScoreCountUp);
                     battleRepo.ShipHpChanged += OnShipHpChanged;
                     battleRepo.GameOverOccurred += OnGameOver;
                     battleRepo.SpPercentChanged += OnSpPercentChanged;
@@ -134,7 +142,8 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
                 OnDetach(() =>
                 {
                     IBattleRepo battleRepo = Get<IBattleRepo>();
-                    battleRepo.Score.Sync -= OnScoreCountUp;
+                    _scoreBinding?.Dispose();
+                    _scoreBinding = null;
                     battleRepo.ShipHpChanged -= OnShipHpChanged;
                     battleRepo.GameOverOccurred -= OnGameOver;
                     battleRepo.SpPercentChanged -= OnSpPercentChanged;

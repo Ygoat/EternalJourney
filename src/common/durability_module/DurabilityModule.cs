@@ -1,7 +1,7 @@
 namespace EternalJourney.Common.DurabilityModule;
 
 using Chickensoft.AutoInject;
-using Chickensoft.Collections;
+using Chickensoft.Sync.Primitives;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using Godot;
@@ -109,9 +109,14 @@ public partial class DurabilityModule : Node, IDurabilityModule
     private float _currentRatio { get; set; } = 1;
 
     /// <summary>
-    /// 耐久値のAutoProp
+    /// 耐久値のAutoValue
     /// </summary>
-    private AutoProp<float> _durability { get; set; } = default!;
+    private AutoValue<float> _durability { get; set; } = default!;
+
+    /// <summary>
+    /// 耐久値変更の購読用バインディング
+    /// </summary>
+    private AutoValue<float>.Binding? _durabilityBinding;
     #endregion Exports
 
     /// <summary>
@@ -132,8 +137,15 @@ public partial class DurabilityModule : Node, IDurabilityModule
     {
         _maxValue = maxValue;
         _currentRatio = currentRatio;
-        _durability = new AutoProp<float>(maxValue * currentRatio);
-        _durability.Sync += OnDurabilityChanged;
+
+        // 再設定時は旧い購読・値を破棄
+        _durabilityBinding?.Dispose();
+        _durability?.Dispose();
+
+        _durability = new AutoValue<float>(maxValue * currentRatio);
+        // 購読登録時に現在値が即時通知される
+        _durabilityBinding = _durability.Bind();
+        _durabilityBinding.OnValue(OnDurabilityChanged);
     }
 
     /// <summary>
@@ -150,7 +162,7 @@ public partial class DurabilityModule : Node, IDurabilityModule
             nextDurability = 0;
         }
         // 耐久値をセット
-        _durability.OnNext(nextDurability);
+        _durability.Value = nextDurability;
         // 現在耐久値比を計算
         CalcCurrentRatio();
     }
@@ -169,7 +181,7 @@ public partial class DurabilityModule : Node, IDurabilityModule
             nextDurability = _maxValue;
         }
         // 耐久値をセット
-        _durability.OnNext(nextDurability);
+        _durability.Value = nextDurability;
         // 現在耐久値比を計算
         CalcCurrentRatio();
     }
@@ -206,7 +218,7 @@ public partial class DurabilityModule : Node, IDurabilityModule
     /// <returns></returns>
     public void MaximizeDurability()
     {
-        _durability.OnNext(_maxValue);
+        _durability.Value = _maxValue;
     }
 
     /// <summary>
@@ -236,6 +248,17 @@ public partial class DurabilityModule : Node, IDurabilityModule
         {
             OnDurabilityLeft();
         }
+    }
+
+    /// <summary>
+    /// ツリー離脱時に購読と耐久値を破棄
+    /// </summary>
+    public override void _ExitTree()
+    {
+        _durabilityBinding?.Dispose();
+        _durabilityBinding = null;
+        _durability?.Dispose();
+        base._ExitTree();
     }
 
     /// <summary>

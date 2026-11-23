@@ -1,7 +1,7 @@
 namespace EternalJourney.Battle.Domain;
 
 using System;
-using Chickensoft.Collections;
+using Chickensoft.Sync.Primitives;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Enemy.Base;
 
@@ -34,12 +34,12 @@ public interface IBattleRepo : IDisposable
     /// <summary>
     /// スコア
     /// </summary>
-    public IAutoProp<int> Score { get; }
+    public IAutoValue<int> Score { get; }
 
     /// <summary>
     /// エネミー撃破数
     /// </summary>
-    public IAutoProp<int> NumEnemyDestroyed { get; }
+    public IAutoValue<int> NumEnemyDestroyed { get; }
 
     /// <summary>
     /// 弾丸がヒットした際に呼び出されるイベント
@@ -203,16 +203,16 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// スコア
     /// </summary>
-    public IAutoProp<int> Score => _score;
+    public IAutoValue<int> Score => _score;
 
-    private readonly AutoProp<int> _score;
+    private readonly AutoValue<int> _score;
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public IAutoProp<int> NumEnemyDestroyed => _numEnemyDestroyed;
+    public IAutoValue<int> NumEnemyDestroyed => _numEnemyDestroyed;
 
-    private readonly AutoProp<int> _numEnemyDestroyed;
+    private readonly AutoValue<int> _numEnemyDestroyed;
 
     /// <summary>
     /// <inheritdoc/>
@@ -266,16 +266,16 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public BattleRepo()
     {
-        _numEnemyDestroyed = new AutoProp<int>(0);
-        _score = new AutoProp<int>(0);
+        _numEnemyDestroyed = new AutoValue<int>(0);
+        _score = new AutoValue<int>(0);
     }
 
     /// <summary>
     /// コンストラクタ
     /// </summary>
     internal BattleRepo(
-      AutoProp<int> numEnemyDestroyed,
-      AutoProp<int> score
+      AutoValue<int> numEnemyDestroyed,
+      AutoValue<int> score
     )
     {
         _numEnemyDestroyed = numEnemyDestroyed;
@@ -287,7 +287,7 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public void ScoreCountUp(int score)
     {
-        _score.OnNext(_score.Value + score);
+        _score.Value = _score.Value + score;
     }
 
     /// <summary>
@@ -295,7 +295,7 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public void NumEnemyDestroyedCountUp()
     {
-        _numEnemyDestroyed.OnNext(_numEnemyDestroyed.Value + 1);
+        _numEnemyDestroyed.Value = _numEnemyDestroyed.Value + 1;
     }
 
     /// <summary>
@@ -311,7 +311,7 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public void SetNumEnemyDestroyed(int numEnemyDestroyed)
     {
-        _numEnemyDestroyed.OnNext(numEnemyDestroyed);
+        _numEnemyDestroyed.Value = numEnemyDestroyed;
     }
 
     /// <summary>
@@ -386,9 +386,7 @@ public class BattleRepo : IBattleRepo
         {
             if (disposing)
             {
-                _score.OnCompleted();
                 _score.Dispose();
-                _numEnemyDestroyed.OnCompleted();
                 _numEnemyDestroyed.Dispose();
             }
 
