@@ -187,7 +187,7 @@ public partial class BattleUI : Control, IBattleUI
         SetPhysicsProcess(false);
     }
 
-    public void OnTreeExiting()
+    public void OnExitTree()
     {
         BattleUIBinding.Dispose();
         ((System.IDisposable)BattleUILogic).Dispose();

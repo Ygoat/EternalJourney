@@ -63,7 +63,7 @@ public partial class SpSkillEffectArea : Area2D, ISpSkillEffectArea
         enemy.StatusEffectReceiverManager.Get<StunEffect>()?.Apply();
     }
 
-    public void OnTreeExiting()
+    public void OnExitTree()
     {
         BattleRepo.SPActivated -= Activate;
     }

@@ -176,6 +176,13 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     /// </summary>
     private void BulletEmit()
     {
+        // 遅延実行の間に持ち主（敵）がプールへ返却されていたら射出しない
+        // （ツリー外に弾を追加すると Setup() が走らず、弾のロジックが未初期化になる）
+        if (!IsInsideTree())
+        {
+            return;
+        }
+
         // プールから弾丸を取得
         StandardBullet? bullet = AcquireFromPool();
         if (bullet == null)

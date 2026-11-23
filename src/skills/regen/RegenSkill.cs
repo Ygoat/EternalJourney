@@ -71,7 +71,7 @@ public partial class RegenSkill : Node, IRegenSkill
 
     public void Activate() => Logic?.Input(new RegenSkillLogic.Input.Apply());
 
-    public void OnTreeExiting()
+    public void OnExitTree()
     {
         Binding.Dispose();
         ((System.IDisposable)Logic).Dispose();

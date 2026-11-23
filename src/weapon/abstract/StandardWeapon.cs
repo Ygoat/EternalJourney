@@ -225,12 +225,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
             : Status.Spd;
     }
 
-    public void OnTreeExiting()
-    {
-        BattleRepo.WeaponSpdMultiplierChanged -= UpdateWaitTime;
-        WeaponBind.Dispose();
-        ((IDisposable)StandardWeaponLogic).Dispose();
-    }
+    // 注意: プール運用される敵の子として、返却のたびにツリーから外れるため、OnExitTree では Dispose / 購読解除をしない。
 
     public override void Attack()
     {

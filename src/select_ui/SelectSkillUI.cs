@@ -84,7 +84,7 @@ public partial class SelectSkillUI : Control, ISelectSkillUI
         Logic.Start<SelectSkillUIState.Idle>();
     }
 
-    public void OnTreeExiting()
+    public void OnExitTree()
     {
         Binding.Dispose();
         ((System.IDisposable)Logic).Dispose();

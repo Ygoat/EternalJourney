@@ -291,11 +291,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         EmitSignal(BaseEnemy.SignalName.Removed, this);
     }
 
-    public void OnTreeExiting()
-    {
-        StandardEnemyBinding.Dispose();
-        ((System.IDisposable)StandardEnemyLogic).Dispose();
-    }
+    // 注意: プールに返却するたびにツリーから外れるため、OnExitTree では Logic / Binding を Dispose しない。
 
     /// <summary>
     /// エネミー初期化

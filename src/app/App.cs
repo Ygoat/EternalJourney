@@ -198,7 +198,7 @@ public partial class App : CanvasLayer, IApp
     /// <summary>
     /// ノードがツリーから離脱する時の後始末
     /// </summary>
-    public void OnTreeExiting()
+    public void OnExitTree()
     {
         Menu.StartGame -= OnStartGame;
         Menu.StartDebugGame -= OnStartDebugGame;

@@ -96,7 +96,7 @@ public partial class ResultUI : Control, IResultUI
         ResultUILogic.Start<ResultUIState.Waiting>();
     }
 
-    public void OnTreeExiting()
+    public void OnExitTree()
     {
         ResultUIBinding.Dispose();
         ((System.IDisposable)ResultUILogic).Dispose();

@@ -40,7 +40,7 @@ public partial class HealSkill : Node, IHealSkill
 
     public void Activate() => Logic?.Input(new HealSkillLogic.Input.Apply());
 
-    public void OnTreeExiting()
+    public void OnExitTree()
     {
         Binding.Dispose();
         ((System.IDisposable)Logic).Dispose();

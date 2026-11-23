@@ -53,7 +53,7 @@ public abstract partial class StatusUpSkillBase : Node, ISkillNode
 
     public void Activate() => Logic?.Input(new StatusUpSkillLogic.Input.Apply());
 
-    public void OnTreeExiting()
+    public void OnExitTree()
     {
         Binding.Dispose();
         ((System.IDisposable)Logic).Dispose();

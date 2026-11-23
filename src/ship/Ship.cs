@@ -122,7 +122,7 @@ public partial class Ship : BaseEntity, IShip
         ShipLogic.Start<ShipState.Alive>();
     }
 
-    public void OnTreeExiting()
+    public void OnExitTree()
     {
         ShipBinding.Dispose();
         ((System.IDisposable)ShipLogic).Dispose();

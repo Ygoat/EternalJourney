@@ -125,7 +125,7 @@ public partial class Game : Node2D, IGame
         GameLogic.Start<GameState.SelectSkillPhase>();
     }
 
-    public void OnTreeExiting()
+    public void OnExitTree()
     {
         GameBinding.Dispose();
         ((System.IDisposable)GameLogic).Dispose();
