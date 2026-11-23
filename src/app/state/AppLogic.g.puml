@@ -1,9 +1,9 @@
 @startuml AppLogic
 state "AppLogic State" as EternalJourney_App_State_AppLogic_State {
-  state "SplashScreen" as EternalJourney_App_State_AppLogic_State_SplashScreen
-  state "MainMenu" as EternalJourney_App_State_AppLogic_State_MainMenu
   state "InGame" as EternalJourney_App_State_AppLogic_State_InGame
   state "LeavingGame" as EternalJourney_App_State_AppLogic_State_LeavingGame
+  state "MainMenu" as EternalJourney_App_State_AppLogic_State_MainMenu
+  state "SplashScreen" as EternalJourney_App_State_AppLogic_State_SplashScreen
 }
 
 EternalJourney_App_State_AppLogic_State_InGame --> EternalJourney_App_State_AppLogic_State_LeavingGame : EndGame

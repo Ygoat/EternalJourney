@@ -1,10 +1,10 @@
 @startuml GameLogic
 state "GameLogic State" as EternalJourney_Game_State_GameLogic_State {
-  state "SelectSkillPhase" as EternalJourney_Game_State_GameLogic_State_SelectSkillPhase
+  state "BattleEndingPhase" as EternalJourney_Game_State_GameLogic_State_BattleEndingPhase
   state "BattleInitPhase" as EternalJourney_Game_State_GameLogic_State_BattleInitPhase
   state "BattleRunningPhase" as EternalJourney_Game_State_GameLogic_State_BattleRunningPhase
-  state "BattleEndingPhase" as EternalJourney_Game_State_GameLogic_State_BattleEndingPhase
   state "ResultPhase" as EternalJourney_Game_State_GameLogic_State_ResultPhase
+  state "SelectSkillPhase" as EternalJourney_Game_State_GameLogic_State_SelectSkillPhase
 }
 
 EternalJourney_Game_State_GameLogic_State_BattleEndingPhase --> EternalJourney_Game_State_GameLogic_State_ResultPhase : BattleEnded

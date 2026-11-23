@@ -1,7 +1,7 @@
 @startuml BattleUILogic
 state "BattleUILogic State" as EternalJourney_BattleUI_State_BattleUILogic_State {
-  state "InActive" as EternalJourney_BattleUI_State_BattleUILogic_State_InActive
   state "Active" as EternalJourney_BattleUI_State_BattleUILogic_State_Active
+  state "InActive" as EternalJourney_BattleUI_State_BattleUILogic_State_InActive
 }
 
 EternalJourney_BattleUI_State_BattleUILogic_State_Active --> EternalJourney_BattleUI_State_BattleUILogic_State_Active : PhysicsProcess

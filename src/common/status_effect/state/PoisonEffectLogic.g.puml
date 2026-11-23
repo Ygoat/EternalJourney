@@ -1,7 +1,7 @@
 @startuml PoisonEffectLogic
 state "PoisonEffectLogic State" as EternalJourney_Common_StatusEffect_State_PoisonEffectLogic_State {
-  state "InActive" as EternalJourney_Common_StatusEffect_State_PoisonEffectLogic_State_InActive
   state "Active" as EternalJourney_Common_StatusEffect_State_PoisonEffectLogic_State_Active
+  state "InActive" as EternalJourney_Common_StatusEffect_State_PoisonEffectLogic_State_InActive
 }
 
 EternalJourney_Common_StatusEffect_State_PoisonEffectLogic_State_Active --> EternalJourney_Common_StatusEffect_State_PoisonEffectLogic_State_Active : Apply

@@ -1,8 +1,8 @@
 @startuml BulletLogic
 state "BulletLogic State" as EternalJourney_Bullet_Abstract_State_BulletLogic_State {
+  state "Blast" as EternalJourney_Bullet_Abstract_State_BulletLogic_State_Blast
   state "EmitWait" as EternalJourney_Bullet_Abstract_State_BulletLogic_State_EmitWait
   state "InFlight" as EternalJourney_Bullet_Abstract_State_BulletLogic_State_InFlight
-  state "Blast" as EternalJourney_Bullet_Abstract_State_BulletLogic_State_Blast
 }
 
 EternalJourney_Bullet_Abstract_State_BulletLogic_State_Blast --> EternalJourney_Bullet_Abstract_State_BulletLogic_State_Blast : EnemyHit

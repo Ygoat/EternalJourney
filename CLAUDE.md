@@ -4,7 +4,7 @@
 
 ## プロジェクト概要
 
-EternalJourneyは **Godot 4.3.0（バージョン固定）** と **C#（.NET 8.0）** で開発された放置型オートシューティングゲームです。[Chickensoft](https://chickensoft.games/) エコシステムを多用しています。
+EternalJourneyは **Godot 4.7.2（バージョン固定）** と **C#（.NET 8.0）** で開発された放置型オートシューティングゲームです。[Chickensoft](https://chickensoft.games/) エコシステムを多用しています。
 
 設計判断・コードレビュー時は `docs/ARCHITECTURE_REFERENCE.md`（Chickensoft GameDemo流アーキテクチャ・リファレンス）を正とします。現状の準拠状況と改善事項は `docs/PROJECT_REVIEW.md` を参照してください。
 
@@ -15,7 +15,7 @@ EternalJourneyは **Godot 4.3.0（バージョン固定）** と **C#（.NET 8.0
 dotnet build
 ```
 
-Godot 4.3.0（.NET版）のインストールが必要です。VSCodeからデバッグする場合は、環境変数 `GODOT` にGodot実行ファイルのパスを設定してください。
+Godot 4.7.2（.NET版）のインストールが必要です。VSCodeからデバッグする場合は、環境変数 `GODOT` にGodot実行ファイルのパスを設定してください。
 
 ## アーキテクチャ概要
 
@@ -86,11 +86,11 @@ public partial class Player : Node2D, IReady, IProcess {
   public override void _Notification(int what) => this.Notify(what);
 
   public void OnReady() {
-    GD.Print("Ready!");
+	GD.Print("Ready!");
   }
 
   public void OnProcess(double delta) {
-    GD.Print($"Frame: {delta}");
+	GD.Print($"Frame: {delta}");
   }
 }
 ```
@@ -104,16 +104,16 @@ public partial class Player : CharacterBody2D, IReady, IPhysicsProcess {
   private float _speed = 200;
 
   public void OnReady() {
-    GD.Print("Player initialized");
+	GD.Print("Player initialized");
   }
 
   public void OnPhysicsProcess(double delta) {
-    var velocity = Velocity;
-    if (Input.IsActionPressed("ui_right"))      velocity.X = _speed;
-    else if (Input.IsActionPressed("ui_left"))  velocity.X = -_speed;
-    else                                        velocity.X = 0;
-    Velocity = velocity;
-    MoveAndSlide();
+	var velocity = Velocity;
+	if (Input.IsActionPressed("ui_right"))      velocity.X = _speed;
+	else if (Input.IsActionPressed("ui_left"))  velocity.X = -_speed;
+	else                                        velocity.X = 0;
+	Velocity = velocity;
+	MoveAndSlide();
   }
 }
 ```
@@ -126,11 +126,11 @@ public partial class Player : Node2D, IReady, IProcess {
   public override void _Notification(int what) => this.Notify(what);
 
   public void OnReady() {
-    GD.Print("AutoInject + NodeInterfaces");
+	GD.Print("AutoInject + NodeInterfaces");
   }
 
   public void OnProcess(double delta) {
-    // フレーム処理
+	// フレーム処理
   }
 }
 ```
@@ -149,13 +149,13 @@ public partial class GameServiceProvider : Node, IProvide<GameService> {
   private GameService _service;
 
   public void Initialize() {
-    _service = new GameService();
+	_service = new GameService();
   }
 
   GameService IProvide<GameService>.Value() => _service;
 
   public void OnReady() {
-    this.Provide();  // 子ノードへの提供を開始
+	this.Provide();  // 子ノードへの提供を開始
   }
 }
 ```
@@ -170,8 +170,8 @@ public partial class Player : Node {
   [Dependency] public GameService GameService => this.DependOn<GameService>();
 
   public void OnResolved() {
-    GD.Print("DI解決完了");
-    // ここから GameService が使用可能
+	GD.Print("DI解決完了");
+	// ここから GameService が使用可能
   }
 }
 ```
@@ -236,9 +236,9 @@ public record Land : Input;
 ```csharp
 public record Idle : State {
   public override Transition On(Input input) => input switch {
-    Run => To<Running>(),
-    Jump => To<Jumping>(),
-    _ => Stay()
+	Run => To<Running>(),
+	Jump => To<Jumping>(),
+	_ => Stay()
   };
 }
 
@@ -246,16 +246,16 @@ public record Running : State {
   public override void OnEnter() { /* 走り始めた */ }
   public override void OnExit()  { /* 走るのをやめた */ }
   public override Transition On(Input input) => input switch {
-    Stop => To<Idle>(),
-    Jump => To<Jumping>(),
-    _ => Stay()
+	Stop => To<Idle>(),
+	Jump => To<Jumping>(),
+	_ => Stay()
   };
 }
 
 public record Jumping : State {
   public override Transition On(Input input) => input switch {
-    Land => To<Idle>(),
-    _ => Stay()
+	Land => To<Idle>(),
+	_ => Stay()
   };
 }
 ```
@@ -265,8 +265,8 @@ public record Jumping : State {
 // 「地上にいる」共通ステート
 public record Grounded : State {
   public override Transition On(Input input) => input switch {
-    Jump => To<Jumping>(),
-    _ => Stay()
+	Jump => To<Jumping>(),
+	_ => Stay()
   };
 }
 public record Idle : Grounded { }
@@ -279,24 +279,24 @@ public record Running : Grounded { }
 [Meta, LogicBlock(typeof(State), Diagram = true)]
 public partial class FooLogic : LogicBlock<FooLogic.State>
 {
-    public override Transition GetInitialState() => To<State.Idle>();
+	public override Transition GetInitialState() => To<State.Idle>();
 
-    public static class Input {
-        public readonly record struct DoThing(float Value);
-    }
-    public static class Output {
-        public readonly record struct ThingDone(float Result);
-    }
+	public static class Input {
+		public readonly record struct DoThing(float Value);
+	}
+	public static class Output {
+		public readonly record struct ThingDone(float Result);
+	}
 
-    public abstract record State : StateLogic<State> {
-        public record Idle : State, IGet<Input.DoThing> {
-            public Transition On(in Input.DoThing input) {
-                Output(new Output.ThingDone(input.Value));
-                return To<Active>();
-            }
-        }
-        public record Active : State { /* ... */ }
-    }
+	public abstract record State : StateLogic<State> {
+		public record Idle : State, IGet<Input.DoThing> {
+			public Transition On(in Input.DoThing input) {
+				Output(new Output.ThingDone(input.Value));
+				return To<Active>();
+			}
+		}
+		public record Active : State { /* ... */ }
+	}
 }
 ```
 
@@ -304,9 +304,9 @@ public partial class FooLogic : LogicBlock<FooLogic.State>
 ```csharp
 LogicBinding = Logic.Bind();
 LogicBinding
-    .When<FooLogic.State.Active>(state => { /* ステート進入時 */ })
-    .Handle((in FooLogic.Output.ThingDone o) => { /* Output処理 */ })
-    .Start();
+	.When<FooLogic.State.Active>(state => { /* ステート進入時 */ })
+	.Handle((in FooLogic.Output.ThingDone o) => { /* Output処理 */ })
+	.Start();
 ```
 
 `OnTreeExiting` で必ず `LogicBinding.Dispose()` と `Logic.Dispose()` を呼ぶこと。
@@ -319,25 +319,25 @@ public interface IFoo : INode2D { }
 [Meta(typeof(IAutoNode))]
 public partial class Foo : Node2D, IFoo
 {
-    public override void _Notification(int what) => this.Notify(what);
+	public override void _Notification(int what) => this.Notify(what);
 
-    #region Signals
-    #endregion Signals
-    #region State
-    #endregion State
-    #region Exports
-    #endregion Exports
-    #region Nodes
-    #endregion Nodes
-    #region Provisions
-    #endregion Provisions
-    #region Dependencies
-    #endregion Dependencies
+	#region Signals
+	#endregion Signals
+	#region State
+	#endregion State
+	#region Exports
+	#endregion Exports
+	#region Nodes
+	#endregion Nodes
+	#region Provisions
+	#endregion Provisions
+	#region Dependencies
+	#endregion Dependencies
 
-    public void Initialize() { }
-    public void OnReady() { }
-    public void Setup() { }
-    public void OnResolved() { }
+	public void Initialize() { }
+	public void OnReady() { }
+	public void Setup() { }
+	public void OnResolved() { }
 }
 ```
 
@@ -373,8 +373,8 @@ graph TD
   B --> C[Data Layer]
 
   subgraph Game Logic Layer
-    B1[Visual Game Logic<br>StateMachine]
-    B2[Pure Game Logic<br>Repository]
+	B1[Visual Game Logic<br>StateMachine]
+	B2[Pure Game Logic<br>Repository]
   end
 ```
 

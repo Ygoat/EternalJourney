@@ -1,8 +1,8 @@
 @startuml BaseFactoryLogic
 state "BaseFactoryLogic State" as EternalJourney_Common_BaseFactory_State_BaseFactoryLogic_State {
-  state "Ready" as EternalJourney_Common_BaseFactory_State_BaseFactoryLogic_State_Ready
-  state "Generating" as EternalJourney_Common_BaseFactory_State_BaseFactoryLogic_State_Generating
   state "CoolDown" as EternalJourney_Common_BaseFactory_State_BaseFactoryLogic_State_CoolDown
+  state "Generating" as EternalJourney_Common_BaseFactory_State_BaseFactoryLogic_State_Generating
+  state "Ready" as EternalJourney_Common_BaseFactory_State_BaseFactoryLogic_State_Ready
 }
 
 EternalJourney_Common_BaseFactory_State_BaseFactoryLogic_State_CoolDown --> EternalJourney_Common_BaseFactory_State_BaseFactoryLogic_State_Ready : CoolDownComplete

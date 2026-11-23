@@ -3,7 +3,6 @@ namespace EternalJourney.Cores.Helpers;
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Chickensoft.GoDotLog;
 using EternalJourney.Cores.Consts;
 using Godot;
 
@@ -44,7 +43,7 @@ public static class GDJsonHelper
         if (parseModel == null)
         {
             // エラー
-            GDLog.PushErrorAction(Message.GetMessage(Message.ERR_MESSAGE_002, FilePath));
+            GD.PushError(Message.GetMessage(Message.ERR_MESSAGE_002, FilePath));
             throw new InvalidOperationException(Message.GetMessage(Message.ERR_MESSAGE_002, FilePath));
         }
         return parseModel;

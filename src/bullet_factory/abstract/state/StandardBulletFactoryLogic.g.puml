@@ -1,7 +1,7 @@
 @startuml StandardBulletFactoryLogic
 state "StandardBulletFactoryLogic State" as EternalJourney_Bullet_Abstract_State_StandardBulletFactoryLogic_State {
-  state "Ready" as EternalJourney_Bullet_Abstract_State_StandardBulletFactoryLogic_State_Ready
   state "CoolDown" as EternalJourney_Bullet_Abstract_State_StandardBulletFactoryLogic_State_CoolDown
+  state "Ready" as EternalJourney_Bullet_Abstract_State_StandardBulletFactoryLogic_State_Ready
 }
 
 EternalJourney_Bullet_Abstract_State_StandardBulletFactoryLogic_State_CoolDown --> EternalJourney_Bullet_Abstract_State_StandardBulletFactoryLogic_State_Ready : CoolDownComplete

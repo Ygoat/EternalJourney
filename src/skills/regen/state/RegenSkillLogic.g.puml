@@ -1,7 +1,7 @@
 @startuml RegenSkillLogic
 state "RegenSkillLogic State" as EternalJourney_Skills_Regen_State_RegenSkillLogic_State {
-  state "InActive" as EternalJourney_Skills_Regen_State_RegenSkillLogic_State_InActive
   state "Active" as EternalJourney_Skills_Regen_State_RegenSkillLogic_State_Active
+  state "InActive" as EternalJourney_Skills_Regen_State_RegenSkillLogic_State_InActive
 }
 
 EternalJourney_Skills_Regen_State_RegenSkillLogic_State_Active --> EternalJourney_Skills_Regen_State_RegenSkillLogic_State_Active : Apply
