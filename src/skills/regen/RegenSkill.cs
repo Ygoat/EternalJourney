@@ -1,6 +1,7 @@
 namespace EternalJourney.Skills;
 
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Skill;
@@ -17,7 +18,7 @@ public partial class RegenSkill : Node, IRegenSkill
     public string Description => SkillInfo.GetDescription(SkillType.Regen);
 
     public RegenSkillLogic Logic { get; set; } = default!;
-    public RegenSkillLogic.IBinding Binding { get; set; } = default!;
+    public LogicBlock.Binding Binding { get; set; } = default!;
     public Timer HealTimer { get; set; } = default!;
     public Timer DurationTimer { get; set; } = default!;
     public float DurationSec { get; set; } = 10.0f;
@@ -49,23 +50,23 @@ public partial class RegenSkill : Node, IRegenSkill
         HealTimer.Timeout += () => Logic.Input(new RegenSkillLogic.Input.Tick());
         DurationTimer.Timeout += () => Logic.Input(new RegenSkillLogic.Input.Remove());
         Binding
-            .Handle((in RegenSkillLogic.Output.Activated _) =>
+            .OnOutput((in RegenSkillLogic.Output.Activated _) =>
             {
                 HealTimer.Stop();
                 HealTimer.Start();
                 DurationTimer.Stop();
                 DurationTimer.Start();
             })
-            .Handle((in RegenSkillLogic.Output.TikHeal o) =>
+            .OnOutput((in RegenSkillLogic.Output.TikHeal o) =>
             {
                 BattleRepo.RequestShipHeal(o.Amount);
             })
-            .Handle((in RegenSkillLogic.Output.Deactivated _) =>
+            .OnOutput((in RegenSkillLogic.Output.Deactivated _) =>
             {
                 HealTimer.Stop();
                 DurationTimer.Stop();
             });
-        Logic.Start();
+        Logic.Start<RegenSkillState.InActive>();
     }
 
     public void Activate() => Logic?.Input(new RegenSkillLogic.Input.Apply());

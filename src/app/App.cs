@@ -1,6 +1,7 @@
 namespace EternalJourney.App;
 
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.App.Domain;
@@ -86,7 +87,7 @@ public partial class App : CanvasLayer, IApp
     /// <summary>
     /// アプリケーションロジックステートバインド
     /// </summary>
-    public AppLogic.IBinding AppBinding { get; set; } = default!;
+    public LogicBlock.Binding AppBinding { get; set; } = default!;
 
     /// <summary>
     /// NodeがReady状態になる前の初期処理
@@ -129,43 +130,43 @@ public partial class App : CanvasLayer, IApp
 
         AppBinding
             // ShowSplashScreen（スプラッシュ表示）が出力された時の処理
-            .Handle((in AppLogic.Output.ShowSplashScreen _) =>
+            .OnOutput((in AppLogic.Output.ShowSplashScreen _) =>
             {
                 HideMenus();
                 BlankScreen.Hide();
                 Splash.Show();
             })
             // HideSplashScreen（スプラッシュ非表示）が出力された時の処理
-            .Handle((in AppLogic.Output.HideSplashScreen _) =>
+            .OnOutput((in AppLogic.Output.HideSplashScreen _) =>
             {
                 AppLogic.Input(new AppLogic.Input.SplashFinished());
             })
             // ShowMainMenu（メインメニュー表示）が出力された時の処理
-            .Handle((in AppLogic.Output.ShowMainMenu _) =>
+            .OnOutput((in AppLogic.Output.ShowMainMenu _) =>
             {
                 HideMenus();
                 Menu.Show();
             })
             // SetupGameScene（ゲームシーンセットアップ）が出力された時の処理
-            .Handle((in AppLogic.Output.SetupGameScene _) =>
+            .OnOutput((in AppLogic.Output.SetupGameScene _) =>
             {
                 Game = Instantiator.LoadAndInstantiate<Game>(Const.GAME_NODE_PATH);
             })
             // ShowGame（ゲームシーン表示）が出力された時の処理
-            .Handle((in AppLogic.Output.ShowGame _) =>
+            .OnOutput((in AppLogic.Output.ShowGame _) =>
             {
                 GameView.AddChildEx(Game);
                 HideMenus();
             })
             // RemoveExistingGame（ゲーム終了）が出力された時の処理
-            .Handle((in AppLogic.Output.RemoveExistingGame _) =>
+            .OnOutput((in AppLogic.Output.RemoveExistingGame _) =>
             {
                 Game.QueueFree();
                 Game = default!;
             });
 
         // 初期状態（SplashScreen）開始
-        AppLogic.Start();
+        AppLogic.Start<AppState.SplashScreen>();
     }
 
     /// <summary>

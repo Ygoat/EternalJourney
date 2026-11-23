@@ -1,6 +1,7 @@
 namespace EternalJourney.Bullet.Abstract;
 
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
@@ -39,7 +40,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <summary>
     /// 弾丸ロジックバインド
     /// </summary>
-    public BulletLogic.IBinding BulletBinding { get; set; } = default!;
+    public LogicBlock.Binding BulletBinding { get; set; } = default!;
 
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
@@ -108,13 +109,13 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         BulletLogic.Set(BattleRepo);
 
         BulletBinding
-            .When<BulletLogic.State.EmitWait>(state =>
+            .OnState<BulletState.EmitWait>(state =>
             {
                 // 爆風テクスチャ非表示と爆風当たり判定無効化
                 CallDeferred(nameof(SetBlastBodyEnabled), false);
                 // }
             })
-            .When<BulletLogic.State.InFlight>(state =>
+            .OnState<BulletState.InFlight>(state =>
             {
                 // 射出時の位置を設定(武器の発射口の位置)
                 GlobalPosition = state.ShotGlobalPosition;
@@ -128,24 +129,24 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
 
                 SetPhysicsProcess(true);
             })
-            .Handle((in BulletLogic.Output.Move output) =>
+            .OnOutput((in BulletLogic.Output.Move output) =>
             {
                 GlobalPosition += output.NextPositionDelta;
             })
-            .Handle((in BulletLogic.Output.CurrentDurChange output) =>
+            .OnOutput((in BulletLogic.Output.CurrentDurChange output) =>
             {
                 Status.CurrentDur = output.CurrentDur;
             })
-            .Handle((in BulletLogic.Output.SpdUpdated output) =>
+            .OnOutput((in BulletLogic.Output.SpdUpdated output) =>
             {
                 Status.Spd = output.Spd;
             })
-            .Handle((in BulletLogic.Output.Collapse _) =>
+            .OnOutput((in BulletLogic.Output.Collapse _) =>
             {
                 SetPhysicsProcess(false);
 
             })
-            .When<BulletLogic.State.Blast>(state =>
+            .OnState<BulletState.Blast>(state =>
             {
                 if (CollisionStrategy is ExplosionCollisionStrategy)
                 {
@@ -157,7 +158,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
                     BlastTimer!.Start();
                 }
             })
-            .Handle((in BulletLogic.Output.RemoveSelf _) =>
+            .OnOutput((in BulletLogic.Output.RemoveSelf _) =>
             {
                 if (CollisionStrategy is ExplosionCollisionStrategy)
                 {
@@ -173,7 +174,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         // 画面外イベント
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // ロジック初期化
-        BulletLogic.Start();
+        BulletLogic.Start<BulletState.EmitWait>();
 
         // 爆風タイマー設定（爆風弾シーンの場合のみ）
         if (BlastTimer != null)

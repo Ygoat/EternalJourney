@@ -1,5 +1,6 @@
 namespace EternalJourney.BattleUI.State;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using Chickensoft.Sync.Primitives;
@@ -11,19 +12,21 @@ using EternalJourney.SkillButton;
 /// <summary>
 /// バトルUIロジック
 /// </summary>
-public interface IBattleUILogic : ILogicBlock<BattleUILogic.State>;
+public interface IBattleUILogic : ILogicBlock;
 
 /// <summary>
 /// アプリケーションロジック
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUILogic
+[Meta]
+public partial class BattleUILogic : LogicBlock, IBattleUILogic
 {
-    /// <summary>
-    /// 初期状態
-    /// </summary>
-    /// <returns></returns>
-    public override Transition GetInitialState() => To<State.InActive>();
+    public BattleUILogic()
+    {
+        // ステートを事前確保
+        Set(new BattleUIState.InActive());
+        Set(new BattleUIState.Active());
+    }
+
 
     /// <summary>
     /// 入力定義
@@ -84,106 +87,108 @@ public partial class BattleUILogic : LogicBlock<BattleUILogic.State>, IBattleUIL
 
     // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
 
+}
+
+/// <summary>
+/// 状態定義
+/// </summary>
+[StateDiagram]
+public abstract partial record BattleUIState : LogicBlockState
+{
     /// <summary>
-    /// 状態定義
+    /// 非アクティブ（バトル開始待ち）
     /// </summary>
-    public abstract record State : StateLogic<State>
+    public record InActive : BattleUIState, IGet<BattleUILogic.Input.BattleStarted>
     {
-        /// <summary>
-        /// 非アクティブ（バトル開始待ち）
-        /// </summary>
-        public record InActive : State, IGet<Input.BattleStarted>
+        public InActive()
         {
-            public InActive()
-            {
-                OnAttach(() => Get<IBattleRepo>().BattleStarted += OnBattleStarted);
-                OnDetach(() => Get<IBattleRepo>().BattleStarted -= OnBattleStarted);
-            }
-
-            private void OnBattleStarted() => Input(new Input.BattleStarted());
-
-            public Transition On(in Input.BattleStarted input)
-            {
-                IBattleUI battleUI = Get<IBattleUI>();
-                ISkillButton[] slots = { battleUI.SkillButton1, battleUI.SkillButton2, battleUI.SkillButton3, battleUI.SkillButton4 };
-                var skills = Get<IGameRepo>().SelectedSkills;
-                for (int i = 0; i < slots.Length && i < skills.Count; i++)
-                {
-                    slots[i].SetLabel(SkillInfo.GetName(skills[i]));
-                    slots[i].Activated += battleUI.GetSkill(skills[i]).Activate;
-                }
-                Output(new Output.ActivateBattleUI());
-                return To<Active>();
-            }
+            this.OnEnter(() => Get<IBattleRepo>().BattleStarted += OnBattleStarted);
+            this.OnExit(() => Get<IBattleRepo>().BattleStarted -= OnBattleStarted);
         }
 
-        /// <summary>
-        /// アクティブ（バトル中）
-        /// </summary>
-        public record Active : State, IGet<Input.PhysicsProcess>, IGet<Input.SPButtonPressed>
+        private void OnBattleStarted() => Input(new BattleUILogic.Input.BattleStarted());
+
+        public Type On(in BattleUILogic.Input.BattleStarted input)
         {
-            /// <summary>
-            /// スコア購読用バインディング
-            /// </summary>
-            private AutoValue<int>.Binding? _scoreBinding;
-
-            public Active()
+            IBattleUI battleUI = Get<IBattleUI>();
+            ISkillButton[] slots = { battleUI.SkillButton1, battleUI.SkillButton2, battleUI.SkillButton3, battleUI.SkillButton4 };
+            var skills = Get<IGameRepo>().SelectedSkills;
+            for (int i = 0; i < slots.Length && i < skills.Count; i++)
             {
-                OnAttach(() =>
-                {
-                    IBattleRepo battleRepo = Get<IBattleRepo>();
-                    // 購読登録時に現在値が即時通知される
-                    _scoreBinding = battleRepo.Score.Bind();
-                    _scoreBinding.OnValue(OnScoreCountUp);
-                    battleRepo.ShipHpChanged += OnShipHpChanged;
-                    battleRepo.GameOverOccurred += OnGameOver;
-                    battleRepo.SpPercentChanged += OnSpPercentChanged;
-                });
-                OnDetach(() =>
-                {
-                    IBattleRepo battleRepo = Get<IBattleRepo>();
-                    _scoreBinding?.Dispose();
-                    _scoreBinding = null;
-                    battleRepo.ShipHpChanged -= OnShipHpChanged;
-                    battleRepo.GameOverOccurred -= OnGameOver;
-                    battleRepo.SpPercentChanged -= OnSpPercentChanged;
-                });
+                slots[i].SetLabel(SkillInfo.GetName(skills[i]));
+                slots[i].Activated += battleUI.GetSkill(skills[i]).Activate;
             }
+            Output(new BattleUILogic.Output.ActivateBattleUI());
+            return To<Active>();
+        }
+    }
 
-            public void OnScoreCountUp(int currentScore) =>
-                Output(new Output.ScoreChanged(currentScore));
+    /// <summary>
+    /// アクティブ（バトル中）
+    /// </summary>
+    public record Active : BattleUIState, IGet<BattleUILogic.Input.PhysicsProcess>, IGet<BattleUILogic.Input.SPButtonPressed>
+    {
+        /// <summary>
+        /// スコア購読用バインディング
+        /// </summary>
+        private AutoValue<int>.Binding? _scoreBinding;
 
-            public void OnShipHpChanged(float currentHp, float maxHp) =>
-                Output(new Output.ShipHpChanged(CalcHpGaugeRatio(currentHp, maxHp)));
-
-            public void OnGameOver()
+        public Active()
+        {
+            this.OnEnter(() =>
             {
                 IBattleRepo battleRepo = Get<IBattleRepo>();
-                Get<IGameRepo>().SaveResult(battleRepo.Score.Value, Get<IBattleUI>().Count);
-                Get<IGameRepo>().NotifyGameOver();
-                Output(new Output.GameOver());
-            }
-
-            public Transition On(in Input.PhysicsProcess input)
+                // 購読登録時に現在値が即時通知される
+                _scoreBinding = battleRepo.Score.Bind();
+                _scoreBinding.OnValue(OnScoreCountUp);
+                battleRepo.ShipHpChanged += OnShipHpChanged;
+                battleRepo.GameOverOccurred += OnGameOver;
+                battleRepo.SpPercentChanged += OnSpPercentChanged;
+            });
+            this.OnExit(() =>
             {
-                Output(new Output.TikCount());
-                return ToSelf();
-            }
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                _scoreBinding?.Dispose();
+                _scoreBinding = null;
+                battleRepo.ShipHpChanged -= OnShipHpChanged;
+                battleRepo.GameOverOccurred -= OnGameOver;
+                battleRepo.SpPercentChanged -= OnSpPercentChanged;
+            });
+        }
 
-            public Transition On(in Input.SPButtonPressed input)
-            {
-                Get<IBattleRepo>().ActivateSP();
-                return ToSelf();
-            }
+        public void OnScoreCountUp(int currentScore) =>
+            Output(new BattleUILogic.Output.ScoreChanged(currentScore));
 
-            public void OnSpPercentChanged(float spPercent) =>
-                Output(new Output.SpPercentChanged(spPercent / 100f));
+        public void OnShipHpChanged(float currentHp, float maxHp) =>
+            Output(new BattleUILogic.Output.ShipHpChanged(CalcHpGaugeRatio(currentHp, maxHp)));
 
-            public float CalcHpGaugeRatio(float currentHp, float maxHp)
-            {
-                float ratio = maxHp > 0f ? currentHp / maxHp : 0f;
-                return ratio;
-            }
+        public void OnGameOver()
+        {
+            IBattleRepo battleRepo = Get<IBattleRepo>();
+            Get<IGameRepo>().SaveResult(battleRepo.Score.Value, Get<IBattleUI>().Count);
+            Get<IGameRepo>().NotifyGameOver();
+            Output(new BattleUILogic.Output.GameOver());
+        }
+
+        public Type On(in BattleUILogic.Input.PhysicsProcess input)
+        {
+            Output(new BattleUILogic.Output.TikCount());
+            return ToSelf();
+        }
+
+        public Type On(in BattleUILogic.Input.SPButtonPressed input)
+        {
+            Get<IBattleRepo>().ActivateSP();
+            return ToSelf();
+        }
+
+        public void OnSpPercentChanged(float spPercent) =>
+            Output(new BattleUILogic.Output.SpPercentChanged(spPercent / 100f));
+
+        public float CalcHpGaugeRatio(float currentHp, float maxHp)
+        {
+            float ratio = maxHp > 0f ? currentHp / maxHp : 0f;
+            return ratio;
         }
     }
 }

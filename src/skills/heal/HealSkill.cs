@@ -1,6 +1,7 @@
 namespace EternalJourney.Skills;
 
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Skill;
@@ -17,7 +18,7 @@ public partial class HealSkill : Node, IHealSkill
     public string Description => SkillInfo.GetDescription(SkillType.Heal);
 
     public HealSkillLogic Logic { get; set; } = default!;
-    public HealSkillLogic.IBinding Binding { get; set; } = default!;
+    public LogicBlock.Binding Binding { get; set; } = default!;
 
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
@@ -30,11 +31,11 @@ public partial class HealSkill : Node, IHealSkill
     public void OnResolved()
     {
         Binding
-            .Handle((in HealSkillLogic.Output.Healed o) =>
+            .OnOutput((in HealSkillLogic.Output.Healed o) =>
             {
                 BattleRepo.RequestShipHeal(o.Amount);
             });
-        Logic.Start();
+        Logic.Start<HealSkillState.Ready>();
     }
 
     public void Activate() => Logic?.Input(new HealSkillLogic.Input.Apply());

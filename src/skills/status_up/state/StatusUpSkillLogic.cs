@@ -1,20 +1,27 @@
 namespace EternalJourney.Skills.StatusUp.State;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 
 /// <summary>
 /// ステータスアップスキルロジックインターフェース
 /// </summary>
-public interface IStatusUpSkillLogic : ILogicBlock<StatusUpSkillLogic.State>;
+public interface IStatusUpSkillLogic : ILogicBlock;
 
 /// <summary>
 /// ステータスアップスキルロジッククラス
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class StatusUpSkillLogic : LogicBlock<StatusUpSkillLogic.State>, IStatusUpSkillLogic
+[Meta]
+public partial class StatusUpSkillLogic : LogicBlock, IStatusUpSkillLogic
 {
-    public override Transition GetInitialState() => To<State.InActive>();
+    public StatusUpSkillLogic()
+    {
+        // ステートを事前確保
+        Set(new StatusUpSkillState.InActive());
+        Set(new StatusUpSkillState.Active());
+    }
+
 
     /// <summary>スタック数を保持するblackboardオブジェクト</summary>
     public class StackState { public int Count { get; set; } = 1; }
@@ -37,48 +44,50 @@ public partial class StatusUpSkillLogic : LogicBlock<StatusUpSkillLogic.State>, 
         public readonly record struct Deactivated;
     }
 
-    public abstract record State : StateLogic<State>
+}
+
+[StateDiagram]
+public abstract partial record StatusUpSkillState : LogicBlockState
+{
+    /// <summary>未発動</summary>
+    public record InActive : StatusUpSkillState, IGet<StatusUpSkillLogic.Input.Apply>
     {
-        /// <summary>未発動</summary>
-        public record InActive : State, IGet<Input.Apply>
+        public Type On(in StatusUpSkillLogic.Input.Apply input)
         {
-            public Transition On(in Input.Apply input)
-            {
-                Get<StackState>().Count = 1;
-                return To<Active>();
-            }
+            Get<StatusUpSkillLogic.StackState>().Count = 1;
+            return To<Active>();
+        }
+    }
+
+    /// <summary>バフ中（スタック最大3）</summary>
+    public record Active : StatusUpSkillState, IGet<StatusUpSkillLogic.Input.Apply>, IGet<StatusUpSkillLogic.Input.Remove>
+    {
+        private const int MaxStacks = 3;
+
+        public Active()
+        {
+            this.OnEnter(() => Output(new StatusUpSkillLogic.Output.Activated(Get<StatusUpSkillLogic.StackState>().Count)));
+            this.OnExit(() => Output(new StatusUpSkillLogic.Output.Deactivated()));
         }
 
-        /// <summary>バフ中（スタック最大3）</summary>
-        public record Active : State, IGet<Input.Apply>, IGet<Input.Remove>
+        public Type On(in StatusUpSkillLogic.Input.Apply input)
         {
-            private const int MaxStacks = 3;
+            var stack = Get<StatusUpSkillLogic.StackState>();
+            if (stack.Count < MaxStacks) { stack.Count++; }
+            Output(new StatusUpSkillLogic.Output.Activated(stack.Count));
+            return ToSelf();
+        }
 
-            public Active()
+        public Type On(in StatusUpSkillLogic.Input.Remove input)
+        {
+            var stack = Get<StatusUpSkillLogic.StackState>();
+            if (stack.Count > 1)
             {
-                this.OnEnter(() => Output(new Output.Activated(Get<StackState>().Count)));
-                this.OnExit(() => Output(new Output.Deactivated()));
-            }
-
-            public Transition On(in Input.Apply input)
-            {
-                var stack = Get<StackState>();
-                if (stack.Count < MaxStacks) { stack.Count++; }
-                Output(new Output.Activated(stack.Count));
+                stack.Count--;
+                Output(new StatusUpSkillLogic.Output.Activated(stack.Count));
                 return ToSelf();
             }
-
-            public Transition On(in Input.Remove input)
-            {
-                var stack = Get<StackState>();
-                if (stack.Count > 1)
-                {
-                    stack.Count--;
-                    Output(new Output.Activated(stack.Count));
-                    return ToSelf();
-                }
-                return To<InActive>();
-            }
+            return To<InActive>();
         }
     }
 }

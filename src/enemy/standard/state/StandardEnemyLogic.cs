@@ -1,5 +1,6 @@
 namespace EternalJourney.Enemy.Standard.State;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
@@ -15,19 +16,21 @@ using Godot;
 /// <summary>
 /// エネミーロジックインターフェース
 /// </summary>
-public interface IStandardEnemyLogic : ILogicBlock<StandardEnemyLogic.State>;
+public interface IStandardEnemyLogic : ILogicBlock;
 
 /// <summary>
 /// エネミーロジック
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, IStandardEnemyLogic
+[Meta]
+public partial class StandardEnemyLogic : LogicBlock, IStandardEnemyLogic
 {
-    /// <summary>
-    /// 初期状態
-    /// </summary>
-    /// <returns></returns>
-    public override Transition GetInitialState() => To<State.SpawnWait>();
+    public StandardEnemyLogic()
+    {
+        // ステートを事前確保
+        Set(new StandardEnemyState.SpawnWait());
+        Set(new StandardEnemyState.Invading());
+    }
+
 
     /// <summary>
     /// 入力定義
@@ -106,106 +109,108 @@ public partial class StandardEnemyLogic : LogicBlock<StandardEnemyLogic.State>, 
 
     }
 
-    /// <summary>
-    /// 状態定義
-    /// </summary>
-    public abstract record State : StateLogic<State>
-    {
-        /// <summary>
-        /// スポーン待機
-        /// </summary>
-        public record SpawnWait : State, IGet<Input.Spawn>
-        {
-            public SpawnWait()
-            {
-            }
+}
 
-            public Transition On(in Input.Spawn input)
-            {
-                IShip ship = Get<IShip>();
-                Vector2 dir = input.SpawnGlobalPosition.DirectionTo(ship.EnemyTargetMarker.GlobalPosition);
-                Output(new Output.StartInvade(input.SpawnGlobalPosition, dir.Angle()));
-                return To<Invading>();
-            }
+/// <summary>
+/// 状態定義
+/// </summary>
+[StateDiagram]
+public abstract partial record StandardEnemyState : LogicBlockState
+{
+    /// <summary>
+    /// スポーン待機
+    /// </summary>
+    public record SpawnWait : StandardEnemyState, IGet<StandardEnemyLogic.Input.Spawn>
+    {
+        public SpawnWait()
+        {
         }
 
-        /// <summary>
-        /// 侵攻
-        /// </summary>
-        public record Invading : State, IGet<Input.PhysicsProcess>, IGet<Input.BulletHit>, IGet<Input.OutOfArea>
+        public Type On(in StandardEnemyLogic.Input.Spawn input)
         {
-            public Invading()
-            {
-            }
+            IShip ship = Get<IShip>();
+            Vector2 dir = input.SpawnGlobalPosition.DirectionTo(ship.EnemyTargetMarker.GlobalPosition);
+            Output(new StandardEnemyLogic.Output.StartInvade(input.SpawnGlobalPosition, dir.Angle()));
+            return To<Invading>();
+        }
+    }
 
-            public Transition On(in Input.PhysicsProcess input)
-            {
-                // 移動戦略を使用して位置を更新
-                Vector2 nextPositionDelta = input.MovementStrategy.CalculateMovement(
-                    input.CurrentPosition,
-                    input.Direction,
-                    input.Speed,
-                    input.ElapsedTime);
-                IStandardEnemy standardEnemy = Get<IStandardEnemy>();
-                Output(new Output.Move(nextPositionDelta));
-                UpdateColor(standardEnemy.Status.CurrentDur, standardEnemy.Status.MaxDur);
-                return CheckUnderZeroDurability(standardEnemy.Status.CurrentDur);
-            }
+    /// <summary>
+    /// 侵攻
+    /// </summary>
+    public record Invading : StandardEnemyState, IGet<StandardEnemyLogic.Input.PhysicsProcess>, IGet<StandardEnemyLogic.Input.BulletHit>, IGet<StandardEnemyLogic.Input.OutOfArea>
+    {
+        public Invading()
+        {
+        }
 
-            public Transition On(in Input.BulletHit input)
-            {
-                IBattleRepo battleRepo = Get<IBattleRepo>();
-                IStandardEnemy standardEnemy = Get<IStandardEnemy>();
-                float currentDur = battleRepo.ReduceEnemyDurability(
-                    standardEnemy.Status.CurrentDur,
-                    input.BaseBullet.Status.Atk,
-                    input.BaseBullet.Status.Def,
-                    standardEnemy.Status.Def
-                );
-                Output(new Output.CurrentDurChange(currentDur));
-                UpdateColor(currentDur, standardEnemy.Status.MaxDur);
-                return CheckUnderZeroDurability(currentDur);
-            }
+        public Type On(in StandardEnemyLogic.Input.PhysicsProcess input)
+        {
+            // 移動戦略を使用して位置を更新
+            Vector2 nextPositionDelta = input.MovementStrategy.CalculateMovement(
+                input.CurrentPosition,
+                input.Direction,
+                input.Speed,
+                input.ElapsedTime);
+            IStandardEnemy standardEnemy = Get<IStandardEnemy>();
+            Output(new StandardEnemyLogic.Output.Move(nextPositionDelta));
+            UpdateColor(standardEnemy.Status.CurrentDur, standardEnemy.Status.MaxDur);
+            return CheckUnderZeroDurability(standardEnemy.Status.CurrentDur);
+        }
 
-            public Transition On(in Input.OutOfArea input)
+        public Type On(in StandardEnemyLogic.Input.BulletHit input)
+        {
+            IBattleRepo battleRepo = Get<IBattleRepo>();
+            IStandardEnemy standardEnemy = Get<IStandardEnemy>();
+            float currentDur = battleRepo.ReduceEnemyDurability(
+                standardEnemy.Status.CurrentDur,
+                input.BaseBullet.Status.Atk,
+                input.BaseBullet.Status.Def,
+                standardEnemy.Status.Def
+            );
+            Output(new StandardEnemyLogic.Output.CurrentDurChange(currentDur));
+            UpdateColor(currentDur, standardEnemy.Status.MaxDur);
+            return CheckUnderZeroDurability(currentDur);
+        }
+
+        public Type On(in StandardEnemyLogic.Input.OutOfArea input)
+        {
+            // 破壊を出力する
+            Output(new StandardEnemyLogic.Output.Destroyed());
+            // スポーン待機に遷移する
+            return To<SpawnWait>();
+        }
+
+        private Type CheckUnderZeroDurability(float currentDur)
+        {
+            // 耐久値が0以下の場合
+            if (currentDur <= 0)
             {
                 // 破壊を出力する
-                Output(new Output.Destroyed());
+                Output(new StandardEnemyLogic.Output.Destroyed());
+
+                // スコアをカウントアップさせる（JSONの設定値を使用）
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                IStandardEnemy standardEnemy = Get<IStandardEnemy>();
+                battleRepo.ScoreCountUp(standardEnemy.ScoreValue);
+                battleRepo.OnEnemyDestroyed(standardEnemy);
+
                 // スポーン待機に遷移する
                 return To<SpawnWait>();
             }
+            return ToSelf();
+        }
 
-            private Transition CheckUnderZeroDurability(float currentDur)
-            {
-                // 耐久値が0以下の場合
-                if (currentDur <= 0)
-                {
-                    // 破壊を出力する
-                    Output(new Output.Destroyed());
+        private void UpdateColor(float currentDur, float maxDur)
+        {
+            // 耐久割合（0〜1）
+            float ratio = Mathf.Clamp(currentDur / maxDur, 0f, 1f);
+            // 赤（Full）から青（Zero）へ補間
+            Color fullColor = new Color(1f, 0f, 0f);  // 赤
+            Color emptyColor = new Color(0f, 0f, 1f); // 青
+            Color result = fullColor.Lerp(emptyColor, 1f - ratio);
 
-                    // スコアをカウントアップさせる（JSONの設定値を使用）
-                    IBattleRepo battleRepo = Get<IBattleRepo>();
-                    IStandardEnemy standardEnemy = Get<IStandardEnemy>();
-                    battleRepo.ScoreCountUp(standardEnemy.ScoreValue);
-                    battleRepo.OnEnemyDestroyed(standardEnemy);
-
-                    // スポーン待機に遷移する
-                    return To<SpawnWait>();
-                }
-                return ToSelf();
-            }
-
-            private void UpdateColor(float currentDur, float maxDur)
-            {
-                // 耐久割合（0〜1）
-                float ratio = Mathf.Clamp(currentDur / maxDur, 0f, 1f);
-                // 赤（Full）から青（Zero）へ補間
-                Color fullColor = new Color(1f, 0f, 0f);  // 赤
-                Color emptyColor = new Color(0f, 0f, 1f); // 青
-                Color result = fullColor.Lerp(emptyColor, 1f - ratio);
-
-                Output(new Output.UpdateColor(result));
-            }
+            Output(new StandardEnemyLogic.Output.UpdateColor(result));
         }
     }
 }

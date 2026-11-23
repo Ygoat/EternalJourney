@@ -2,6 +2,7 @@ namespace EternalJourney.SelectUI;
 
 using System.Collections.Generic;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Game.Domain;
@@ -29,7 +30,7 @@ public partial class SelectSkillUI : Control, ISelectSkillUI
 
     #region State
     public SelectSkillUILogic Logic { get; set; } = default!;
-    public SelectSkillUILogic.IBinding Binding { get; set; } = default!;
+    public LogicBlock.Binding Binding { get; set; } = default!;
     #endregion State
 
     #region Nodes
@@ -80,7 +81,7 @@ public partial class SelectSkillUI : Control, ISelectSkillUI
         Logic.Set(GameRepo);
         Logic.Set<ISelectSkillUI>(this);
         Logic.Set(new HashSet<int>());
-        Logic.Start();
+        Logic.Start<SelectSkillUIState.Idle>();
     }
 
     public void OnTreeExiting()

@@ -1,21 +1,28 @@
 namespace EternalJourney.Bullet.Abstract.State;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 
 /// <summary>
 /// スタンダード弾丸ファクトリロジックインターフェース
 /// </summary>
-public interface IStandardBulletFactoryLogic : ILogicBlock<StandardBulletFactoryLogic.State>;
+public interface IStandardBulletFactoryLogic : ILogicBlock;
 
 /// <summary>
 /// スタンダード弾丸ファクトリロジック
 /// Ready → CoolDown → Ready のサイクルで弾丸射出とクールダウンを管理
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class StandardBulletFactoryLogic : LogicBlock<StandardBulletFactoryLogic.State>, IStandardBulletFactoryLogic
+[Meta]
+public partial class StandardBulletFactoryLogic : LogicBlock, IStandardBulletFactoryLogic
 {
-    public override Transition GetInitialState() => To<State.Ready>();
+    public StandardBulletFactoryLogic()
+    {
+        // ステートを事前確保
+        Set(new StandardBulletFactoryState.Ready());
+        Set(new StandardBulletFactoryState.CoolDown());
+    }
+
 
     public static class Input
     {
@@ -43,31 +50,33 @@ public partial class StandardBulletFactoryLogic : LogicBlock<StandardBulletFacto
         public readonly record struct StartCoolDown;
     }
 
-    public abstract record State : StateLogic<State>
+}
+
+[StateDiagram]
+public abstract partial record StandardBulletFactoryState : LogicBlockState
+{
+    /// <summary>
+    /// 発射可能状態
+    /// </summary>
+    public record Ready : StandardBulletFactoryState, IGet<StandardBulletFactoryLogic.Input.FireRequested>
     {
-        /// <summary>
-        /// 発射可能状態
-        /// </summary>
-        public record Ready : State, IGet<Input.FireRequested>
+        public Type On(in StandardBulletFactoryLogic.Input.FireRequested input)
         {
-            public Transition On(in Input.FireRequested input)
-            {
-                Output(new Output.Fire());
-                return To<CoolDown>();
-            }
+            Output(new StandardBulletFactoryLogic.Output.Fire());
+            return To<CoolDown>();
+        }
+    }
+
+    /// <summary>
+    /// クールダウン状態
+    /// </summary>
+    public record CoolDown : StandardBulletFactoryState, IGet<StandardBulletFactoryLogic.Input.CoolDownComplete>
+    {
+        public CoolDown()
+        {
+            this.OnEnter(() => Output(new StandardBulletFactoryLogic.Output.StartCoolDown()));
         }
 
-        /// <summary>
-        /// クールダウン状態
-        /// </summary>
-        public record CoolDown : State, IGet<Input.CoolDownComplete>
-        {
-            public CoolDown()
-            {
-                this.OnEnter(() => Output(new Output.StartCoolDown()));
-            }
-
-            public Transition On(in Input.CoolDownComplete input) => To<Ready>();
-        }
+        public Type On(in StandardBulletFactoryLogic.Input.CoolDownComplete input) => To<Ready>();
     }
 }

@@ -1,20 +1,26 @@
 namespace EternalJourney.Skills.Heal.State;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 
 /// <summary>
 /// 回復スキルロジックインターフェース
 /// </summary>
-public interface IHealSkillLogic : ILogicBlock<HealSkillLogic.State>;
+public interface IHealSkillLogic : ILogicBlock;
 
 /// <summary>
 /// 回復スキルロジック
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class HealSkillLogic : LogicBlock<HealSkillLogic.State>, IHealSkillLogic
+[Meta]
+public partial class HealSkillLogic : LogicBlock, IHealSkillLogic
 {
-    public override Transition GetInitialState() => To<State.Ready>();
+    public HealSkillLogic()
+    {
+        // ステートを事前確保
+        Set(new HealSkillState.Ready());
+    }
+
 
     public static class Input
     {
@@ -32,22 +38,24 @@ public partial class HealSkillLogic : LogicBlock<HealSkillLogic.State>, IHealSki
         public readonly record struct Healed(float Amount);
     }
 
-    public abstract record State : StateLogic<State>
+}
+
+[StateDiagram]
+public abstract partial record HealSkillState : LogicBlockState
+{
+    private const float HealAmount = 100f;
+
+    /// <summary>
+    /// 待機
+    /// </summary>
+    public record Ready : HealSkillState, IGet<HealSkillLogic.Input.Apply>
     {
-        private const float HealAmount = 100f;
+        public Ready() { }
 
-        /// <summary>
-        /// 待機
-        /// </summary>
-        public record Ready : State, IGet<Input.Apply>
+        public Type On(in HealSkillLogic.Input.Apply input)
         {
-            public Ready() { }
-
-            public Transition On(in Input.Apply input)
-            {
-                Output(new Output.Healed(HealAmount));
-                return ToSelf();
-            }
+            Output(new HealSkillLogic.Output.Healed(HealAmount));
+            return ToSelf();
         }
     }
 }

@@ -3,6 +3,7 @@ namespace EternalJourney.Radar;
 using System.Collections.Generic;
 using System.Linq;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Cores.Consts;
@@ -76,7 +77,7 @@ public partial class Radar : Area2D, IRadar
     /// <summary>
     /// レーダーロジックバインド
     /// </summary>
-    public RadarLogic.IBinding RadarLogicBinding { get; set; } = default!;
+    public LogicBlock.Binding RadarLogicBinding { get; set; } = default!;
 
     /// <summary>
     /// <inheritdoc/>
@@ -99,23 +100,23 @@ public partial class Radar : Area2D, IRadar
     public void OnResolved()
     {
 
-        RadarLogicBinding.Handle((in RadarLogic.Output.StatusChanged output) =>
+        RadarLogicBinding.OnOutput((in RadarLogic.Output.StatusChanged output) =>
         {
         });
-        RadarLogicBinding.When((RadarLogic.State.Idle _) =>
+        RadarLogicBinding.OnState<RadarState.Idle>(_ =>
         {
             AreaEntered += OnAreaEntered;
             EmitSignal(SignalName.NotSearched);
             SetPhysicsProcess(false);
         });
         // Monitor a specific type of state:
-        RadarLogicBinding.When((RadarLogic.State.EnemySearched _) =>
+        RadarLogicBinding.OnState<RadarState.EnemySearched>(_ =>
         {
             AreaEntered -= OnAreaEntered;
             EmitSignal(SignalName.Searched);
             SetPhysicsProcess(true);
         });
-        RadarLogic.Start();
+        RadarLogic.Start<RadarState.Idle>();
     }
 
     /// <summary>

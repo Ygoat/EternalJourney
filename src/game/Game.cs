@@ -1,6 +1,7 @@
 namespace EternalJourney.Game;
 
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
@@ -74,7 +75,7 @@ public partial class Game : Node2D, IGame
     /// <summary>
     /// ゲームロジックバインド
     /// </summary>
-    public GameLogic.IBinding GameBinding { get; set; } = default!;
+    public LogicBlock.Binding GameBinding { get; set; } = default!;
 
     [Dependency]
     private ICrewCsvReader crewCsvReader => this.DependOn<ICrewCsvReader>(() => new CrewCsvReader());
@@ -93,35 +94,35 @@ public partial class Game : Node2D, IGame
         this.Provide();
 
         GameBinding
-            .Handle((in GameLogic.Output.ShowSelectSkill _) =>
+            .OnOutput((in GameLogic.Output.ShowSelectSkill _) =>
             {
                 Battle.ProcessMode = ProcessModeEnum.Disabled;
                 SelectSkill.Show();
                 Battle.Hide();
             })
-            .Handle((in GameLogic.Output.InitializeBattle _) =>
+            .OnOutput((in GameLogic.Output.InitializeBattle _) =>
             {
                 Battle.Initialize();
                 GameRepo.NotifyBattleInitialized();
             })
-            .Handle((in GameLogic.Output.StartBattle _) =>
+            .OnOutput((in GameLogic.Output.StartBattle _) =>
             {
                 Battle.ProcessMode = ProcessModeEnum.Inherit;
                 SelectSkill.Hide();
                 Battle.Show();
                 Battle.StartBattle();
             })
-            .Handle((in GameLogic.Output.EndBattle _) =>
+            .OnOutput((in GameLogic.Output.EndBattle _) =>
             {
                 Battle.Hide();
                 GameRepo.NotifyBattleEnded();
             })
-            .Handle((in GameLogic.Output.ShowResult _) =>
+            .OnOutput((in GameLogic.Output.ShowResult _) =>
             {
                 Result.Show();
             });
 
-        GameLogic.Start();
+        GameLogic.Start<GameState.SelectSkillPhase>();
     }
 
     public void OnTreeExiting()

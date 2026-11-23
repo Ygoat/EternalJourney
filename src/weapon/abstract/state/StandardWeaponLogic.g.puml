@@ -1,14 +1,12 @@
-@startuml StandardWeaponLogic
-state "StandardWeaponLogic State" as EternalJourney_Weapon_Abstract_State_StandardWeaponLogic_State {
-  state "Attack" as EternalJourney_Weapon_Abstract_State_StandardWeaponLogic_State_Attack
-  state "Idle" as EternalJourney_Weapon_Abstract_State_StandardWeaponLogic_State_Idle
+@startuml StandardWeaponState
+state "StandardWeaponState" as EternalJourney_Weapon_Abstract_State_StandardWeaponState {
+  state "Attack" as EternalJourney_Weapon_Abstract_State_StandardWeaponState_Attack
+  state "Idle" as EternalJourney_Weapon_Abstract_State_StandardWeaponState_Idle
 }
 
-EternalJourney_Weapon_Abstract_State_StandardWeaponLogic_State_Attack --> EternalJourney_Weapon_Abstract_State_StandardWeaponLogic_State_Idle : StartIdle
-EternalJourney_Weapon_Abstract_State_StandardWeaponLogic_State_Idle --> EternalJourney_Weapon_Abstract_State_StandardWeaponLogic_State_Attack : StartAttack
+EternalJourney_Weapon_Abstract_State_StandardWeaponState_Attack --> EternalJourney_Weapon_Abstract_State_StandardWeaponState_Idle : StartIdle
+EternalJourney_Weapon_Abstract_State_StandardWeaponState_Idle --> EternalJourney_Weapon_Abstract_State_StandardWeaponState_Attack : StartAttack
 
-EternalJourney_Weapon_Abstract_State_StandardWeaponLogic_State_Attack : OnEnter → Attacking
-EternalJourney_Weapon_Abstract_State_StandardWeaponLogic_State_Idle : OnEnter → Idling
-
-[*] --> EternalJourney_Weapon_Abstract_State_StandardWeaponLogic_State_Idle
+EternalJourney_Weapon_Abstract_State_StandardWeaponState_Attack : OnEnter → Attacking
+EternalJourney_Weapon_Abstract_State_StandardWeaponState_Idle : OnEnter → Idling
 @enduml

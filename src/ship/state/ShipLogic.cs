@@ -12,18 +12,20 @@ using Godot;
 /// <summary>
 /// 船ロジックインターフェース
 /// </summary>
-public interface IShipLogic : ILogicBlock<ShipLogic.State>;
+public interface IShipLogic : ILogicBlock;
 
 /// <summary>
 /// 船ロジック
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class ShipLogic : LogicBlock<ShipLogic.State>, IShipLogic
+[Meta]
+public partial class ShipLogic : LogicBlock, IShipLogic
 {
-    /// <summary>
-    /// 初期状態
-    /// </summary>
-    public override Transition GetInitialState() => To<State.Alive>();
+    public ShipLogic()
+    {
+        // ステートを事前確保
+        Set(new ShipState.Alive());
+    }
+
 
     /// <summary>
     /// 入力定義
@@ -57,91 +59,92 @@ public partial class ShipLogic : LogicBlock<ShipLogic.State>, IShipLogic
         public readonly record struct Dead;
     }
 
+}
+
+/// <summary>
+/// 状態定義
+/// </summary>
+[StateDiagram]
+public abstract partial record ShipState : LogicBlockState
+{
     /// <summary>
-    /// 状態定義
+    /// 生存状態
     /// </summary>
-    public abstract record State : StateLogic<State>
+    public record Alive : ShipState, IGet<ShipLogic.Input.Damaged>, IGet<ShipLogic.Input.Healed>
     {
-        /// <summary>
-        /// 生存状態
-        /// </summary>
-        public record Alive : State, IGet<Input.Damaged>, IGet<Input.Healed>
+        public Alive()
         {
-            public Alive()
-            {
-                OnAttach(() =>
-                {
-                    IShip ship = Get<IShip>();
-                    IBattleRepo battleRepo = Get<IBattleRepo>();
-                    ship.AreaEntered += OnAreaEntered;
-                    battleRepo.EnemyDestroyed += OnEnemyDestroyed;
-                    battleRepo.ShipHealRequested += OnHealRequested;
-                });
-
-                OnDetach(() =>
-                {
-                    IShip ship = Get<IShip>();
-                    IBattleRepo battleRepo = Get<IBattleRepo>();
-                    ship.AreaEntered -= OnAreaEntered;
-                    battleRepo.EnemyDestroyed -= OnEnemyDestroyed;
-                    battleRepo.ShipHealRequested -= OnHealRequested;
-                });
-            }
-
-            public Transition On(in Input.Damaged input)
-            {
-                ApplyDamage(input.Damage);
-                return ToSelf();
-            }
-
-            public Transition On(in Input.Healed input)
-            {
-                ApplyHeal(input.Amount);
-                return ToSelf();
-            }
-
-            private void OnAreaEntered(Area2D area)
-            {
-                if (area is IBaseBullet bullet)
-                {
-                    IBattleRepo battleRepo = Get<IBattleRepo>();
-                    IShip ship = Get<IShip>();
-                    float shipDef = ship.Status.Def + battleRepo.ShipDefBonus;
-                    float reducedDamage = bullet.Status.Atk * (100f / (100f + shipDef));
-                    ApplyDamage(reducedDamage);
-                }
-            }
-
-            private void OnEnemyDestroyed(IBaseEnemy _)
-            {
-                ApplyHeal(10f);
-            }
-
-            private void OnHealRequested(float amount)
-            {
-                ApplyHeal(amount);
-            }
-
-            private bool _isDead = false;
-
-            private void ApplyDamage(float damage)
+            this.OnEnter(() =>
             {
                 IShip ship = Get<IShip>();
-                ship.Status.CurrentDur = Math.Max(0f, ship.Status.CurrentDur - damage);
-                Output(new Output.HpChanged(ship.Status.CurrentDur, ship.Status.MaxDur));
-                if (ship.Status.CurrentDur <= 0f && !_isDead)
-                {
-                    _isDead = true;
-                    Output(new Output.Dead());
-                }
-            }
-
-            private void ApplyHeal(float amount)
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                ship.AreaEntered += OnAreaEntered;
+                battleRepo.EnemyDestroyed += OnEnemyDestroyed;
+                battleRepo.ShipHealRequested += OnHealRequested;
+            });
+            this.OnExit(() =>
             {
                 IShip ship = Get<IShip>();
-                ship.Status.CurrentDur = Math.Min(ship.Status.MaxDur, ship.Status.CurrentDur + amount);
-                Output(new Output.HpChanged(ship.Status.CurrentDur, ship.Status.MaxDur));
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                ship.AreaEntered -= OnAreaEntered;
+                battleRepo.EnemyDestroyed -= OnEnemyDestroyed;
+                battleRepo.ShipHealRequested -= OnHealRequested;
+            });
+        }
+
+        public Type On(in ShipLogic.Input.Damaged input)
+        {
+            ApplyDamage(input.Damage);
+            return ToSelf();
+        }
+
+        public Type On(in ShipLogic.Input.Healed input)
+        {
+            ApplyHeal(input.Amount);
+            return ToSelf();
+        }
+
+        private void OnAreaEntered(Area2D area)
+        {
+            if (area is IBaseBullet bullet)
+            {
+                IBattleRepo battleRepo = Get<IBattleRepo>();
+                IShip ship = Get<IShip>();
+                float shipDef = ship.Status.Def + battleRepo.ShipDefBonus;
+                float reducedDamage = bullet.Status.Atk * (100f / (100f + shipDef));
+                ApplyDamage(reducedDamage);
             }
+        }
+
+        private void OnEnemyDestroyed(IBaseEnemy _)
+        {
+            ApplyHeal(10f);
+        }
+
+        private void OnHealRequested(float amount)
+        {
+            ApplyHeal(amount);
+        }
+
+        private bool _isDead = false;
+
+        private void ApplyDamage(float damage)
+        {
+            IShip ship = Get<IShip>();
+            ship.Status.CurrentDur = Math.Max(0f, ship.Status.CurrentDur - damage);
+            Output(new ShipLogic.Output.HpChanged(ship.Status.CurrentDur, ship.Status.MaxDur));
+            if (ship.Status.CurrentDur <= 0f && !_isDead)
+            {
+                _isDead = true;
+                Output(new ShipLogic.Output.Dead());
+            }
+        }
+
+        private void ApplyHeal(float amount)
+        {
+            IShip ship = Get<IShip>();
+            ship.Status.CurrentDur = Math.Min(ship.Status.MaxDur, ship.Status.CurrentDur + amount);
+            Output(new ShipLogic.Output.HpChanged(ship.Status.CurrentDur, ship.Status.MaxDur));
         }
     }
 }

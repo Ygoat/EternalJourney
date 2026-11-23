@@ -1,6 +1,7 @@
 namespace EternalJourney.Ship;
 
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
@@ -43,7 +44,7 @@ public partial class Ship : BaseEntity, IShip
     /// <summary>
     /// 船ロジックバインド
     /// </summary>
-    public ShipLogic.IBinding ShipBinding { get; set; } = default!;
+    public LogicBlock.Binding ShipBinding { get; set; } = default!;
     #endregion State
 
     #region Nodes
@@ -111,14 +112,14 @@ public partial class Ship : BaseEntity, IShip
 
         ShipLogic.Set(BattleRepo);
         ShipBinding
-            .Handle((in ShipLogic.Output.HpChanged o) =>
+            .OnOutput((in ShipLogic.Output.HpChanged o) =>
                 BattleRepo.NotifyShipHpChanged(o.CurrentHp, o.MaxHp))
-            .Handle((in ShipLogic.Output.Dead _) =>
+            .OnOutput((in ShipLogic.Output.Dead _) =>
             {
                 BattleRepo.NotifyGameOver();
             });
 
-        ShipLogic.Start();
+        ShipLogic.Start<ShipState.Alive>();
     }
 
     public void OnTreeExiting()

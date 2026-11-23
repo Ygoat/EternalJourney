@@ -1,8 +1,7 @@
-@startuml ResultUILogic
-state "ResultUILogic State" as EternalJourney_ResultUI_State_ResultUILogic_State {
-  state "Waiting" as EternalJourney_ResultUI_State_ResultUILogic_State_Waiting
+@startuml ResultUIState
+state "ResultUIState" as EternalJourney_ResultUI_State_ResultUIState {
+  state "Waiting" as EternalJourney_ResultUI_State_ResultUIState_Waiting
 }
-EternalJourney_ResultUI_State_ResultUILogic_State_Waiting : OnGameOver() → UpdateDisplay
 
-[*] --> EternalJourney_ResultUI_State_ResultUILogic_State_Waiting
+EternalJourney_ResultUI_State_ResultUIState_Waiting : OnGameOver() → UpdateDisplay
 @enduml

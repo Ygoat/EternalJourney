@@ -2,6 +2,7 @@ namespace EternalJourney.BattleUI;
 
 using System.Collections.Generic;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
@@ -77,7 +78,7 @@ public partial class BattleUI : Control, IBattleUI
     public IBattleUILogic BattleUILogic { get; set; } = default!;
 
     /// <summary>バトルUIバインド</summary>
-    public BattleUILogic.IBinding BattleUIBinding { get; set; } = default!;
+    public LogicBlock.Binding BattleUIBinding { get; set; } = default!;
 
     public float Count { get; set; } = default!;
 
@@ -122,36 +123,36 @@ public partial class BattleUI : Control, IBattleUI
         BattleUILogic.Set<IBattleUI>(this);
         BattleUIBinding = BattleUILogic.Bind();
         BattleUIBinding
-            .Handle((in BattleUILogic.Output.ScoreChanged output) =>
+            .OnOutput((in BattleUILogic.Output.ScoreChanged output) =>
             {
                 SetScoreLabel(output.CurrentScore);
             })
-            .Handle((in BattleUILogic.Output.ShipHpChanged output) =>
+            .OnOutput((in BattleUILogic.Output.ShipHpChanged output) =>
             {
                 LeftHPGauge.AnchorRight = output.Ratio;
             })
-            .Handle((in BattleUILogic.Output.GameOver _) =>
+            .OnOutput((in BattleUILogic.Output.GameOver _) =>
             {
                 OnGameOver();
             })
-            .Handle((in BattleUILogic.Output.ActivateBattleUI _) =>
+            .OnOutput((in BattleUILogic.Output.ActivateBattleUI _) =>
             {
                 Count = 0;
                 SetPhysicsProcess(true);
             })
-            .Handle((in BattleUILogic.Output.TikCount _) =>
+            .OnOutput((in BattleUILogic.Output.TikCount _) =>
             {
                 Count++;
                 TimerLabel.Text = $"Time: {Count}";
             })
-            .Handle((in BattleUILogic.Output.SpPercentChanged output) =>
+            .OnOutput((in BattleUILogic.Output.SpPercentChanged output) =>
             {
                 LeftSPGauge.AnchorRight = output.Ratio;
                 SPButton.Disabled = output.Ratio < 1.0f;
             });
         SPButton.Pressed += OnSPButtonPressed;
         SPButton.Disabled = true;
-        BattleUILogic.Start();
+        BattleUILogic.Start<BattleUIState.InActive>();
     }
 
     public void OnPhysicsProcess(double delta)

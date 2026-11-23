@@ -1,5 +1,6 @@
 namespace EternalJourney.Radar.State;
 
+using System;
 using System.Collections.Generic;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
@@ -8,19 +9,21 @@ using Godot;
 /// <summary>
 /// レーダーロジックインターフェース
 /// </summary>
-public interface IRadarLogic : ILogicBlock<RadarLogic.State>;
+public interface IRadarLogic : ILogicBlock;
 
 /// <summary>
 /// レーダーロジッククラス
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class RadarLogic : LogicBlock<RadarLogic.State>, IRadarLogic
+[Meta]
+public partial class RadarLogic : LogicBlock, IRadarLogic
 {
-    /// <summary>
-    /// 初期状態
-    /// </summary>
-    /// <returns></returns>
-    public override Transition GetInitialState() => To<State.Idle>();
+    public RadarLogic()
+    {
+        // ステートを事前確保
+        Set(new RadarState.Idle());
+        Set(new RadarState.EnemySearched());
+    }
+
 
     /// <summary>
     /// 入力
@@ -55,45 +58,47 @@ public partial class RadarLogic : LogicBlock<RadarLogic.State>, IRadarLogic
         public readonly record struct StatusChanged(bool IsOn);
     }
 
-    /// <summary>
-    /// 状態
-    /// </summary>
-    public abstract record State : StateLogic<State>
-    {
-        /// <summary>
-        /// アイドル
-        /// </summary>
-        public record Idle : State, IGet<Input.WatchEnemy>
-        {
-            public Idle()
-            {
-                this.OnEnter(() => Output(new Output.StatusChanged(IsOn: true)));
-            }
+}
 
-            public Transition On(in Input.WatchEnemy input)
-            {
-                return To<EnemySearched>();
-            }
+/// <summary>
+/// 状態
+/// </summary>
+[StateDiagram]
+public abstract partial record RadarState : LogicBlockState
+{
+    /// <summary>
+    /// アイドル
+    /// </summary>
+    public record Idle : RadarState, IGet<RadarLogic.Input.WatchEnemy>
+    {
+        public Idle()
+        {
+            this.OnEnter(() => Output(new RadarLogic.Output.StatusChanged(IsOn: true)));
         }
 
-        /// <summary>
-        /// 敵発見
-        /// </summary>
-        public record EnemySearched : State, IGet<Input.PhysicProcess>
+        public Type On(in RadarLogic.Input.WatchEnemy input)
         {
-            public EnemySearched()
-            {
-                this.OnEnter(() => Output(new Output.StatusChanged(IsOn: false)));
-            }
+            return To<EnemySearched>();
+        }
+    }
 
-            public Transition On(in Input.PhysicProcess input)
+    /// <summary>
+    /// 敵発見
+    /// </summary>
+    public record EnemySearched : RadarState, IGet<RadarLogic.Input.PhysicProcess>
+    {
+        public EnemySearched()
+        {
+            this.OnEnter(() => Output(new RadarLogic.Output.StatusChanged(IsOn: false)));
+        }
+
+        public Type On(in RadarLogic.Input.PhysicProcess input)
+        {
+            if (input.Enemies.Count == 0)
             {
-                if (input.Enemies.Count == 0)
-                {
-                    return To<Idle>();
-                }
-                return ToSelf();
+                return To<Idle>();
             }
+            return ToSelf();
         }
     }
 }

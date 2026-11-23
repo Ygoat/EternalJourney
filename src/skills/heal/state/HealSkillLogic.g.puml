@@ -1,11 +1,9 @@
-@startuml HealSkillLogic
-state "HealSkillLogic State" as EternalJourney_Skills_Heal_State_HealSkillLogic_State {
-  state "Ready" as EternalJourney_Skills_Heal_State_HealSkillLogic_State_Ready
+@startuml HealSkillState
+state "HealSkillState" as EternalJourney_Skills_Heal_State_HealSkillState {
+  state "Ready" as EternalJourney_Skills_Heal_State_HealSkillState_Ready
 }
 
-EternalJourney_Skills_Heal_State_HealSkillLogic_State_Ready --> EternalJourney_Skills_Heal_State_HealSkillLogic_State_Ready : Apply
+EternalJourney_Skills_Heal_State_HealSkillState_Ready --> EternalJourney_Skills_Heal_State_HealSkillState_Ready : Apply
 
-EternalJourney_Skills_Heal_State_HealSkillLogic_State_Ready : OnApply → Healed
-
-[*] --> EternalJourney_Skills_Heal_State_HealSkillLogic_State_Ready
+EternalJourney_Skills_Heal_State_HealSkillState_Ready : OnApply → Healed
 @enduml

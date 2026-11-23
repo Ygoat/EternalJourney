@@ -1,5 +1,6 @@
 namespace EternalJourney.Enemy.Base.State;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
@@ -8,19 +9,20 @@ using EternalJourney.Common.Traits;
 /// <summary>
 /// エネミーロジックインターフェース
 /// </summary>
-public interface IBaseEnemyLogic : ILogicBlock<BaseEnemyLogic.State>;
+public interface IBaseEnemyLogic : ILogicBlock;
 
 /// <summary>
 /// エネミーロジック
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEnemyLogic
+[Meta]
+public partial class BaseEnemyLogic : LogicBlock, IBaseEnemyLogic
 {
-    /// <summary>
-    /// 初期状態
-    /// </summary>
-    /// <returns></returns>
-    public override Transition GetInitialState() => To<State.DummyState>();
+    public BaseEnemyLogic()
+    {
+        // ステートを事前確保
+        Set(new BaseEnemyState.DummyState());
+    }
+
 
     /// <summary>
     /// 入力定義
@@ -69,49 +71,51 @@ public partial class BaseEnemyLogic : LogicBlock<BaseEnemyLogic.State>, IBaseEne
         public readonly record struct StunEnd;
     }
 
+}
+
+/// <summary>
+/// 状態定義
+/// </summary>
+[StateDiagram]
+public abstract partial record BaseEnemyState : LogicBlockState
+{
     /// <summary>
-    /// 状態定義
+    /// スポーン待機
     /// </summary>
-    public abstract record State : StateLogic<State>
+    public record DummyState : BaseEnemyState, IGet<BaseEnemyLogic.Input.PoisonDamage>, IGet<BaseEnemyLogic.Input.StunStart>, IGet<BaseEnemyLogic.Input.StunEnd>, IGet<BaseEnemyLogic.Input.SPDamage>
     {
-        /// <summary>
-        /// スポーン待機
-        /// </summary>
-        public record DummyState : State, IGet<Input.PoisonDamage>, IGet<Input.StunStart>, IGet<Input.StunEnd>, IGet<Input.SPDamage>
+        public DummyState()
         {
-            public DummyState()
-            {
-            }
+        }
 
-            public Transition On(in Input.PoisonDamage input)
-            {
-                IBattleRepo battleRepo = Get<IBattleRepo>();
-                IBaseEnemy baseEnemy = Get<IBaseEnemy>();
-                float reducedDurability = battleRepo.ReduceEnemyDurability(baseEnemy.Status.CurrentDur, input.Damage, 0f, 0f);
-                Output(new Output.ReduceDurability(reducedDurability));
-                return ToSelf();
-            }
+        public Type On(in BaseEnemyLogic.Input.PoisonDamage input)
+        {
+            IBattleRepo battleRepo = Get<IBattleRepo>();
+            IBaseEnemy baseEnemy = Get<IBaseEnemy>();
+            float reducedDurability = battleRepo.ReduceEnemyDurability(baseEnemy.Status.CurrentDur, input.Damage, 0f, 0f);
+            Output(new BaseEnemyLogic.Output.ReduceDurability(reducedDurability));
+            return ToSelf();
+        }
 
-            public Transition On(in Input.StunStart input)
-            {
-                Output(new Output.StunStart());
-                return ToSelf();
-            }
+        public Type On(in BaseEnemyLogic.Input.StunStart input)
+        {
+            Output(new BaseEnemyLogic.Output.StunStart());
+            return ToSelf();
+        }
 
-            public Transition On(in Input.StunEnd input)
-            {
-                Output(new Output.StunEnd());
-                return ToSelf();
-            }
+        public Type On(in BaseEnemyLogic.Input.StunEnd input)
+        {
+            Output(new BaseEnemyLogic.Output.StunEnd());
+            return ToSelf();
+        }
 
-            public Transition On(in Input.SPDamage input)
-            {
-                IBattleRepo battleRepo = Get<IBattleRepo>();
-                IBaseEnemy baseEnemy = Get<IBaseEnemy>();
-                float reduced = battleRepo.ReduceEnemyDurability(baseEnemy.Status.CurrentDur, input.Damage, 0f, 0f);
-                Output(new Output.ReduceDurability(reduced));
-                return ToSelf();
-            }
+        public Type On(in BaseEnemyLogic.Input.SPDamage input)
+        {
+            IBattleRepo battleRepo = Get<IBattleRepo>();
+            IBaseEnemy baseEnemy = Get<IBaseEnemy>();
+            float reduced = battleRepo.ReduceEnemyDurability(baseEnemy.Status.CurrentDur, input.Damage, 0f, 0f);
+            Output(new BaseEnemyLogic.Output.ReduceDurability(reduced));
+            return ToSelf();
         }
     }
 }

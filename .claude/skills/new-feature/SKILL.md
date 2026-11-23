@@ -25,11 +25,11 @@ EternalJourney の規約に沿って新機能一式を作成する手順。詳�
 
 3. **ライフサイクルの分担を守る**:
    - `Setup()`: Logic の生成・`Bind()`（DI 依存には触らない）
-   - `OnResolved()`: `Logic.Set(依存)` → Binding の `.When<>()` / `.Handle<>()` 定義 → `Start()`
+   - `OnResolved()`: `Logic.Set(依存)` → Binding の `.OnState<>()` / `.OnOutput()` / `.OnInput()` 定義 → `Start<XState.Initial>()`
    - `OnTreeExiting()`: `LogicBinding.Dispose()` と `Logic.Dispose()` を必ず呼ぶ。イベント購読があれば解除。Repo を所有しているなら `Repo.Dispose()` も
 
 4. **LogicBlock を作る**: CLAUDE.md「LogicBlocksパターン」のプロジェクト流儀に従う。
-   - `[Meta, LogicBlock(typeof(State), Diagram = true)]`
+   - `[Meta] partial class XLogic : LogicBlock`、ステートは Logic の外に `[StateDiagram] abstract partial record XState : LogicBlockState` として定義し、ctor で `Set(new XState.A())` 事前確保（可変フィールドは `OnEnter` で初期化）
    - Input/Output は `static class Input / Output` 内の `readonly record struct`
    - 状態は「ロード中」「攻撃中」「死亡」等をすべて record 状態として列挙する。**bool フラグで状態を持たない**
    - Logic 同士は直接参照しない。他の機能との連携は Repo のイベント経由

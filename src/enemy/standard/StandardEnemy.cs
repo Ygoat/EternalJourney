@@ -3,6 +3,7 @@ namespace EternalJourney.Enemy.Standard;
 using System.Collections.Generic;
 using System.Linq;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
@@ -44,7 +45,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// <summary>
     /// エネミーロジックバインド
     /// </summary>
-    public StandardEnemyLogic.IBinding StandardEnemyBinding { get; set; } = default!;
+    public LogicBlock.Binding StandardEnemyBinding { get; set; } = default!;
 
     [Dependency] public EntityTable<int> EntityTable => this.DependOn<EntityTable<int>>();
 
@@ -155,7 +156,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         }
 
         StandardEnemyBinding
-            .Handle((in StandardEnemyLogic.Output.StartInvade output) =>
+            .OnOutput((in StandardEnemyLogic.Output.StartInvade output) =>
             {
                 // スポーン時の位置を設定
                 GlobalPosition = output.SpawnGlobalPosition;
@@ -165,19 +166,19 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
                 Rotation = output.SpawnGlobalAngle;
                 SetPhysicsProcess(true);
             })
-            .Handle((in StandardEnemyLogic.Output.CurrentDurChange output) =>
+            .OnOutput((in StandardEnemyLogic.Output.CurrentDurChange output) =>
             {
                 Status.CurrentDur = output.CurrentDur;
             })
-            .Handle((in StandardEnemyLogic.Output.Move output) =>
+            .OnOutput((in StandardEnemyLogic.Output.Move output) =>
             {
                 GlobalPosition += output.NextPositionDelta;
             })
-            .Handle((in StandardEnemyLogic.Output.UpdateColor output) =>
+            .OnOutput((in StandardEnemyLogic.Output.UpdateColor output) =>
             {
                 Sprite2D.Modulate = output.Color;
             })
-            .Handle((in StandardEnemyLogic.Output.Destroyed _) =>
+            .OnOutput((in StandardEnemyLogic.Output.Destroyed _) =>
             {
                 CallDeferred(nameof(RemoveSelf));
             });
@@ -186,7 +187,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // スクリーン外イベント設定
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // エネミーロジック初期状態開始
-        StandardEnemyLogic.Start();
+        StandardEnemyLogic.Start<StandardEnemyState.SpawnWait>();
     }
 
     /// <summary>

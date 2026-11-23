@@ -1,6 +1,7 @@
 namespace EternalJourney.ResultUI;
 
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.App.Domain;
@@ -37,7 +38,7 @@ public partial class ResultUI : Control, IResultUI
     /// <summary>
     /// リザルトUIバインド
     /// </summary>
-    public ResultUILogic.IBinding ResultUIBinding { get; set; } = default!;
+    public LogicBlock.Binding ResultUIBinding { get; set; } = default!;
     #endregion State
 
     #region Nodes
@@ -87,12 +88,12 @@ public partial class ResultUI : Control, IResultUI
         ResultUILogic.Set(AppRepo);
         ResultUILogic.Set(GameRepo);
         ResultUIBinding
-            .Handle((in ResultUILogic.Output.UpdateDisplay o) =>
+            .OnOutput((in ResultUILogic.Output.UpdateDisplay o) =>
             {
                 ScoreLabel.Text = $"Score: {o.Score}";
                 TimerLabel.Text = $"Time: {o.Time:F0}";
             });
-        ResultUILogic.Start();
+        ResultUILogic.Start<ResultUIState.Waiting>();
     }
 
     public void OnTreeExiting()

@@ -1,6 +1,7 @@
 namespace EternalJourney.Common.StatusEffect;
 
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Common.StatusEffect.State;
@@ -38,7 +39,7 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
     /// <summary>
     /// 毒バインド
     /// </summary>
-    public PoisonEffectLogic.IBinding PoisonEffectBinding { get; set; } = default!;
+    public LogicBlock.Binding PoisonEffectBinding { get; set; } = default!;
 
     /// <summary>
     /// ダメージタイマー
@@ -97,7 +98,7 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
 
         // ステートロジック設定
         PoisonEffectBinding
-            .When<PoisonEffectLogic.State.Active>(state =>
+            .OnState<PoisonEffectState.Active>(state =>
             {
                 // タイマー開始
                 DamageTimer.Start();
@@ -105,7 +106,7 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
                 // 毒ダメージ設定
                 PoisonDamage = state.PoisonDamage;
             })
-            .When<PoisonEffectLogic.State.InActive>(state =>
+            .OnState<PoisonEffectState.InActive>(state =>
             {
                 // タイマーの停止と初期化
                 DamageTimer.Stop();
@@ -113,7 +114,7 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
                 RemoveTimer.Stop();
                 RemoveTimer.WaitTime = RemoveTime;
             })
-            .Watch((in PoisonEffectLogic.Input.Apply input) =>
+            .OnInput((in PoisonEffectLogic.Input.Apply input) =>
             {
                 // 除去タイマーリセット
                 RemoveTimer.Stop();
@@ -121,7 +122,7 @@ public partial class PoisonEffect : StatusEffect, IPoisonEffect
                 RemoveTimer.Start();
             });
         // 初期状態開始
-        PoisonEffectLogic.Start();
+        PoisonEffectLogic.Start<PoisonEffectState.InActive>();
     }
 
     /// <summary>

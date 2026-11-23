@@ -2,6 +2,7 @@ namespace EternalJourney.Bullet.Abstract;
 
 using System.Data;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
@@ -79,7 +80,7 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
 
     #region State
     public StandardBulletFactoryLogic BulletFactoryLogic { get; set; } = default!;
-    public StandardBulletFactoryLogic.IBinding BulletFactoryBind { get; set; } = default!;
+    public LogicBlock.Binding BulletFactoryBind { get; set; } = default!;
     #endregion State
 
     /// <summary>
@@ -132,16 +133,16 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         Timer.Timeout += OnTimeout;
 
         BulletFactoryBind
-            .Handle((in StandardBulletFactoryLogic.Output.Fire _) =>
+            .OnOutput((in StandardBulletFactoryLogic.Output.Fire _) =>
             {
                 CallDeferred(nameof(BulletEmit));
             })
-            .Handle((in StandardBulletFactoryLogic.Output.StartCoolDown _) =>
+            .OnOutput((in StandardBulletFactoryLogic.Output.StartCoolDown _) =>
             {
                 StartTimer();
             });
 
-        BulletFactoryLogic.Start();
+        BulletFactoryLogic.Start<StandardBulletFactoryState.Ready>();
     }
 
     /// <summary>

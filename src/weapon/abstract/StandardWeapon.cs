@@ -3,6 +3,7 @@ namespace EternalJourney.Weapon.Abstract;
 using System;
 using System.Linq;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
@@ -46,7 +47,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// <summary>
     /// 武器ロジックバインド
     /// </summary>
-    public StandardWeaponLogic.IBinding WeaponBind { get; set; } = default!;
+    public LogicBlock.Binding WeaponBind { get; set; } = default!;
     #endregion State
 
     #region Exports
@@ -143,13 +144,13 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         StandardBulletFactory.BulletScale = BulletScale;
         WeaponBind
             // Idling出力時
-            .Handle((in StandardWeaponLogic.Output.Idling _) =>
+            .OnOutput((in StandardWeaponLogic.Output.Idling _) =>
             {
                 // 物理処理無効化
                 SetPhysicsProcess(false);
             })
             // Attacking出力時
-            .Handle((in StandardWeaponLogic.Output.Attacking _) =>
+            .OnOutput((in StandardWeaponLogic.Output.Attacking _) =>
             {
                 // 物理処理有効化
                 SetPhysicsProcess(true);
@@ -159,7 +160,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         // 敵未発見イベント
         Radar.NotSearched += OnNotSearched;
         // 武器ロジック初期状態開始
-        StandardWeaponLogic.Start();
+        StandardWeaponLogic.Start<StandardWeaponState.Idle>();
 
         BattleRepo.WeaponSpdMultiplierChanged += UpdateWaitTime;
         UpdateWaitTime();

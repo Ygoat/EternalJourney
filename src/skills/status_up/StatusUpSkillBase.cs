@@ -1,6 +1,7 @@
 namespace EternalJourney.Skills;
 
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Skill;
@@ -16,7 +17,7 @@ public abstract partial class StatusUpSkillBase : Node, ISkillNode
     public string Description => SkillInfo.GetDescription(SkillKind);
 
     public IStatusUpSkillLogic Logic { get; set; } = default!;
-    public StatusUpSkillLogic.IBinding Binding { get; set; } = default!;
+    public LogicBlock.Binding Binding { get; set; } = default!;
     public Timer BuffTimer { get; set; } = default!;
 
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
@@ -40,14 +41,14 @@ public abstract partial class StatusUpSkillBase : Node, ISkillNode
         BuffTimer.Timeout += () => Logic.Input(new StatusUpSkillLogic.Input.Remove());
         Logic.Set(new StatusUpSkillLogic.StackState());
         Binding
-            .Handle((in StatusUpSkillLogic.Output.Activated o) =>
+            .OnOutput((in StatusUpSkillLogic.Output.Activated o) =>
             {
                 ApplyEffect(o.StackCount);
                 BuffTimer.Stop();
                 BuffTimer.Start();
             })
-            .Handle((in StatusUpSkillLogic.Output.Deactivated _) => ResetEffect());
-        Logic.Start();
+            .OnOutput((in StatusUpSkillLogic.Output.Deactivated _) => ResetEffect());
+        Logic.Start<StatusUpSkillState.InActive>();
     }
 
     public void Activate() => Logic?.Input(new StatusUpSkillLogic.Input.Apply());

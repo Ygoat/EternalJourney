@@ -2,6 +2,7 @@ namespace EternalJourney.Enemy.Base;
 
 using System;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Common.BaseEntity;
@@ -54,7 +55,7 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
     /// <summary>
     /// ベースエネミーバインド
     /// </summary>
-    public BaseEnemyLogic.IBinding BaseEnemyBinding { get; set; } = default!;
+    public LogicBlock.Binding BaseEnemyBinding { get; set; } = default!;
 
     /// <summary>
     /// ヒットシグナル
@@ -96,13 +97,13 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
         StatusEffectReceiverManager.Get<StunEffect>()!.Stunned += OnStunned;
         StatusEffectReceiverManager.Get<StunEffect>()!.StunEnded += OnStunEnded;
         BaseEnemyBinding
-            .Handle((in BaseEnemyLogic.Output.ReduceDurability output) =>
+            .OnOutput((in BaseEnemyLogic.Output.ReduceDurability output) =>
             {
                 Status.CurrentDur = output.ReducedDurability;
             })
-            .Handle((in BaseEnemyLogic.Output.StunStart _) => OnStunStart())
-            .Handle((in BaseEnemyLogic.Output.StunEnd _) => OnStunEnd());
-        BaseEnemyLogic.Start();
+            .OnOutput((in BaseEnemyLogic.Output.StunStart _) => OnStunStart())
+            .OnOutput((in BaseEnemyLogic.Output.StunEnd _) => OnStunEnd());
+        BaseEnemyLogic.Start<BaseEnemyState.DummyState>();
     }
 
     /// <summary>

@@ -1,24 +1,27 @@
 namespace EternalJourney.Weapon.Abstract.State;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 
 /// <summary>
 /// 武器ロジックインターフェース
 /// </summary>
-public interface IStandardWeaponLogic : ILogicBlock<StandardWeaponLogic.State>;
+public interface IStandardWeaponLogic : ILogicBlock;
 
 /// <summary>
 /// 武器ロジック
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class StandardWeaponLogic : LogicBlock<StandardWeaponLogic.State>, IStandardWeaponLogic
+[Meta]
+public partial class StandardWeaponLogic : LogicBlock, IStandardWeaponLogic
 {
-    /// <summary>
-    /// 初期状態
-    /// </summary>
-    /// <returns></returns>
-    public override Transition GetInitialState() => To<State.Idle>();
+    public StandardWeaponLogic()
+    {
+        // ステートを事前確保
+        Set(new StandardWeaponState.Idle());
+        Set(new StandardWeaponState.Attack());
+    }
+
 
     /// <summary>
     /// 入力定義
@@ -52,35 +55,37 @@ public partial class StandardWeaponLogic : LogicBlock<StandardWeaponLogic.State>
         public readonly record struct Attacking;
     }
 
+}
+
+/// <summary>
+/// 状態定義
+/// </summary>
+[StateDiagram]
+public abstract partial record StandardWeaponState : LogicBlockState
+{
     /// <summary>
-    /// 状態定義
+    /// スポーン待機
     /// </summary>
-    public abstract record State : StateLogic<State>
+    public record Idle : StandardWeaponState, IGet<StandardWeaponLogic.Input.StartAttack>
     {
-        /// <summary>
-        /// スポーン待機
-        /// </summary>
-        public record Idle : State, IGet<Input.StartAttack>
+        public Idle()
         {
-            public Idle()
-            {
-                this.OnEnter(() => Output(new Output.Idling()));
-            }
-
-            public Transition On(in Input.StartAttack input) => To<Attack>();
+            this.OnEnter(() => Output(new StandardWeaponLogic.Output.Idling()));
         }
 
-        /// <summary>
-        /// 攻撃
-        /// </summary>
-        public record Attack : State, IGet<Input.StartIdle>
-        {
-            public Attack()
-            {
-                this.OnEnter(() => Output(new Output.Attacking()));
-            }
+        public Type On(in StandardWeaponLogic.Input.StartAttack input) => To<Attack>();
+    }
 
-            public Transition On(in Input.StartIdle input) => To<Idle>();
+    /// <summary>
+    /// 攻撃
+    /// </summary>
+    public record Attack : StandardWeaponState, IGet<StandardWeaponLogic.Input.StartIdle>
+    {
+        public Attack()
+        {
+            this.OnEnter(() => Output(new StandardWeaponLogic.Output.Attacking()));
         }
+
+        public Type On(in StandardWeaponLogic.Input.StartIdle input) => To<Idle>();
     }
 }

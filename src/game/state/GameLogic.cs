@@ -1,5 +1,6 @@
 namespace EternalJourney.Game.State;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Game.Domain;
@@ -7,15 +8,24 @@ using EternalJourney.Game.Domain;
 /// <summary>
 /// ゲームロジックインターフェース
 /// </summary>
-public interface IGameLogic : ILogicBlock<GameLogic.State>;
+public interface IGameLogic : ILogicBlock;
 
 /// <summary>
 /// ゲームロジック
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class GameLogic : LogicBlock<GameLogic.State>, IGameLogic
+[Meta]
+public partial class GameLogic : LogicBlock, IGameLogic
 {
-    public override Transition GetInitialState() => To<State.SelectSkillPhase>();
+    public GameLogic()
+    {
+        // ステートを事前確保
+        Set(new GameState.SelectSkillPhase());
+        Set(new GameState.BattleInitPhase());
+        Set(new GameState.BattleRunningPhase());
+        Set(new GameState.BattleEndingPhase());
+        Set(new GameState.ResultPhase());
+    }
+
 
     public static class Input
     {
@@ -68,85 +78,87 @@ public partial class GameLogic : LogicBlock<GameLogic.State>, IGameLogic
         public readonly record struct ShowResult;
     }
 
-    public abstract record State : StateLogic<State>
+}
+
+[StateDiagram]
+public abstract partial record GameState : LogicBlockState
+{
+    /// <summary>
+    /// スキル選択フェーズ
+    /// </summary>
+    public record SelectSkillPhase : GameState, IGet<GameLogic.Input.SkillSelected>
     {
-        /// <summary>
-        /// スキル選択フェーズ
-        /// </summary>
-        public record SelectSkillPhase : State, IGet<Input.SkillSelected>
+        public SelectSkillPhase()
         {
-            public SelectSkillPhase()
-            {
-                this.OnEnter(() => Output(new Output.ShowSelectSkill()));
-                OnAttach(() => Get<IGameRepo>().SkillSelected += OnSkillSelected);
-                OnDetach(() => Get<IGameRepo>().SkillSelected -= OnSkillSelected);
-            }
-
-            private void OnSkillSelected() => Input(new Input.SkillSelected());
-
-            public Transition On(in Input.SkillSelected input) => To<BattleInitPhase>();
+            this.OnEnter(() => Get<IGameRepo>().SkillSelected += OnSkillSelected);
+            this.OnEnter(() => Output(new GameLogic.Output.ShowSelectSkill()));
+            this.OnExit(() => Get<IGameRepo>().SkillSelected -= OnSkillSelected);
         }
 
-        /// <summary>
-        /// バトル初期化フェーズ
-        /// </summary>
-        public record BattleInitPhase : State, IGet<Input.BattleInitialized>
+        private void OnSkillSelected() => Input(new GameLogic.Input.SkillSelected());
+
+        public Type On(in GameLogic.Input.SkillSelected input) => To<BattleInitPhase>();
+    }
+
+    /// <summary>
+    /// バトル初期化フェーズ
+    /// </summary>
+    public record BattleInitPhase : GameState, IGet<GameLogic.Input.BattleInitialized>
+    {
+        public BattleInitPhase()
         {
-            public BattleInitPhase()
-            {
-                this.OnEnter(() => Output(new Output.InitializeBattle()));
-                OnAttach(() => Get<IGameRepo>().BattleInitialized += OnBattleInitialized);
-                OnDetach(() => Get<IGameRepo>().BattleInitialized -= OnBattleInitialized);
-            }
-
-            private void OnBattleInitialized() => Input(new Input.BattleInitialized());
-
-            public Transition On(in Input.BattleInitialized input) => To<BattleRunningPhase>();
+            this.OnEnter(() => Get<IGameRepo>().BattleInitialized += OnBattleInitialized);
+            this.OnEnter(() => Output(new GameLogic.Output.InitializeBattle()));
+            this.OnExit(() => Get<IGameRepo>().BattleInitialized -= OnBattleInitialized);
         }
 
-        /// <summary>
-        /// バトル実行フェーズ
-        /// </summary>
-        public record BattleRunningPhase : State, IGet<Input.GameOver>
+        private void OnBattleInitialized() => Input(new GameLogic.Input.BattleInitialized());
+
+        public Type On(in GameLogic.Input.BattleInitialized input) => To<BattleRunningPhase>();
+    }
+
+    /// <summary>
+    /// バトル実行フェーズ
+    /// </summary>
+    public record BattleRunningPhase : GameState, IGet<GameLogic.Input.GameOver>
+    {
+        public BattleRunningPhase()
         {
-            public BattleRunningPhase()
-            {
-                this.OnEnter(() => Output(new Output.StartBattle()));
-                OnAttach(() => Get<IGameRepo>().GameOver += OnGameOver);
-                OnDetach(() => Get<IGameRepo>().GameOver -= OnGameOver);
-            }
-
-            private void OnGameOver() => Input(new Input.GameOver());
-
-            public Transition On(in Input.GameOver input) => To<BattleEndingPhase>();
+            this.OnEnter(() => Get<IGameRepo>().GameOver += OnGameOver);
+            this.OnEnter(() => Output(new GameLogic.Output.StartBattle()));
+            this.OnExit(() => Get<IGameRepo>().GameOver -= OnGameOver);
         }
 
-        /// <summary>
-        /// バトル終了フェーズ
-        /// </summary>
-        public record BattleEndingPhase : State, IGet<Input.BattleEnded>
+        private void OnGameOver() => Input(new GameLogic.Input.GameOver());
+
+        public Type On(in GameLogic.Input.GameOver input) => To<BattleEndingPhase>();
+    }
+
+    /// <summary>
+    /// バトル終了フェーズ
+    /// </summary>
+    public record BattleEndingPhase : GameState, IGet<GameLogic.Input.BattleEnded>
+    {
+        public BattleEndingPhase()
         {
-            public BattleEndingPhase()
-            {
-                this.OnEnter(() => Output(new Output.EndBattle()));
-                OnAttach(() => Get<IGameRepo>().BattleEnded += OnBattleEnded);
-                OnDetach(() => Get<IGameRepo>().BattleEnded -= OnBattleEnded);
-            }
-
-            private void OnBattleEnded() => Input(new Input.BattleEnded());
-
-            public Transition On(in Input.BattleEnded input) => To<ResultPhase>();
+            this.OnEnter(() => Get<IGameRepo>().BattleEnded += OnBattleEnded);
+            this.OnEnter(() => Output(new GameLogic.Output.EndBattle()));
+            this.OnExit(() => Get<IGameRepo>().BattleEnded -= OnBattleEnded);
         }
 
-        /// <summary>
-        /// リザルトフェーズ
-        /// </summary>
-        public record ResultPhase : State
+        private void OnBattleEnded() => Input(new GameLogic.Input.BattleEnded());
+
+        public Type On(in GameLogic.Input.BattleEnded input) => To<ResultPhase>();
+    }
+
+    /// <summary>
+    /// リザルトフェーズ
+    /// </summary>
+    public record ResultPhase : GameState
+    {
+        public ResultPhase()
         {
-            public ResultPhase()
-            {
-                this.OnEnter(() => Output(new Output.ShowResult()));
-            }
+            this.OnEnter(() => Output(new GameLogic.Output.ShowResult()));
         }
     }
 }
