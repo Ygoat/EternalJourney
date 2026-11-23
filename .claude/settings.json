@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet format:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "PowerShell(dotnet build:*)",
+      "PowerShell(dotnet test:*)",
+      "PowerShell(git status:*)",
+      "PowerShell(git diff:*)",
+      "PowerShell(git log:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "input=$(cat); fp=$(printf '%s' \"$input\" | grep -o '\"file_path\"[^,}]*' | head -1); case \"$fp\" in *.g.puml\\\"*|*.generated*) echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"自動生成ファイル(*.g.puml / .generated/)は手動編集禁止です(CLAUDE.mdの規約)\"}}' ;; esac",
+            "timeout": 10,
+            "statusMessage": "自動生成ファイル保護チェック中..."
+          }
+        ]
+      }
+    ]
+  }
+}

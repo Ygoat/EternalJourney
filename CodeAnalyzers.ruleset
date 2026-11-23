@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="EternalJourney Code Analyzers" ToolsVersion="10.0">
+  <!-- 実行が遅いアナライザのみを無効化する（他の全ルールは.editorconfigでwarning化済み） -->
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.Analyzers" RuleNamespace="Microsoft.CodeAnalysis.Analyzers">
+    <!-- RS1022: アナライザの実装チェック（アナライザ自体を開発する場合のみ関係） -->
+    <Rule Id="RS1022" Action="None" />
+  </Rules>
+  <Rules AnalyzerId="Microsoft.CodeAnalysis.CSharp.NetAnalyzers" RuleNamespace="Microsoft.CodeAnalysis.CSharp.NetAnalyzers">
+    <!-- CA2252: プレビューAPIの使用チェック（低速かつ本プロジェクトでは非該当） -->
+    <Rule Id="CA2252" Action="None" />
+  </Rules>
+</RuleSet>

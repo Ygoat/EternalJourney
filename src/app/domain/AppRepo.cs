@@ -23,6 +23,11 @@ public interface IAppRepo : IDisposable
     event Action? MainMenuEntered;
 
     /// <summary>
+    /// メニューへ戻るリクエストイベント
+    /// </summary>
+    event Action? GoToMenuRequested;
+
+    /// <summary>
     /// スプラッシュ画面スキップイベントファンクション
     /// </summary>
 
@@ -37,6 +42,21 @@ public interface IAppRepo : IDisposable
     /// メインメニュー開始イベントファンクション
     /// </summary>
     void OnMainMenuEntered();
+
+    /// <summary>
+    /// メニューへ戻るリクエストイベントファンクション
+    /// </summary>
+    void RequestGoToMenu();
+
+    /// <summary>
+    /// デバッグモード状態
+    /// </summary>
+    bool IsDebugMode { get; }
+
+    /// <summary>
+    /// デバッグモードを開始する
+    /// </summary>
+    void StartDebugMode();
 }
 
 
@@ -60,6 +80,11 @@ public class AppRepo : IAppRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    public event Action? GoToMenuRequested;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void SkipSplashScreen()
     {
         SplashScreenSkipped?.Invoke();
@@ -79,6 +104,24 @@ public class AppRepo : IAppRepo
     public void OnEnterGame()
     {
         GameEntered?.Invoke();
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public bool IsDebugMode { get; private set; }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void StartDebugMode() => IsDebugMode = true;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void RequestGoToMenu()
+    {
+        GoToMenuRequested?.Invoke();
     }
 
     /// <summary>

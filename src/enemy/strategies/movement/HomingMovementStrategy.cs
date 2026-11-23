@@ -1,6 +1,5 @@
 namespace EternalJourney.Enemy.Strategies.Movement;
 
-using EternalJourney.Cores.Models.Enemy;
 using Godot;
 
 /// <summary>
@@ -8,24 +7,22 @@ using Godot;
 /// </summary>
 public class HomingMovementStrategy : IMovementStrategy
 {
-    private float _turnSpeed = 1.5f;
-    private float _maxTurnAngle = 45.0f;
+    private readonly float _turnSpeed;
+    private readonly float _maxTurnAngle;
     private Vector2 _targetPosition;
+
+    public HomingMovementStrategy(float turnSpeed = 1.5f, float maxTurnAngle = 45.0f)
+    {
+        _turnSpeed = turnSpeed;
+        _maxTurnAngle = maxTurnAngle;
+    }
 
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize(MovementConfig config, Vector2 targetPosition)
+    public void Initialize(Vector2 targetPosition)
     {
         _targetPosition = targetPosition;
-        if (config.Params.TryGetValue("turnSpeed", out float ts))
-        {
-            _turnSpeed = ts;
-        }
-        if (config.Params.TryGetValue("maxTurnAngle", out float mta))
-        {
-            _maxTurnAngle = mta;
-        }
     }
 
     /// <summary>

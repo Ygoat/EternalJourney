@@ -2,11 +2,14 @@ namespace EternalJourney.Bullet.Abstract;
 
 using System.Data;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Introspection;
+using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Common.BaseFactory;
-using EternalJourney.Cores.Models.Bullet;
-using EternalJourney.Cores.Repositories;
+using EternalJourney.Common.Traits;
+using EternalJourney.Cores.Consts;
 using Godot;
 
 /// <summary>
@@ -15,15 +18,29 @@ using Godot;
 public interface IStandardBulletFactory
 {
     /// <summary>
-    /// 弾丸生成（デフォルトのBulletIdを使用）
+    /// 弾丸のコリジョンマスク（武器所有者に応じて設定される）
     /// </summary>
-    public void GenerateBullet();
+    uint BulletCollisionMask { get; set; }
 
     /// <summary>
-    /// 弾丸生成（弾丸IDを指定）
+    /// プレイヤー所有の弾丸を生成するか（デフォルト: true）
     /// </summary>
-    /// <param name="bulletId">弾丸設定ID（BulletConfig.jsonのidと対応）</param>
-    public void GenerateBullet(string bulletId);
+    bool IsPlayerBullet { get; set; }
+
+    /// <summary>
+    /// 発射間隔（秒）
+    /// </summary>
+    public float WaitTime { get; set; }
+
+    /// <summary>
+    /// 弾丸の拡大率（見た目・当たり判定の両方に反映される）
+    /// </summary>
+    public float BulletScale { get; set; }
+
+    /// <summary>
+    /// 弾丸生成
+    /// </summary>
+    public void GenerateBullet();
 }
 
 /// <summary>
@@ -48,10 +65,33 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     [Export]
     public string BulletName { get; set; } = default!;
 
+    /// <summary>
+    /// 弾丸の拡大率（見た目・当たり判定の両方に反映される）
+    /// </summary>
+    [Export]
+    public float BulletScale { get; set; } = 1.0f;
+
     #endregion Exports
 
-    private readonly BulletConfigReader _bulletConfigReader = new();
-    private BulletConfig? _bulletConfig;
+    #region Dependencies
+    [Dependency]
+    public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
+    #endregion Dependencies
+
+    #region State
+    public StandardBulletFactoryLogic BulletFactoryLogic { get; set; } = default!;
+    public LogicBlock.Binding BulletFactoryBind { get; set; } = default!;
+    #endregion State
+
+    /// <summary>
+    /// 弾丸のコリジョンマスク（武器所有者に応じて設定される）
+    /// </summary>
+    public uint BulletCollisionMask { get; set; } = CollisionEntity.Enemy;
+
+    /// <summary>
+    /// プレイヤー所有の弾丸を生成するか（デフォルト: true）
+    /// </summary>
+    public bool IsPlayerBullet { get; set; } = true;
 
     /// <summary>
     /// シーンパスの取得（BaseFactory抽象メソッドの実装）
@@ -78,39 +118,56 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     /// </summary>
     public override void Setup()
     {
-        // 基底クラスの初期化を呼び出す
-        base.Initialize();
-
-        // 基底クラスのセットアップ（プール生成）
         base.Setup();
+        BulletFactoryLogic = new StandardBulletFactoryLogic();
+        BulletFactoryBind = BulletFactoryLogic.Bind();
     }
 
     /// <summary>
-    /// 弾丸生成（デフォルトのBulletIdを使用）
+    /// 解決後処理（タイマー設定とロジックバインド）
+    /// </summary>
+    public override void OnResolved()
+    {
+        Timer.OneShot = true;
+        Timer.WaitTime = WaitTime;
+        Timer.Timeout += OnTimeout;
+
+        BulletFactoryBind
+            .OnOutput((in StandardBulletFactoryLogic.Output.Fire _) =>
+            {
+                CallDeferred(nameof(BulletEmit));
+            })
+            .OnOutput((in StandardBulletFactoryLogic.Output.StartCoolDown _) =>
+            {
+                StartTimer();
+            });
+
+        BulletFactoryLogic.Start<StandardBulletFactoryState.Ready>();
+    }
+
+    /// <summary>
+    /// タイマー開始
+    /// </summary>
+    protected override void StartTimer()
+    {
+        Timer.WaitTime = WaitTime;
+        base.StartTimer();
+    }
+
+    /// <summary>
+    /// 弾丸生成
     /// </summary>
     public void GenerateBullet()
     {
-        RequestGenerate();
+        BulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.FireRequested());
     }
 
     /// <summary>
-    /// 弾丸生成（弾丸IDを指定）
+    /// タイムアウト時の処理（クールダウン完了をロジックに通知）
     /// </summary>
-    /// <param name="bulletId">弾丸設定ID（BulletConfig.jsonのidと対応）</param>
-    public void GenerateBullet(string bulletId)
+    protected override void OnTimeout()
     {
-        // 指定されたIDの弾丸設定を取得
-        _bulletConfig = _bulletConfigReader.GetById(bulletId);
-        RequestGenerate();
-    }
-
-    /// <summary>
-    /// 生成完了時の処理（BaseFactoryのオーバーライド）
-    /// </summary>
-    protected override void OnGenerated()
-    {
-        // 弾丸生成（遅延実行）
-        CallDeferred(nameof(BulletEmit));
+        BulletFactoryLogic.Input(new StandardBulletFactoryLogic.Input.CoolDownComplete());
     }
 
     /// <summary>
@@ -124,20 +181,35 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         if (bullet == null)
             return;
 
-        // 弾丸設定を適用（Setup()の後に呼び出すことでJSONの値が反映される）
-        if (_bulletConfig != null)
-        {
-            bullet.Configure(_bulletConfig);
-        }
+        // 武器所有者に応じたコリジョンマスクを適用
+        bullet.CollisionMask = BulletCollisionMask;
+        // プレイヤー所有フラグを適用
+        bullet.IsPlayerOwned = IsPlayerBullet;
+        // 弾丸サイズを適用（見た目・当たり判定の両方に反映される）
+        bullet.Scale = Vector2.One * BulletScale;
 
-        // シーンツリーに追加
-        AddChild(bullet);
+        // シーンツリーに追加（エネミー撃破後も弾丸が残るよう、IBattleRepoを提供する祖先ノードに追加）
+        GetBulletContainer().AddChild(bullet);
 
         // 弾丸射出
         bullet.Emit(GlobalPosition, GlobalRotation);
+    }
 
-        // クールダウン開始
-        StartCoolDown();
+    /// <summary>
+    /// IBattleRepoを提供する最も近い祖先ノードを取得する
+    /// 弾丸をエネミーより長生きさせるために、エネミー外のノードに追加する
+    /// </summary>
+    private Node GetBulletContainer()
+    {
+        Node? current = GetParent();
+        while (current != null)
+        {
+            if (current is IProvide<IBattleRepo>)
+                return current;
+            current = current.GetParent();
+        }
+        // フォールバック：自身を返す
+        return this;
     }
 
     /// <summary>

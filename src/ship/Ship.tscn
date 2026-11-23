@@ -1,62 +1,67 @@
-[gd_scene load_steps=4 format=3 uid="uid://brbkk7msm1p13"]
+[gd_scene load_steps=10 format=3 uid="uid://brbkk7msm1p13"]
 
 [ext_resource type="Script" path="res://src/ship/Ship.cs" id="1_78rl6"]
-[ext_resource type="PackedScene" uid="uid://bf7204x00kgdy" path="res://src/weapon/01_NormalWeapon.tscn" id="2_aq0oi"]
+[ext_resource type="PackedScene" uid="uid://hce48dum5bam" path="res://src/common/base_entity/BaseEntity.tscn" id="1_y0q76"]
+[ext_resource type="PackedScene" uid="uid://bf7204x00kgdy" path="res://src/weapon/01_NormalWeapon.tscn" id="2_ceogd"]
+[ext_resource type="Script" path="res://src/common/traits/Status.cs" id="3_lsy2c"]
+[ext_resource type="PackedScene" uid="uid://ckea0f5qnrrrv" path="res://src/weapon/03_ExplosionWeapon.tscn" id="4_expwp"]
+[ext_resource type="PackedScene" uid="uid://cfpsts638espo" path="res://src/weapon/02_PenetrateWeapon.tscn" id="4_pntrw"]
+[ext_resource type="Texture2D" uid="uid://tew8q5534ewg" path="res://assets/Ship.png" id="5_ylh8n"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_emuxv"]
+[sub_resource type="Resource" id="Resource_qo710"]
+script = ExtResource("3_lsy2c")
+MaxDur = 0.0
+CurrentDur = 0.0
+Atk = 0.0
+Spd = 0.0
+Def = 0.0
+Size = 0.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_q2p4j"]
 size = Vector2(219, 348)
 
-[node name="Ship" type="Area2D"]
+[node name="Ship" instance=ExtResource("1_y0q76")]
 script = ExtResource("1_78rl6")
+Status = SubResource("Resource_qo710")
 
-[node name="Control" type="Control" parent="."]
-layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="DebugLabel" parent="." index="0"]
+text = "
+"
 
-[node name="ColorRect" type="ColorRect" parent="Control"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -110.0
-offset_top = -174.0
-offset_right = 110.0
-offset_bottom = 174.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.749496, 0.999764, 0.72598, 1)
+[node name="Sprite2D" type="Sprite2D" parent="." index="1"]
+position = Vector2(0, -4.99997)
+scale = Vector2(0.311726, 0.333333)
+texture = ExtResource("5_ylh8n")
 
-[node name="EnemyTargetMarker" type="Marker2D" parent="."]
+[node name="EnemyTargetMarker" type="Marker2D" parent="." index="2"]
 unique_name_in_owner = true
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CenterMarker" type="Marker2D" parent="." index="3"]
+unique_name_in_owner = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." index="4"]
+unique_name_in_owner = true
 position = Vector2(-0.5, 0)
-shape = SubResource("RectangleShape2D_emuxv")
+shape = SubResource("RectangleShape2D_q2p4j")
 
-[node name="01_NormalWeapon" parent="." instance=ExtResource("2_aq0oi")]
+[node name="01_NormalWeapon" parent="." index="5" instance=ExtResource("2_ceogd")]
 position = Vector2(-90, -154)
-BulletId = "normal_bullet"
+scale = Vector2(2, 2)
+BulletScale = 1.0
 
-[node name="01_NormalWeapon2" parent="." instance=ExtResource("2_aq0oi")]
+[node name="02_PenetrateWeapon" parent="." index="6" instance=ExtResource("4_pntrw")]
 position = Vector2(-90, 154)
-BulletId = "penetrate_bullet"
+scale = Vector2(2, 2)
+RotationSpeed = 0.05
+BulletScale = 1.0
 
-[node name="01_NormalWeapon3" parent="." instance=ExtResource("2_aq0oi")]
+[node name="03_ExplosionWeapon" parent="." index="7" instance=ExtResource("4_expwp")]
 position = Vector2(91, -154)
-BulletId = "explosion_bullet"
+scale = Vector2(2, 2)
+RotationSpeed = 0.05
+BulletScale = 1.0
 
-[node name="01_NormalWeapon4" parent="." instance=ExtResource("2_aq0oi")]
+[node name="01_NormalWeapon4" parent="." index="8" instance=ExtResource("2_ceogd")]
 position = Vector2(90, 154)
-BulletId = "normal_bullet"
+scale = Vector2(2, 2)
+BulletScale = 1.0

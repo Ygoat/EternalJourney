@@ -1,26 +1,30 @@
 namespace EternalJourney.Common.BaseFactory.State;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 
 /// <summary>
 /// ベースファクトリロジックインターフェース
 /// </summary>
-public interface IBaseFactoryLogic : ILogicBlock<BaseFactoryLogic.State>;
+public interface IBaseFactoryLogic : ILogicBlock;
 
 /// <summary>
 /// ベースファクトリロジック
 /// オブジェクトプールを使用したファクトリの共通状態遷移を管理します
 /// Ready → Generate → CoolDown → Ready のサイクルで動作
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class BaseFactoryLogic : LogicBlock<BaseFactoryLogic.State>, IBaseFactoryLogic
+[Meta]
+public partial class BaseFactoryLogic : LogicBlock, IBaseFactoryLogic
 {
-    /// <summary>
-    /// 初期状態
-    /// </summary>
-    /// <returns></returns>
-    public override Transition GetInitialState() => To<State.Ready>();
+    public BaseFactoryLogic()
+    {
+        // ステートを事前確保
+        Set(new BaseFactoryState.Ready());
+        Set(new BaseFactoryState.Generating());
+        Set(new BaseFactoryState.CoolDown());
+    }
+
 
     /// <summary>
     /// 入力定義
@@ -59,47 +63,49 @@ public partial class BaseFactoryLogic : LogicBlock<BaseFactoryLogic.State>, IBas
         public readonly record struct Cooling;
     }
 
+}
+
+/// <summary>
+/// 状態定義
+/// </summary>
+[StateDiagram]
+public abstract partial record BaseFactoryState : LogicBlockState
+{
     /// <summary>
-    /// 状態定義
+    /// 生成可能状態
     /// </summary>
-    public abstract record State : StateLogic<State>
+    public record Ready : BaseFactoryState, IGet<BaseFactoryLogic.Input.Generate>
     {
-        /// <summary>
-        /// 生成可能状態
-        /// </summary>
-        public record Ready : State, IGet<Input.Generate>
+        public Ready()
         {
-            public Ready()
-            {
-            }
-
-            public Transition On(in Input.Generate input) => To<Generating>();
         }
 
-        /// <summary>
-        /// 生成中状態
-        /// </summary>
-        public record Generating : State, IGet<Input.StartCoolDown>
-        {
-            public Generating()
-            {
-                this.OnEnter(() => Output(new Output.Generated()));
-            }
+        public Type On(in BaseFactoryLogic.Input.Generate input) => To<Generating>();
+    }
 
-            public Transition On(in Input.StartCoolDown input) => To<CoolDown>();
+    /// <summary>
+    /// 生成中状態
+    /// </summary>
+    public record Generating : BaseFactoryState, IGet<BaseFactoryLogic.Input.StartCoolDown>
+    {
+        public Generating()
+        {
+            this.OnEnter(() => Output(new BaseFactoryLogic.Output.Generated()));
         }
 
-        /// <summary>
-        /// クールダウン状態
-        /// </summary>
-        public record CoolDown : State, IGet<Input.CoolDownComplete>
-        {
-            public CoolDown()
-            {
-                this.OnEnter(() => Output(new Output.Cooling()));
-            }
+        public Type On(in BaseFactoryLogic.Input.StartCoolDown input) => To<CoolDown>();
+    }
 
-            public Transition On(in Input.CoolDownComplete input) => To<Ready>();
+    /// <summary>
+    /// クールダウン状態
+    /// </summary>
+    public record CoolDown : BaseFactoryState, IGet<BaseFactoryLogic.Input.CoolDownComplete>
+    {
+        public CoolDown()
+        {
+            this.OnEnter(() => Output(new BaseFactoryLogic.Output.Cooling()));
         }
+
+        public Type On(in BaseFactoryLogic.Input.CoolDownComplete input) => To<Ready>();
     }
 }

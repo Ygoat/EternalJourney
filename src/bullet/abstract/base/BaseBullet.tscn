@@ -15,4 +15,8 @@ Size = 0.0
 
 [node name="BaseBullet" instance=ExtResource("1_6d77m")]
 script = ExtResource("2_6x8ms")
+MovementStrategyResource = null
+CollisionStrategyResource = null
+PoisonEnabled = false
+StunEnabled = false
 Status = SubResource("Resource_suwpi")

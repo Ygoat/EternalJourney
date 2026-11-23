@@ -5,12 +5,33 @@ using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
+using EternalJourney.BattleUI;
+using EternalJourney.SpSkillEffectArea;
 using Godot;
 /// <summary>
 /// バトルインターフェース
 /// </summary>
 public interface IBattle : INode2D, IProvide<IBattleRepo>, IProvide<EntityTable>
 {
+    /// <summary>
+    /// バトルリポジトリ
+    /// </summary>
+    IBattleRepo BattleRepo { get; }
+
+    /// <summary>
+    /// SPSスキルエリア
+    /// </summary>
+    ISpSkillEffectArea SPSkillEffectArea { get; }
+
+    /// <summary>
+    /// バトルを初期化し完了を通知する
+    /// </summary>
+    void Initialize();
+
+    /// <summary>
+    /// バトルを開始する（タイマー・物理プロセス開始）
+    /// </summary>
+    void StartBattle();
 }
 
 /// <summary>
@@ -34,6 +55,20 @@ public partial class Battle : Node2D, IBattle
     EntityTable IProvide<EntityTable>.Value() => EntityTable;
     #endregion Save
 
+    #region Nodes
+    /// <summary>
+    /// バトルUI
+    /// </summary>
+    [Node]
+    public IBattleUI BattleUI { get; set; } = default!;
+
+    /// <summary>
+    /// SPスキルエリア
+    /// </summary>
+    [Node]
+    public ISpSkillEffectArea SPSkillEffectArea { get; set; } = default!;
+    #endregion Nodes
+
     #region State
     /// <summary>
     /// バトルレポジトリ
@@ -54,8 +89,7 @@ public partial class Battle : Node2D, IBattle
         // バトルレポジトリインタスタンス化
         BattleRepo = new BattleRepo();
 
-        // ロジックブロックステートで共有できるデータテーブル
-        Blackboard upgradeDpendencies = new Blackboard();
+        SetPhysicsProcess(false);
     }
 
     public void OnResolved()
@@ -63,5 +97,16 @@ public partial class Battle : Node2D, IBattle
         this.Provide();
     }
 
-    public void OnExitTree() { }
+    public void Initialize() { }
+
+    public void StartBattle()
+    {
+        SetPhysicsProcess(true);
+        BattleRepo.NotifyBattleStarted();
+    }
+
+    public void OnExitTree()
+    {
+        BattleRepo.Dispose();
+    }
 }

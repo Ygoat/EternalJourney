@@ -1,0 +1,11 @@
+@startuml ShipState
+state "ShipState" as EternalJourney_Ship_State_ShipState {
+  state "Alive" as EternalJourney_Ship_State_ShipState_Alive
+}
+
+EternalJourney_Ship_State_ShipState_Alive --> EternalJourney_Ship_State_ShipState_Alive : Damaged
+EternalJourney_Ship_State_ShipState_Alive --> EternalJourney_Ship_State_ShipState_Alive : Healed
+
+EternalJourney_Ship_State_ShipState_Alive : ApplyDamage() → Dead, HpChanged
+EternalJourney_Ship_State_ShipState_Alive : ApplyHeal() → HpChanged
+@enduml

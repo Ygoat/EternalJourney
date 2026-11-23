@@ -1,7 +1,7 @@
 namespace EternalJourney.Bullet.Abstract;
 
 using Chickensoft.AutoInject;
-using Chickensoft.Collections;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
@@ -9,7 +9,6 @@ using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Bullet.Abstract.State;
 using EternalJourney.Bullet.Strategies.Collision;
 using EternalJourney.Cores.Consts;
-using EternalJourney.Cores.Models.Bullet;
 using EternalJourney.Enemy.Base;
 using Godot;
 
@@ -41,9 +40,8 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <summary>
     /// 弾丸ロジックバインド
     /// </summary>
-    public BulletLogic.IBinding BulletBinding { get; set; } = default!;
+    public LogicBlock.Binding BulletBinding { get; set; } = default!;
 
-    [Dependency] public EntityTable<int> EntityTable => this.DependOn<EntityTable<int>>();
     [Dependency] public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
     #endregion State
@@ -70,10 +68,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     public ICollisionShape2D BulletCollisionShape2D { get; set; } = default!;
 
     /// <summary>
-    /// 弾丸カラーレクト（爆風弾シーンのみ存在）
+    /// 弾丸画像（爆風弾シーンのみ存在）
     /// </summary>
     [Node]
-    public IColorRect BulletColorRect { get; set; } = default!;
+    public ISprite2D BulletSprite2D { get; set; } = default!;
 
     /// <summary>
     /// 爆風コリジョンシェイプ（爆風弾シーンのみ存在）
@@ -82,10 +80,10 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     public ICollisionShape2D BlastCollisionShape2D { get; set; } = default!;
 
     /// <summary>
-    /// 爆風カラーレクト（爆風弾シーンのみ存在）
+    /// 爆風画像（爆風弾シーンのみ存在）
     /// </summary>
     [Node]
-    public IColorRect BlastColorRect { get; set; } = default!;
+    public ISprite2D BlastSprite2D { get; set; } = default!;
 
     #endregion OptionalBlastNodes
 
@@ -98,8 +96,6 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         BulletLogic.Set(this as IBaseBullet);
         // コリジョンレイヤーを弾丸
         CollisionLayer = CollisionEntity.Bullet;
-        // コリジョンマスクをエネミー
-        CollisionMask = CollisionEntity.Enemy;
     }
 
     /// <summary>
@@ -113,13 +109,13 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         BulletLogic.Set(BattleRepo);
 
         BulletBinding
-            .When<BulletLogic.State.EmitWait>(state =>
+            .OnState<BulletState.EmitWait>(state =>
             {
                 // 爆風テクスチャ非表示と爆風当たり判定無効化
                 CallDeferred(nameof(SetBlastBodyEnabled), false);
                 // }
             })
-            .When<BulletLogic.State.InFlight>(state =>
+            .OnState<BulletState.InFlight>(state =>
             {
                 // 射出時の位置を設定(武器の発射口の位置)
                 GlobalPosition = state.ShotGlobalPosition;
@@ -133,24 +129,24 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
 
                 SetPhysicsProcess(true);
             })
-            .Handle((in BulletLogic.Output.Move output) =>
+            .OnOutput((in BulletLogic.Output.Move output) =>
             {
                 GlobalPosition += output.NextPositionDelta;
             })
-            .Handle((in BulletLogic.Output.CurrentDurChange output) =>
+            .OnOutput((in BulletLogic.Output.CurrentDurChange output) =>
             {
                 Status.CurrentDur = output.CurrentDur;
             })
-            .Handle((in BulletLogic.Output.SpdUpdated output) =>
+            .OnOutput((in BulletLogic.Output.SpdUpdated output) =>
             {
                 Status.Spd = output.Spd;
             })
-            .Handle((in BulletLogic.Output.Collapse _) =>
+            .OnOutput((in BulletLogic.Output.Collapse _) =>
             {
                 SetPhysicsProcess(false);
 
             })
-            .When<BulletLogic.State.Blast>(state =>
+            .OnState<BulletState.Blast>(state =>
             {
                 if (CollisionStrategy is ExplosionCollisionStrategy)
                 {
@@ -162,7 +158,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
                     BlastTimer!.Start();
                 }
             })
-            .Handle((in BulletLogic.Output.RemoveSelf _) =>
+            .OnOutput((in BulletLogic.Output.RemoveSelf _) =>
             {
                 if (CollisionStrategy is ExplosionCollisionStrategy)
                 {
@@ -178,7 +174,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         // 画面外イベント
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // ロジック初期化
-        BulletLogic.Start();
+        BulletLogic.Start<BulletState.EmitWait>();
 
         // 爆風タイマー設定（爆風弾シーンの場合のみ）
         if (BlastTimer != null)
@@ -200,19 +196,16 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <inheritdoc/>
     /// </summary>
     /// <param name="delta"></param>
-    public void OnPhysicsProcess(double delta)
+    public override void OnPhysicsProcess(double delta)
     {
+        base.OnPhysicsProcess(delta);
+
         // 経過時間を更新
         ElapsedTime += (float)delta;
         // PhysicsProcess入力（移動ストラテジーを渡す）
         BulletLogic.Input(new BulletLogic.Input.PhysicsProcess(
             Direction, Status.Spd, ElapsedTime, MovementStrategy, GlobalPosition
         ));
-    }
-
-    public override void Configure(BulletConfig config)
-    {
-        base.Configure(config);
     }
 
     /// <summary>
@@ -234,6 +227,11 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         if (area is IBaseEnemy baseEnemy)
         {
             BulletLogic.Input(new BulletLogic.Input.EnemyHit(baseEnemy));
+        }
+        else
+        {
+            // Enemy以外のターゲット（Shipなど）に命中した場合
+            BulletLogic.Input(new BulletLogic.Input.TargetHit());
         }
     }
 
@@ -259,19 +257,19 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     /// <param name="flag">有効化フラグ</param>
     private void SetBulletBodyEnabled(bool flag)
     {
-        if (BulletColorRect == null || BulletCollisionShape2D == null)
+        if (BulletSprite2D == null || BulletCollisionShape2D == null)
         {
             return;
         }
 
         if (flag)
         {
-            BulletColorRect.Show();
+            BulletSprite2D.Show();
             BulletCollisionShape2D.Disabled = false;
         }
         else
         {
-            BulletColorRect.Hide();
+            BulletSprite2D.Hide();
             BulletCollisionShape2D.Disabled = true;
         }
     }
@@ -284,12 +282,12 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
     {
         if (flag)
         {
-            BlastColorRect.Show();
+            BlastSprite2D.Show();
             BlastCollisionShape2D.Disabled = false;
         }
         else
         {
-            BlastColorRect.Hide();
+            BlastSprite2D.Hide();
             BlastCollisionShape2D.Disabled = true;
         }
     }

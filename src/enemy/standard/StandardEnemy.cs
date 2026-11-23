@@ -1,18 +1,20 @@
 namespace EternalJourney.Enemy.Standard;
 
+using System.Collections.Generic;
+using System.Linq;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Consts;
-using EternalJourney.Cores.Models.Enemy;
 using EternalJourney.Enemy.Base;
 using EternalJourney.Enemy.Standard.State;
 using EternalJourney.Enemy.Strategies.Movement;
 using EternalJourney.Ship;
+using EternalJourney.Weapon.Abstract;
 using Godot;
 
 /// <summary>
@@ -38,19 +40,14 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// <summary>
     /// エネミーロジック
     /// </summary>
-    public StandardEnemyLogic StandardEnemyLogic { get; set; } = default!;
+    public IStandardEnemyLogic StandardEnemyLogic { get; set; } = default!;
 
     /// <summary>
     /// エネミーロジックバインド
     /// </summary>
-    public StandardEnemyLogic.IBinding StandardEnemyBinding { get; set; } = default!;
+    public LogicBlock.Binding StandardEnemyBinding { get; set; } = default!;
 
     [Dependency] public EntityTable<int> EntityTable => this.DependOn<EntityTable<int>>();
-
-    /// <summary>
-    /// エネミー設定
-    /// </summary>
-    private EnemyConfig? _config;
 
     /// <summary>
     /// 移動戦略
@@ -62,13 +59,27 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     /// </summary>
     private float _elapsedTime;
 
+    private const float BodyRotationSpeed = 0.03f;
+
     /// <summary>
     /// スコア値
     /// </summary>
-    public int ScoreValue { get; private set; } = 10;
+    [Export]
+    public int ScoreValue { get; set; } = 10;
+
+    /// <summary>
+    /// 搭載武器一覧（子ノードから動的に検出する。名前・数は自由）
+    /// </summary>
+    private List<IStandardWeapon> _weapons = new();
     #endregion State
 
     #region Exports
+    /// <summary>
+    /// 移動戦略リソース
+    /// </summary>
+    [Export]
+    public EnemyMovementStrategyResource? MovementStrategyResource { get; set; }
+
     /// <summary>
     /// 標的対象位置
     /// </summary>
@@ -87,14 +98,17 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
     [Node]
     public IVisibleOnScreenNotifier2D VisibleOnScreenNotifier2D { get; set; } = default!;
 
+    /// <summary>
+    /// エネミー画像
+    /// </summary>
     [Node]
-    public IColorRect ColorRect { get; set; } = default!;
+    public ISprite2D Sprite2D { get; set; } = default!;
     #endregion Nodes
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void OnReady()
+    public override void OnReady()
     {
         base.OnReady();
     }
@@ -115,8 +129,6 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         CollisionLayer = CollisionEntity.Enemy;
         // コリジョンマスクを船と弾丸に設定
         CollisionMask = CollisionEntity.Ship | CollisionEntity.Bullet;
-        // ステータスセット
-        Status = new Status { Spd = 0.7f, MaxDur = 10.0f, CurrentDur = 10.0f };
 
         TopLevel = true;
     }
@@ -130,11 +142,21 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
 
         // DI解決後に依存を設定
         StandardEnemyLogic.Set(BattleRepo);
-        // ターゲット位置を設定（DI解決後のみアクセス可能）
+        StandardEnemyLogic.Set(EntityTable.Get<IShip>(0)!);
+        // ターゲット位置を設定（Configure呼び出し時点でShipは登録済み）
         TargetPosition = EntityTable.Get<IShip>(0)!.EnemyTargetMarker.GlobalPosition;
+        // 子ノードから武器を動的検出（名前・数は自由）
+        _weapons = GetChildren().OfType<IStandardWeapon>().ToList();
+        foreach (var weapon in _weapons)
+        {
+            // WeaponのターゲットをShipに設定
+            weapon.SetTargetMask(CollisionEntity.Ship);
+            // 敵所有フラグを設定
+            weapon.SetPlayerOwned(false);
+        }
 
         StandardEnemyBinding
-            .Handle((in StandardEnemyLogic.Output.StartInvade output) =>
+            .OnOutput((in StandardEnemyLogic.Output.StartInvade output) =>
             {
                 // スポーン時の位置を設定
                 GlobalPosition = output.SpawnGlobalPosition;
@@ -144,19 +166,19 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
                 Rotation = output.SpawnGlobalAngle;
                 SetPhysicsProcess(true);
             })
-            .Handle((in StandardEnemyLogic.Output.CurrentDurChange output) =>
+            .OnOutput((in StandardEnemyLogic.Output.CurrentDurChange output) =>
             {
                 Status.CurrentDur = output.CurrentDur;
             })
-            .Handle((in StandardEnemyLogic.Output.Move output) =>
+            .OnOutput((in StandardEnemyLogic.Output.Move output) =>
             {
                 GlobalPosition += output.NextPositionDelta;
             })
-            .Handle((in StandardEnemyLogic.Output.UpdateColor output) =>
+            .OnOutput((in StandardEnemyLogic.Output.UpdateColor output) =>
             {
-                ColorRect.Color = output.Color;
+                Sprite2D.Modulate = output.Color;
             })
-            .Handle((in StandardEnemyLogic.Output.Destroyed _) =>
+            .OnOutput((in StandardEnemyLogic.Output.Destroyed _) =>
             {
                 CallDeferred(nameof(RemoveSelf));
             });
@@ -165,47 +187,42 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // スクリーン外イベント設定
         VisibleOnScreenNotifier2D.ScreenExited += OnScreenExited;
         // エネミーロジック初期状態開始
-        StandardEnemyLogic.Start();
+        StandardEnemyLogic.Start<StandardEnemyState.SpawnWait>();
     }
 
     /// <summary>
-    /// エネミー設定を適用
+    /// プールから取得された時のコールバック（IPoolable実装）
     /// </summary>
-    /// <param name="config">エネミー設定</param>
-    public void Configure(EnemyConfig config)
+    public override void OnAcquired()
     {
-        _config = config;
-
-        // ステータスを設定から適用
-        Status = new Status
-        {
-            MaxDur = config.Status.MaxDur,
-            CurrentDur = config.Status.MaxDur,
-            Atk = config.Status.Atk,
-            Spd = config.Status.Spd,
-            Def = config.Status.Def,
-            Size = config.Status.Size
-        };
-
-        // スコア値を設定
-        ScoreValue = config.ScoreValue;
-
-        // 移動戦略を生成・初期化
-        _movementStrategy = MovementStrategyFactory.Create(config.Movement.Type);
-        _movementStrategy.Initialize(config.Movement, TargetPosition);
+        base.OnAcquired();
 
         // 経過時間をリセット
         _elapsedTime = 0f;
+
+        // 移動戦略を毎回新規生成（プール内での状態共有を避けるため）
+        _movementStrategy = MovementStrategyResource?.CreateStrategy() ?? new LinearMovementStrategy();
+        _movementStrategy.Initialize(TargetPosition);
     }
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
     /// <param name="delta"></param>
-    public void OnPhysicsProcess(double delta)
+    public override void OnPhysicsProcess(double delta)
     {
+        base.OnPhysicsProcess(delta);
+
         // 経過時間を更新
         _elapsedTime += (float)delta;
+
+        // 船体をShipのEnemyTargetMarkerに向けて回転
+        IShip? ship = EntityTable.Get<IShip>(0);
+        if (ship != null)
+        {
+            Vector2 dir = GlobalPosition.DirectionTo(ship.EnemyTargetMarker.GlobalPosition);
+            GlobalRotation = Mathf.LerpAngle(GlobalRotation, dir.Angle(), BodyRotationSpeed);
+        }
 
         // PhysicsProcess入力（移動戦略を使用）
         StandardEnemyLogic.Input(new StandardEnemyLogic.Input.PhysicsProcess(
@@ -272,6 +289,12 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         SetPhysicsProcess(false);
         // シグナル出力
         EmitSignal(BaseEnemy.SignalName.Removed, this);
+    }
+
+    public void OnTreeExiting()
+    {
+        StandardEnemyBinding.Dispose();
+        ((System.IDisposable)StandardEnemyLogic).Dispose();
     }
 
     /// <summary>

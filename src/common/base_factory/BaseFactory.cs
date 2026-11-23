@@ -2,6 +2,7 @@ namespace EternalJourney.Common.BaseFactory;
 
 using System.Collections.Generic;
 using System.Linq;
+using Chickensoft.LogicBlocks;
 using EternalJourney.Common.BaseFactory.State;
 using EternalJourney.Cores.Pooling;
 using EternalJourney.Cores.Utils;
@@ -87,7 +88,7 @@ public abstract partial class BaseFactory<T> : Node2D, IBaseFactory<T> where T :
     /// <summary>
     /// ファクトリバインド
     /// </summary>
-    protected BaseFactoryLogic.IBinding FactoryBinding { get; set; } = default!;
+    protected LogicBlock.Binding FactoryBinding { get; set; } = default!;
     #endregion State
 
     #region Dependencies
@@ -153,17 +154,17 @@ public abstract partial class BaseFactory<T> : Node2D, IBaseFactory<T> where T :
 
         // ロジック出力ハンドラの設定
         FactoryBinding
-            .Handle((in BaseFactoryLogic.Output.Generated _) =>
+            .OnOutput((in BaseFactoryLogic.Output.Generated _) =>
             {
                 OnGenerated();
             })
-            .Handle((in BaseFactoryLogic.Output.Cooling _) =>
+            .OnOutput((in BaseFactoryLogic.Output.Cooling _) =>
             {
                 StartTimer();
             });
 
         // ロジックの開始
-        FactoryLogic.Start();
+        FactoryLogic.Start<BaseFactoryState.Ready>();
     }
 
     /// <summary>

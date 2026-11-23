@@ -1,6 +1,5 @@
 namespace EternalJourney.Enemy.Strategies.Movement;
 
-using EternalJourney.Cores.Models.Enemy;
 using Godot;
 
 /// <summary>
@@ -9,11 +8,10 @@ using Godot;
 public interface IMovementStrategy
 {
     /// <summary>
-    /// 設定で初期化
+    /// 初期化
     /// </summary>
-    /// <param name="config">移動設定</param>
     /// <param name="targetPosition">ターゲット位置</param>
-    void Initialize(MovementConfig config, Vector2 targetPosition);
+    void Initialize(Vector2 targetPosition);
 
     /// <summary>
     /// 次フレームの移動差分を計算

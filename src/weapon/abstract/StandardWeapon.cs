@@ -3,9 +3,12 @@ namespace EternalJourney.Weapon.Abstract;
 using System;
 using System.Linq;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract;
+using EternalJourney.Common.Traits;
 using EternalJourney.Radar;
 using EternalJourney.Weapon.Abstract.Base;
 using EternalJourney.Weapon.Abstract.State;
@@ -16,6 +19,15 @@ using Godot;
 /// </summary>
 public interface IStandardWeapon : IBaseWeapon
 {
+    /// <summary>
+    /// レーダーの検知対象コリジョンマスクを設定する
+    /// </summary>
+    void SetTargetMask(uint mask);
+
+    /// <summary>
+    /// プレイヤー所有フラグを設定する
+    /// </summary>
+    void SetPlayerOwned(bool isPlayer);
 }
 
 /// <summary>
@@ -30,12 +42,12 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// <summary>
     /// 武器ロジック
     /// </summary>
-    public StandardWeaponLogic StandardWeaponLogic { get; set; } = default!;
+    public IStandardWeaponLogic StandardWeaponLogic { get; set; } = default!;
 
     /// <summary>
     /// 武器ロジックバインド
     /// </summary>
-    public StandardWeaponLogic.IBinding WeaponBind { get; set; } = default!;
+    public LogicBlock.Binding WeaponBind { get; set; } = default!;
     #endregion State
 
     #region Exports
@@ -52,13 +64,14 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// <summary>
     /// 回転速度
     /// </summary>
+    [Export]
     public float RotationSpeed { get; set; } = 0.05f;
 
     /// <summary>
-    /// 弾丸設定ID（BulletConfig.jsonのidと対応）
+    /// 弾丸の拡大率（見た目・当たり判定の両方に反映される）
     /// </summary>
-    [Export(PropertyHint.Enum, "normal_bullet,penetrate_bullet,explosion_bullet")]
-    public string BulletId { get; set; } = string.Empty;
+    [Export]
+    public float BulletScale { get; set; } = 1.0f;
     #endregion Exports
 
     #region Nodes
@@ -87,20 +100,34 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     public IRadar Radar { get; set; } = default!;
     #endregion Nodes
 
+    #region Dependencies
+    [Dependency]
+    public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
+    #endregion Dependencies
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
     public void Initialize()
     {
-        // 依存性提供
-        this.Provide();
+        Status = new Status { Spd = 0.1f, MaxDur = 10.0f, CurrentDur = 10.0f };
     }
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void Setup()
+    public override void OnReady()
     {
+        base.OnReady();
+        StandardBulletFactory.WaitTime = Status.Spd;
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public override void Setup()
+    {
+        base.Setup();
         // 武器ロジックインスタンス化
         StandardWeaponLogic = new StandardWeaponLogic();
         // 武器ロジックバインド
@@ -110,17 +137,20 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public void OnResolved()
+    public override void OnResolved()
     {
+        base.OnResolved();
+        // 弾丸サイズを弾丸ファクトリへ橋渡し
+        StandardBulletFactory.BulletScale = BulletScale;
         WeaponBind
             // Idling出力時
-            .Handle((in StandardWeaponLogic.Output.Idling _) =>
+            .OnOutput((in StandardWeaponLogic.Output.Idling _) =>
             {
                 // 物理処理無効化
                 SetPhysicsProcess(false);
             })
             // Attacking出力時
-            .Handle((in StandardWeaponLogic.Output.Attacking _) =>
+            .OnOutput((in StandardWeaponLogic.Output.Attacking _) =>
             {
                 // 物理処理有効化
                 SetPhysicsProcess(true);
@@ -130,15 +160,20 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         // 敵未発見イベント
         Radar.NotSearched += OnNotSearched;
         // 武器ロジック初期状態開始
-        StandardWeaponLogic.Start();
+        StandardWeaponLogic.Start<StandardWeaponState.Idle>();
+
+        BattleRepo.WeaponSpdMultiplierChanged += UpdateWaitTime;
+        UpdateWaitTime();
     }
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
     /// <param name="delta"></param>
-    public void OnPhysicsProcess(double delta)
+    public override void OnPhysicsProcess(double delta)
     {
+        base.OnPhysicsProcess(delta);
+
         // センターマーカーと発射口マーカーから武器の方向を計算
         WeaponDirection = CenterMarker.GlobalPosition.DirectionTo(Marker2D.GlobalPosition);
         // レーダーにて索敵された敵のうち一番近い敵のArea2Dを取得
@@ -147,34 +182,46 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         {
             // 敵の方向を取得
             TargetDirection = CenterMarker.GlobalPosition.DirectionTo(enemy.GlobalPosition);
-            // 敵方向の角度を計算
-            float AngleToTarget = Math.Abs(WeaponDirection.AngleTo(TargetDirection));
-            // 外積計算
-            float OuterProduct = WeaponDirection.Cross(TargetDirection);
-
-            // 外積・敵方向の角度・ローテーションスピード・シグモイド関数から
-            // 回転角度を計算
-            float rotation = Math.Sign(OuterProduct) * Math.Sign(AngleToTarget) * RotationSpeed * Sigmoid(1, AngleToTarget);
-
-            // 回転する
-            Rotate(rotation);
+            // LerpAngleで最短経路を補間（微振動なし）
+            GlobalRotation = Mathf.LerpAngle(GlobalRotation, TargetDirection.Angle(), RotationSpeed);
         }
         // 射撃を行う
         Attack();
     }
 
+    /// <summary>
+    /// レーダーの検知対象コリジョンマスクを設定する
+    /// </summary>
+    public void SetTargetMask(uint mask)
+    {
+        Radar.TargetMask = mask;
+        Radar.CollisionMask = mask;
+        StandardBulletFactory.BulletCollisionMask = mask;
+    }
+
+    public void SetPlayerOwned(bool isPlayer)
+    {
+        IsPlayerOwned = isPlayer;
+        StandardBulletFactory.IsPlayerBullet = isPlayer;
+    }
+
+    private void UpdateWaitTime()
+    {
+        StandardBulletFactory.WaitTime = IsPlayerOwned
+            ? Status.Spd / BattleRepo.WeaponSpdMultiplier
+            : Status.Spd;
+    }
+
+    public void OnTreeExiting()
+    {
+        BattleRepo.WeaponSpdMultiplierChanged -= UpdateWaitTime;
+        WeaponBind.Dispose();
+        ((IDisposable)StandardWeaponLogic).Dispose();
+    }
+
     public override void Attack()
     {
-        if (!string.IsNullOrEmpty(BulletId))
-        {
-            // 武器側で指定された弾丸IDで射出
-            StandardBulletFactory.GenerateBullet(BulletId);
-        }
-        else
-        {
-            // デフォルトの弾丸IDで射出
-            StandardBulletFactory.GenerateBullet();
-        }
+        StandardBulletFactory.GenerateBullet();
     }
 
     /// <summary>

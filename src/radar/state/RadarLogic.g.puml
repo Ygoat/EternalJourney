@@ -1,15 +1,13 @@
-@startuml RadarLogic
-state "RadarLogic State" as EternalJourney_Radar_State_RadarLogic_State {
-  state "Idle" as EternalJourney_Radar_State_RadarLogic_State_Idle
-  state "EnemySearched" as EternalJourney_Radar_State_RadarLogic_State_EnemySearched
+@startuml RadarState
+state "RadarState" as EternalJourney_Radar_State_RadarState {
+  state "EnemySearched" as EternalJourney_Radar_State_RadarState_EnemySearched
+  state "Idle" as EternalJourney_Radar_State_RadarState_Idle
 }
 
-EternalJourney_Radar_State_RadarLogic_State_EnemySearched --> EternalJourney_Radar_State_RadarLogic_State_EnemySearched : PhysicProcess
-EternalJourney_Radar_State_RadarLogic_State_EnemySearched --> EternalJourney_Radar_State_RadarLogic_State_Idle : PhysicProcess
-EternalJourney_Radar_State_RadarLogic_State_Idle --> EternalJourney_Radar_State_RadarLogic_State_EnemySearched : WatchEnemy
+EternalJourney_Radar_State_RadarState_EnemySearched --> EternalJourney_Radar_State_RadarState_EnemySearched : PhysicProcess
+EternalJourney_Radar_State_RadarState_EnemySearched --> EternalJourney_Radar_State_RadarState_Idle : PhysicProcess
+EternalJourney_Radar_State_RadarState_Idle --> EternalJourney_Radar_State_RadarState_EnemySearched : WatchEnemy
 
-EternalJourney_Radar_State_RadarLogic_State_EnemySearched : OnEnter → StatusChanged
-EternalJourney_Radar_State_RadarLogic_State_Idle : OnEnter → StatusChanged
-
-[*] --> EternalJourney_Radar_State_RadarLogic_State_Idle
+EternalJourney_Radar_State_RadarState_EnemySearched : OnEnter → StatusChanged
+EternalJourney_Radar_State_RadarState_Idle : OnEnter → StatusChanged
 @enduml

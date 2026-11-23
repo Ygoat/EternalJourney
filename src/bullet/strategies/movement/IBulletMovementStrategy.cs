@@ -1,6 +1,5 @@
 namespace EternalJourney.Bullet.Strategies.Movement;
 
-using EternalJourney.Cores.Models.Bullet;
 using Godot;
 
 /// <summary>
@@ -9,10 +8,9 @@ using Godot;
 public interface IBulletMovementStrategy
 {
     /// <summary>
-    /// 設定で初期化
+    /// 初期化
     /// </summary>
-    /// <param name="config">移動設定</param>
-    void Initialize(BulletMovementConfig config);
+    void Initialize();
 
     /// <summary>
     /// 次フレームの移動差分を計算

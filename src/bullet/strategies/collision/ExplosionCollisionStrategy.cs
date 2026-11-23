@@ -1,13 +1,16 @@
 namespace EternalJourney.Bullet.Strategies.Collision;
 
-using EternalJourney.Cores.Models.Bullet;
-
 /// <summary>
 /// 爆発衝突戦略（耐久値0で爆風フェーズ、ステータスエフェクト非適用）
 /// </summary>
 public class ExplosionCollisionStrategy : IBulletCollisionStrategy
 {
-    private float _blastDuration = 0.5f;
+    private readonly float _blastDuration;
+
+    public ExplosionCollisionStrategy(float blastDuration = 0.5f)
+    {
+        _blastDuration = blastDuration;
+    }
 
     /// <summary>
     /// 爆風持続時間
@@ -17,12 +20,8 @@ public class ExplosionCollisionStrategy : IBulletCollisionStrategy
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize(BulletCollisionConfig config)
+    public void Initialize()
     {
-        if (config.Params.TryGetValue("blastDuration", out float duration))
-        {
-            _blastDuration = duration;
-        }
     }
 
     /// <summary>

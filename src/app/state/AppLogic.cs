@@ -8,19 +8,23 @@ using EternalJourney.App.Domain;
 /// <summary>
 /// アプリケーションロジックインターフェース
 /// </summary>
-public interface IAppLogic : ILogicBlock<AppLogic.State>;
+public interface IAppLogic : ILogicBlock;
 
 /// <summary>
 /// アプリケーションロジック
 /// </summary>
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
+[Meta]
+public partial class AppLogic : LogicBlock, IAppLogic
 {
-    /// <summary>
-    /// 初期状態
-    /// </summary>
-    /// <returns></returns>
-    public override Transition GetInitialState() => To<State.SplashScreen>();
+    public AppLogic()
+    {
+        // ステートを事前確保
+        Set(new AppState.SplashScreen());
+        Set(new AppState.MainMenu());
+        Set(new AppState.InGame());
+        Set(new AppState.LeavingGame());
+    }
+
 
     /// <summary>
     /// 入力定義
@@ -46,6 +50,11 @@ public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
         /// フェードアウト完了
         /// </summary>
         public readonly record struct FadeOutFinished;
+
+        /// <summary>
+        /// メニューへ戻る
+        /// </summary>
+        public readonly record struct GoToMenu;
     }
 
     /// <summary>
@@ -82,120 +91,126 @@ public partial class AppLogic : LogicBlock<AppLogic.State>, IAppLogic
         /// ゲーム終了（ダミー）
         /// </summary>
         public readonly record struct RemoveExistingGame;
+
     }
 
     // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
 
+}
+
+/// <summary>
+/// 状態定義
+/// </summary>
+[StateDiagram]
+public abstract partial record AppState : LogicBlockState
+{
     /// <summary>
-    /// 状態定義
+    /// SplasScreen（スプラッシュ画面）状態
     /// </summary>
-    public abstract record State : StateLogic<State>
+    public record SplashScreen : AppState, IGet<AppLogic.Input.SplashFinished>
     {
-        /// <summary>
-        /// SplasScreen（スプラッシュ画面）状態
-        /// </summary>
-        public record SplashScreen : State, IGet<Input.SplashFinished>
+        public SplashScreen()
         {
-            public SplashScreen()
-            {
-                // この状態に入る時の処理
-                // ShowSplashScreen（スプラッシュ画面表示）を出力
-                this.OnEnter(() => Output(new Output.ShowSplashScreen()));
+            // この状態がアクティブになった時の処理
+            this.OnEnter(
+                // スプラッシュ画面スキップイベント設定
+                () => Get<IAppRepo>().SplashScreenSkipped += OnSplashScreenSkipped
+            );
 
-                // この状態がアクティブになった時の処理
-                OnAttach(
-                    // スプラッシュ画面スキップイベント設定
-                    () => Get<IAppRepo>().SplashScreenSkipped += OnSplashScreenSkipped
-                );
+            // この状態に入る時の処理
+            // ShowSplashScreen（スプラッシュ画面表示）を出力
+            this.OnEnter(() => Output(new AppLogic.Output.ShowSplashScreen()));
 
-                // この状態が非アクティブになった時の処理
-                OnDetach(
-                    // スプラッシュ画面スキップイベント設定
-                    () => Get<IAppRepo>().SplashScreenSkipped -= OnSplashScreenSkipped
-                );
-            }
-
-            /// <summary>
-            /// 状態の遷移を定義
-            /// </summary>
-            /// <param name="input"></param>
-            /// <returns></returns>
-            public Transition On(in Input.SplashFinished input) => To<MainMenu>();
-
-            /// <summary>
-            /// スプラッシュスクリーンスキップイベントファンクション
-            /// </summary>
-            public void OnSplashScreenSkipped()
-            {
-                // HideSplashScreen（スプラッシュ画面非表示）を出力
-                Output(new Output.HideSplashScreen());
-            }
+            // この状態が非アクティブになった時の処理
+            this.OnExit(
+                // スプラッシュ画面スキップイベント設定
+                () => Get<IAppRepo>().SplashScreenSkipped -= OnSplashScreenSkipped
+            );
         }
 
         /// <summary>
-        /// メインメニュー
+        /// 状態の遷移を定義
         /// </summary>
-        public record MainMenu : State, IGet<Input.StartGame>//, IGet<Input.LoadGame>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public Type On(in AppLogic.Input.SplashFinished input) => To<MainMenu>();
+
+        /// <summary>
+        /// スプラッシュスクリーンスキップイベントファンクション
+        /// </summary>
+        public void OnSplashScreenSkipped()
         {
-            public MainMenu()
-            {
-                // この状態に入る時の処理
-                this.OnEnter(
-                    () =>
-                    {
-
-                        Output(new Output.SetupGameScene());
-
-                        Get<IAppRepo>().OnMainMenuEntered();
-
-                        Output(new Output.ShowMainMenu());
-                    }
-                );
-            }
-
-            public Transition On(in Input.StartGame input) => To<InGame>();
+            // HideSplashScreen（スプラッシュ画面非表示）を出力
+            Output(new AppLogic.Output.HideSplashScreen());
         }
+    }
 
-        public partial record InGame : State, IGet<Input.EndGame>
+    /// <summary>
+    /// メインメニュー
+    /// </summary>
+    public record MainMenu : AppState, IGet<AppLogic.Input.StartGame>//, IGet<AppLogic.Input.LoadGame>
+    {
+        public MainMenu()
         {
-            public InGame()
-            {
-                this.OnEnter(() =>
+            // この状態に入る時の処理
+            this.OnEnter(
+                () =>
                 {
-                    Get<IAppRepo>().OnEnterGame();
-                    Output(new Output.ShowGame());
-                });
-                // this.OnExit(() => Output(new Output.HideGame()));
 
-                // OnAttach(() => Get<IAppRepo>().GameExited += OnGameExited);
-                // OnDetach(() => Get<IAppRepo>().GameExited -= OnGameExited);
-            }
+                    Output(new AppLogic.Output.SetupGameScene());
 
-            // public void OnGameExited(PostGameAction reason) =>
-            //   Input(new Input.EndGame(reason));
+                    Get<IAppRepo>().OnMainMenuEntered();
 
-            public Transition On(in Input.EndGame input)
-            {
-                return To<LeavingGame>();
-            }
+                    Output(new AppLogic.Output.ShowMainMenu());
+                }
+            );
         }
 
-        /// <summary>
-        /// ダミーの実装
-        /// </summary>
-        public partial record LeavingGame : State, IGet<Input.FadeOutFinished>
+        public Type On(in AppLogic.Input.StartGame input) => To<InGame>();
+    }
+
+    public partial record InGame : AppState, IGet<AppLogic.Input.EndGame>, IGet<AppLogic.Input.GoToMenu>
+    {
+        public InGame()
         {
-
-            public Transition On(in Input.FadeOutFinished input)
+            this.OnEnter(() => Get<IAppRepo>().GoToMenuRequested += OnGoToMenuRequested);
+            this.OnEnter(() =>
             {
-                // We are either supposed to restart the game or go back to the main
-                // menu. More complex games might have more post-game destinations,
-                // but it's pretty simple for us.
-                Output(new Output.RemoveExistingGame());
+                Get<IAppRepo>().OnEnterGame();
+                Output(new AppLogic.Output.ShowGame());
+            });
+            this.OnExit(() => Get<IAppRepo>().GoToMenuRequested -= OnGoToMenuRequested);
+        }
 
-                // Output(new Output.SetupGameScene());
-                return To<InGame>();
-            }
+        private void OnGoToMenuRequested() => Input(new AppLogic.Input.GoToMenu());
+
+        public Type On(in AppLogic.Input.EndGame input)
+        {
+            return To<LeavingGame>();
+        }
+
+        public Type On(in AppLogic.Input.GoToMenu input)
+        {
+            Output(new AppLogic.Output.RemoveExistingGame());
+            return To<MainMenu>();
+        }
+    }
+
+    /// <summary>
+    /// ダミーの実装
+    /// </summary>
+    public partial record LeavingGame : AppState, IGet<AppLogic.Input.FadeOutFinished>
+    {
+
+        public Type On(in AppLogic.Input.FadeOutFinished input)
+        {
+            // We are either supposed to restart the game or go back to the main
+            // menu. More complex games might have more post-game destinations,
+            // but it's pretty simple for us.
+            Output(new AppLogic.Output.RemoveExistingGame());
+
+            // Output(new AppLogic.Output.SetupGameScene());
+            return To<InGame>();
         }
     }
 }

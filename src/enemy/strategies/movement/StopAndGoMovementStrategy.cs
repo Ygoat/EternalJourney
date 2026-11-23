@@ -1,6 +1,5 @@
 namespace EternalJourney.Enemy.Strategies.Movement;
 
-using EternalJourney.Cores.Models.Enemy;
 using Godot;
 
 /// <summary>
@@ -8,22 +7,20 @@ using Godot;
 /// </summary>
 public class StopAndGoMovementStrategy : IMovementStrategy
 {
-    private float _moveDuration = 1.0f;
-    private float _stopDuration = 0.5f;
+    private readonly float _moveDuration;
+    private readonly float _stopDuration;
+
+    public StopAndGoMovementStrategy(float moveDuration = 1.0f, float stopDuration = 0.5f)
+    {
+        _moveDuration = moveDuration;
+        _stopDuration = stopDuration;
+    }
 
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize(MovementConfig config, Vector2 targetPosition)
+    public void Initialize(Vector2 targetPosition)
     {
-        if (config.Params.TryGetValue("moveDuration", out float md))
-        {
-            _moveDuration = md;
-        }
-        if (config.Params.TryGetValue("stopDuration", out float sd))
-        {
-            _stopDuration = sd;
-        }
     }
 
     /// <summary>

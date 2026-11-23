@@ -4,7 +4,9 @@
 
 ## プロジェクト概要
 
-EternalJourneyは **Godot 4.3.0（バージョン固定）** と **C#（.NET 8.0）** で開発された放置型オートシューティングゲームです。[Chickensoft](https://chickensoft.games/) エコシステムを多用しています。
+EternalJourneyは **Godot 4.7.2（バージョン固定）** と **C#（.NET 8.0）** で開発された放置型オートシューティングゲームです。[Chickensoft](https://chickensoft.games/) エコシステムを多用しています。
+
+設計判断・コードレビュー時は `docs/ARCHITECTURE_REFERENCE.md`（Chickensoft GameDemo流アーキテクチャ・リファレンス）を正とします。現状の準拠状況と改善事項は `docs/PROJECT_REVIEW.md` を参照してください。
 
 ## ビルドコマンド
 
@@ -13,7 +15,7 @@ EternalJourneyは **Godot 4.3.0（バージョン固定）** と **C#（.NET 8.0
 dotnet build
 ```
 
-Godot 4.3.0（.NET版）のインストールが必要です。VSCodeからデバッグする場合は、環境変数 `GODOT` にGodot実行ファイルのパスを設定してください。
+Godot 4.7.2（.NET版）のインストールが必要です。VSCodeからデバッグする場合は、環境変数 `GODOT` にGodot実行ファイルのパスを設定してください。
 
 ## アーキテクチャ概要
 
@@ -38,11 +40,12 @@ Godot 4.3.0（.NET版）のインストールが必要です。VSCodeからデ�
 全ノードで以下のオーバーライドが必須です: `public override void _Notification(int what) => this.Notify(what);`
 
 **2. LogicBlocks** — ステートマシンフレームワーク。各エンティティの振る舞いは `LogicBlock` で管理されます。
-- ステートは抽象レコード `State` の内部にネストされたレコードとして定義
-- ステートは `IGet<Input.X>` を実装して入力を処理する
-- ステート遷移は `To<NewState>()` または `ToSelf()` を返す
+- v6系: `LogicBlock` は非ジェネリック。ステートは Logic クラスの**外**に `{Name}State : LogicBlockState`（抽象レコード）として定義し、その中に具象ステートをネストする（`LogicBlock.State` プロパティと名前衝突するため `State` という名前は使えない）
+- ステートはコンストラクタで `Set(new XState.A())` により**事前確保**する（インスタンスは再利用されるため、可変フィールドは `OnEnter` で初期化すること）
+- ステートは `IGet<XLogic.Input.X>` を実装して入力を処理し、ハンドラは `Type` を返す: `To<NewState>()` または `ToSelf()`
+- 開始は `Logic.Start<XState.Initial>()`。ステート進入/退出は `this.OnEnter(...)` / `this.OnExit(...)`（v5 の `OnAttach/OnDetach` は廃止）
 - Outputはバインディングを通じて親ノードで処理される
-- `[LogicBlock(typeof(State), Diagram = true)]` により `.g.puml` PlantUMLダイアグラムが自動生成される（手動編集不可）
+- 基底ステートに `[StateDiagram]` を付けると `.g.puml` PlantUMLダイアグラムが自動生成される（手動編集不可）
 
 **3. GodotNodeInterfaces** — Godotノードのインターフェースラッパー（例: `INode2D`、`IVisibleOnScreenNotifier2D`）。テスト時のモック化を可能にします。
 
@@ -84,11 +87,11 @@ public partial class Player : Node2D, IReady, IProcess {
   public override void _Notification(int what) => this.Notify(what);
 
   public void OnReady() {
-    GD.Print("Ready!");
+	GD.Print("Ready!");
   }
 
   public void OnProcess(double delta) {
-    GD.Print($"Frame: {delta}");
+	GD.Print($"Frame: {delta}");
   }
 }
 ```
@@ -102,16 +105,16 @@ public partial class Player : CharacterBody2D, IReady, IPhysicsProcess {
   private float _speed = 200;
 
   public void OnReady() {
-    GD.Print("Player initialized");
+	GD.Print("Player initialized");
   }
 
   public void OnPhysicsProcess(double delta) {
-    var velocity = Velocity;
-    if (Input.IsActionPressed("ui_right"))      velocity.X = _speed;
-    else if (Input.IsActionPressed("ui_left"))  velocity.X = -_speed;
-    else                                        velocity.X = 0;
-    Velocity = velocity;
-    MoveAndSlide();
+	var velocity = Velocity;
+	if (Input.IsActionPressed("ui_right"))      velocity.X = _speed;
+	else if (Input.IsActionPressed("ui_left"))  velocity.X = -_speed;
+	else                                        velocity.X = 0;
+	Velocity = velocity;
+	MoveAndSlide();
   }
 }
 ```
@@ -124,11 +127,11 @@ public partial class Player : Node2D, IReady, IProcess {
   public override void _Notification(int what) => this.Notify(what);
 
   public void OnReady() {
-    GD.Print("AutoInject + NodeInterfaces");
+	GD.Print("AutoInject + NodeInterfaces");
   }
 
   public void OnProcess(double delta) {
-    // フレーム処理
+	// フレーム処理
   }
 }
 ```
@@ -147,13 +150,13 @@ public partial class GameServiceProvider : Node, IProvide<GameService> {
   private GameService _service;
 
   public void Initialize() {
-    _service = new GameService();
+	_service = new GameService();
   }
 
   GameService IProvide<GameService>.Value() => _service;
 
   public void OnReady() {
-    this.Provide();  // 子ノードへの提供を開始
+	this.Provide();  // 子ノードへの提供を開始
   }
 }
 ```
@@ -168,8 +171,8 @@ public partial class Player : Node {
   [Dependency] public GameService GameService => this.DependOn<GameService>();
 
   public void OnResolved() {
-    GD.Print("DI解決完了");
-    // ここから GameService が使用可能
+	GD.Print("DI解決完了");
+	// ここから GameService が使用可能
   }
 }
 ```
@@ -216,95 +219,53 @@ IMyService IProvide<IMyService>.Value() => _service;
 
 ### LogicBlocksパターン
 
-#### 🧩 使用例：プレイヤーの状態管理（Idle / Running / Jumping）
-
-**入力（Input）の定義**
-```csharp
-using Chickensoft.LogicBlocks;
-
-// 入力（イベント）
-public abstract record Input;
-public record Run : Input;
-public record Stop : Input;
-public record Jump : Input;
-public record Land : Input;
-```
-
-**ステートの定義**
-```csharp
-public record Idle : State {
-  public override Transition On(Input input) => input switch {
-    Run => To<Running>(),
-    Jump => To<Jumping>(),
-    _ => Stay()
-  };
-}
-
-public record Running : State {
-  public override void OnEnter() { /* 走り始めた */ }
-  public override void OnExit()  { /* 走るのをやめた */ }
-  public override Transition On(Input input) => input switch {
-    Stop => To<Idle>(),
-    Jump => To<Jumping>(),
-    _ => Stay()
-  };
-}
-
-public record Jumping : State {
-  public override Transition On(Input input) => input switch {
-    Land => To<Idle>(),
-    _ => Stay()
-  };
-}
-```
-
-**階層ステート（共通処理の共有）**
-```csharp
-// 「地上にいる」共通ステート
-public record Grounded : State {
-  public override Transition On(Input input) => input switch {
-    Jump => To<Jumping>(),
-    _ => Stay()
-  };
-}
-public record Idle : Grounded { }
-public record Running : Grounded { }
-```
-
 #### プロジェクトでの実際の書き方（Input/Output を record struct で定義）
 
 ```csharp
-[Meta, LogicBlock(typeof(State), Diagram = true)]
-public partial class FooLogic : LogicBlock<FooLogic.State>
+[Meta]
+public partial class FooLogic : LogicBlock, IFooLogic
 {
-    public override Transition GetInitialState() => To<State.Idle>();
+	public FooLogic()
+	{
+		// ステートを事前確保
+		Set(new FooState.Idle());
+		Set(new FooState.Active());
+	}
 
-    public static class Input {
-        public readonly record struct DoThing(float Value);
-    }
-    public static class Output {
-        public readonly record struct ThingDone(float Result);
-    }
+	public static class Input {
+		public readonly record struct DoThing(float Value);
+	}
+	public static class Output {
+		public readonly record struct ThingDone(float Result);
+	}
+}
 
-    public abstract record State : StateLogic<State> {
-        public record Idle : State, IGet<Input.DoThing> {
-            public Transition On(in Input.DoThing input) {
-                Output(new Output.ThingDone(input.Value));
-                return To<Active>();
-            }
-        }
-        public record Active : State { /* ... */ }
-    }
+[StateDiagram]
+public abstract partial record FooState : LogicBlockState
+{
+	public record Idle : FooState, IGet<FooLogic.Input.DoThing> {
+		public Type On(in FooLogic.Input.DoThing input) {
+			Output(new FooLogic.Output.ThingDone(input.Value));
+			return To<Active>();
+		}
+	}
+	public record Active : FooState {
+		public Active() {
+			this.OnEnter(() => { /* 進入時（可変フィールドはここで初期化） */ });
+			this.OnExit(() => { /* 退出時 */ });
+		}
+	}
 }
 ```
 
 **親ノードでのバインディング（`OnResolved()` 内）**
 ```csharp
-LogicBinding = Logic.Bind();
+// Setup(): LogicBinding = Logic.Bind();  型は LogicBlock.Binding
 LogicBinding
-    .When<FooLogic.State.Active>(state => { /* ステート進入時 */ })
-    .Handle((in FooLogic.Output.ThingDone o) => { /* Output処理 */ })
-    .Start();
+	.OnState<FooState.Active>(state => { /* ステート進入時 */ })
+	.OnOutput((in FooLogic.Output.ThingDone o) => { /* Output処理 */ })
+	.OnInput((in FooLogic.Input.DoThing i) => { /* Input監視 */ });
+Logic.Start<FooState.Idle>();
 ```
 
 `OnTreeExiting` で必ず `LogicBinding.Dispose()` と `Logic.Dispose()` を呼ぶこと。
@@ -317,25 +278,25 @@ public interface IFoo : INode2D { }
 [Meta(typeof(IAutoNode))]
 public partial class Foo : Node2D, IFoo
 {
-    public override void _Notification(int what) => this.Notify(what);
+	public override void _Notification(int what) => this.Notify(what);
 
-    #region Signals
-    #endregion Signals
-    #region State
-    #endregion State
-    #region Exports
-    #endregion Exports
-    #region Nodes
-    #endregion Nodes
-    #region Provisions
-    #endregion Provisions
-    #region Dependencies
-    #endregion Dependencies
+	#region Signals
+	#endregion Signals
+	#region State
+	#endregion State
+	#region Exports
+	#endregion Exports
+	#region Nodes
+	#endregion Nodes
+	#region Provisions
+	#endregion Provisions
+	#region Dependencies
+	#endregion Dependencies
 
-    public void Initialize() { }
-    public void OnReady() { }
-    public void Setup() { }
-    public void OnResolved() { }
+	public void Initialize() { }
+	public void OnReady() { }
+	public void Setup() { }
+	public void OnResolved() { }
 }
 ```
 
@@ -350,7 +311,9 @@ public partial class Foo : Node2D, IFoo
 
 ### ステートマシンの配置場所
 
-`src/` 配下の各エンティティフォルダは次の規則に従います: `src/{entity}/abstract/state/{Name}Logic.cs`
+`src/` 配下の各エンティティフォルダは次の規則に従います: `src/{entity}/state/{Name}Logic.cs`
+
+抽象基底クラスを持つエンティティ（weapon / bullet / bullet_factory）のみ `src/{entity}/abstract/state/{Name}Logic.cs` に配置します。
 
 ### コーディング規約
 
@@ -369,8 +332,8 @@ graph TD
   B --> C[Data Layer]
 
   subgraph Game Logic Layer
-    B1[Visual Game Logic<br>StateMachine]
-    B2[Pure Game Logic<br>Repository]
+	B1[Visual Game Logic<br>StateMachine]
+	B2[Pure Game Logic<br>Repository]
   end
 ```
 

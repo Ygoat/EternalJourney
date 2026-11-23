@@ -3,10 +3,17 @@
 [ext_resource type="Script" path="res://src/battle_ui/BattleUI.cs" id="1_fnhvu"]
 [ext_resource type="PackedScene" uid="uid://bs5x55xlyif41" path="res://src/skill_button/SkillButton.tscn" id="1_xs630"]
 
-[node name="BattleUI" type="CanvasLayer"]
+[node name="BattleUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_fnhvu")
 
 [node name="MarginContainer2" type="MarginContainer" parent="."]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -47,6 +54,7 @@ theme_override_font_sizes/font_size = 20
 text = "Score: 000000000000000"
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -57,39 +65,99 @@ theme_override_constants/margin_top = 40
 theme_override_constants/margin_right = 40
 theme_override_constants/margin_bottom = 40
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer5" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer5"]
 layout_mode = 2
 theme_override_constants/separation = 50
 alignment = 1
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer5/HBoxContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="SkillButton1" parent="MarginContainer/HBoxContainer/VBoxContainer" instance=ExtResource("1_xs630")]
+[node name="SkillButton1" parent="MarginContainer/VBoxContainer5/HBoxContainer/VBoxContainer" instance=ExtResource("1_xs630")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="VBoxContainer2" type="VBoxContainer" parent="MarginContainer/VBoxContainer5/HBoxContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="SkillButton2" parent="MarginContainer/HBoxContainer/VBoxContainer2" instance=ExtResource("1_xs630")]
+[node name="SkillButton2" parent="MarginContainer/VBoxContainer5/HBoxContainer/VBoxContainer2" instance=ExtResource("1_xs630")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="VBoxContainer3" type="VBoxContainer" parent="MarginContainer/VBoxContainer5/HBoxContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="SkillButton3" parent="MarginContainer/HBoxContainer/VBoxContainer3" instance=ExtResource("1_xs630")]
+[node name="SkillButton3" parent="MarginContainer/VBoxContainer5/HBoxContainer/VBoxContainer3" instance=ExtResource("1_xs630")]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/HBoxContainer"]
+[node name="VBoxContainer4" type="VBoxContainer" parent="MarginContainer/VBoxContainer5/HBoxContainer"]
 layout_mode = 2
 alignment = 2
 
-[node name="SkillButton4" parent="MarginContainer/HBoxContainer/VBoxContainer4" instance=ExtResource("1_xs630")]
+[node name="SkillButton4" parent="MarginContainer/VBoxContainer5/HBoxContainer/VBoxContainer4" instance=ExtResource("1_xs630")]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer5"]
+layout_mode = 2
+theme_override_constants/margin_top = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer/VBoxContainer5"]
+layout_mode = 2
+
+[node name="HPGauge" type="ColorRect" parent="MarginContainer/VBoxContainer5/VBoxContainer"]
+custom_minimum_size = Vector2(500, 10)
+layout_mode = 2
+color = Color(0, 0, 0, 1)
+
+[node name="LeftHPGauge" type="ColorRect" parent="MarginContainer/VBoxContainer5/VBoxContainer/HPGauge"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.641157, 1, 0.66145, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer5/VBoxContainer"]
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer5/VBoxContainer"]
+layout_mode = 2
+columns = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="MarginContainer/VBoxContainer5/VBoxContainer/GridContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="SPGauge" type="ColorRect" parent="MarginContainer/VBoxContainer5/VBoxContainer/GridContainer/MarginContainer"]
+custom_minimum_size = Vector2(550, 10)
+layout_mode = 2
+color = Color(0, 0, 0, 1)
+
+[node name="LeftSPGauge" type="ColorRect" parent="MarginContainer/VBoxContainer5/VBoxContainer/GridContainer/MarginContainer/SPGauge"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.639216, 0, 0.662745, 1)
+
+[node name="SPButton" type="Button" parent="MarginContainer/VBoxContainer5/VBoxContainer/GridContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 70)
+layout_mode = 2
+theme_override_font_sizes/font_size = 40
+text = "SP"

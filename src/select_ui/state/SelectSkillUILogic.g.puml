@@ -1,0 +1,8 @@
+@startuml SelectSkillUIState
+state "SelectSkillUIState" as EternalJourney_SelectUI_State_SelectSkillUIState {
+  state "Idle" as EternalJourney_SelectUI_State_SelectSkillUIState_Idle
+}
+
+EternalJourney_SelectUI_State_SelectSkillUIState_Idle --> EternalJourney_SelectUI_State_SelectSkillUIState_Idle : SelectButtonPressed
+EternalJourney_SelectUI_State_SelectSkillUIState_Idle --> EternalJourney_SelectUI_State_SelectSkillUIState_Idle : SkillToggled
+@enduml

@@ -41,8 +41,8 @@ ChickenSoftさんのテンプレートを使用してます
 
 ### Godotインストール
 
-- ver 4.3.0 固定 ※後々アップデート予定
-  - [こちらからダウンロード](https://godotengine.org/download/archive/4.3-stable/)
+- ver 4.7.2 固定
+  - [こちらからダウンロード](https://godotengine.org/download/archive/4.7.2-stable/)
     - Windowsの場合：Widowsの.NET
   - zipファイルを解凍し、解凍後のフォルダを```C:\Program Files```に配置する
     - 必要であればフォルダを開いてexeファイルをショートカット等に登録する

@@ -1,6 +1,5 @@
 namespace EternalJourney.Enemy.Strategies.Movement;
 
-using EternalJourney.Cores.Models.Enemy;
 using Godot;
 
 /// <summary>
@@ -8,23 +7,21 @@ using Godot;
 /// </summary>
 public class SineWaveMovementStrategy : IMovementStrategy
 {
-    private float _amplitude = 50.0f;
-    private float _frequency = 2.0f;
+    private readonly float _amplitude;
+    private readonly float _frequency;
     private Vector2 _perpendicular;
+
+    public SineWaveMovementStrategy(float amplitude = 50.0f, float frequency = 2.0f)
+    {
+        _amplitude = amplitude;
+        _frequency = frequency;
+    }
 
     /// <summary>
     /// 初期化
     /// </summary>
-    public void Initialize(MovementConfig config, Vector2 targetPosition)
+    public void Initialize(Vector2 targetPosition)
     {
-        if (config.Params.TryGetValue("amplitude", out float amp))
-        {
-            _amplitude = amp;
-        }
-        if (config.Params.TryGetValue("frequency", out float freq))
-        {
-            _frequency = freq;
-        }
     }
 
     /// <summary>

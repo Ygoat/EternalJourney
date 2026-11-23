@@ -1,7 +1,7 @@
 namespace EternalJourney.Battle.Domain;
 
 using System;
-using Chickensoft.Collections;
+using Chickensoft.Sync.Primitives;
 using EternalJourney.Bullet.Abstract.Base;
 using EternalJourney.Enemy.Base;
 
@@ -15,25 +15,31 @@ public interface IBattleRepo : IDisposable
     /// </summary>
     public float PoisonDamage { get; set; }
 
-    /// <summary>
-    /// ATK乗数（スキルバフ用）
-    /// </summary>
-    public float AtkMultiplier { get; set; }
+    public float ShipAtkBonus { get; set; }
+    public float ShipSpdMultiplier { get; set; }
+    public float ShipDefBonus { get; set; }
+
+    public float WeaponAtkMultiplier { get; set; }
+    public float WeaponSpdMultiplier { get; set; }
 
     /// <summary>
-    /// SPD乗数（スキルバフ用）
+    /// 武器速度乗数変更イベント
     /// </summary>
-    public float SpdMultiplier { get; set; }
+    public event Action? WeaponSpdMultiplierChanged;
+
+    public float BulletAtkMultiplier { get; set; }
+    public float BulletSpdMultiplier { get; set; }
+    public float BulletDefBonus { get; set; }
 
     /// <summary>
     /// スコア
     /// </summary>
-    public IAutoProp<int> Score { get; }
+    public IAutoValue<int> Score { get; }
 
     /// <summary>
     /// エネミー撃破数
     /// </summary>
-    public IAutoProp<int> NumEnemyDestroyed { get; }
+    public IAutoValue<int> NumEnemyDestroyed { get; }
 
     /// <summary>
     /// 弾丸がヒットした際に呼び出されるイベント
@@ -54,6 +60,51 @@ public interface IBattleRepo : IDisposable
     /// 弾丸が破壊された際に呼び出されるイベント
     /// </summary>
     public event Action<IBaseBullet> BulletDestroyed;
+
+    /// <summary>
+    /// 船HP変化イベント
+    /// </summary>
+    public event Action<float, float>? ShipHpChanged;
+
+    /// <summary>
+    /// ゲームオーバーイベント
+    /// </summary>
+    public event Action? GameOverOccurred;
+
+    /// <summary>
+    /// 船回復要求イベント
+    /// </summary>
+    public event Action<float>? ShipHealRequested;
+
+    /// <summary>
+    /// SPパーセント（0〜100）
+    /// </summary>
+    public float SpPercent { get; }
+
+    /// <summary>
+    /// SPパーセント変化イベント
+    /// </summary>
+    public event Action<float>? SpPercentChanged;
+
+    /// <summary>
+    /// SP発動イベント
+    /// </summary>
+    public event Action? SPActivated;
+
+    /// <summary>
+    /// SPを発動する（SP100%時のみ有効）
+    /// </summary>
+    public void ActivateSP();
+
+    /// <summary>
+    /// バトル開始イベント
+    /// </summary>
+    public event Action? BattleStarted;
+
+    /// <summary>
+    /// バトル開始を通知する
+    /// </summary>
+    public void NotifyBattleStarted();
 
     /// <summary>
     /// スコアカウントアップ
@@ -88,12 +139,24 @@ public interface IBattleRepo : IDisposable
     public void SetNumEnemyDestroyed(int numEnemyDestroyed);
 
     /// <summary>
+    /// 船HP変化をバトルUIに通知する
+    /// </summary>
+    public void NotifyShipHpChanged(float currentHp, float maxHp);
+
+    /// <summary>
+    /// ゲームオーバーを通知する
+    /// </summary>
+    public void NotifyGameOver();
+
+    /// <summary>
+    /// 船回復を要求する
+    /// </summary>
+    public void RequestShipHeal(float amount);
+
+    /// <summary>
     /// 敵耐久値減少処理
     /// </summary>
-    /// <param name="curDurability">現在耐久値</param>
-    /// <param name="damage">ダメージ</param>
-    /// <returns></returns>
-    public float ReduceEnemyDurability(float curDurability, float damage);
+    public float ReduceEnemyDurability(float curDurability, float bulletAtk, float bulletDef, float enemyDef);
 
     /// <summary>
     /// 弾丸耐久値減少処理
@@ -114,31 +177,42 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public float PoisonDamage { get; set; } = 2.5f;
 
-    /// <summary>
-    /// ATK乗数（スキルバフ用）
-    /// </summary>
-    public float AtkMultiplier { get; set; } = 1.0f;
+    public float ShipAtkBonus { get; set; } = 0.0f;
+    public float ShipSpdMultiplier { get; set; } = 1.0f;
+    public float ShipDefBonus { get; set; } = 0.0f;
 
-    /// <summary>
-    /// SPD乗数（スキルバフ用）
-    /// </summary>
-    public float SpdMultiplier { get; set; } = 1.0f;
+    public float WeaponAtkMultiplier { get; set; } = 1.0f;
+
+    private float _weaponSpdMultiplier = 1.0f;
+    public float WeaponSpdMultiplier
+    {
+        get => _weaponSpdMultiplier;
+        set { _weaponSpdMultiplier = value; WeaponSpdMultiplierChanged?.Invoke(); }
+    }
+    public event Action? WeaponSpdMultiplierChanged;
+
+    public float BulletAtkMultiplier { get; set; } = 1.0f;
+    public float BulletSpdMultiplier { get; set; } = 1.0f;
+    public float BulletDefBonus { get; set; } = 0.0f;
+
+    private float _spPercent = 0f;
+    public float SpPercent => _spPercent;
+    public event Action<float>? SpPercentChanged;
+    public event Action? SPActivated;
 
     /// <summary>
     /// スコア
     /// </summary>
-    public IAutoProp<int> Score => _score;
+    public IAutoValue<int> Score => _score;
 
-
-    private readonly AutoProp<int> _score;
-
+    private readonly AutoValue<int> _score;
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    public IAutoProp<int> NumEnemyDestroyed => _numEnemyDestroyed;
+    public IAutoValue<int> NumEnemyDestroyed => _numEnemyDestroyed;
 
-    private readonly AutoProp<int> _numEnemyDestroyed;
+    private readonly AutoValue<int> _numEnemyDestroyed;
 
     /// <summary>
     /// <inheritdoc/>
@@ -160,6 +234,31 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public event Action<IBaseBullet>? BulletDestroyed;
 
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action<float, float>? ShipHpChanged;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? GameOverOccurred;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action<float>? ShipHealRequested;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? BattleStarted;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyBattleStarted() => BattleStarted?.Invoke();
+
     private bool _disposedValue;
 
     /// <summary>
@@ -167,17 +266,16 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public BattleRepo()
     {
-        _numEnemyDestroyed = new AutoProp<int>(0);
-        _score = new AutoProp<int>(0);
+        _numEnemyDestroyed = new AutoValue<int>(0);
+        _score = new AutoValue<int>(0);
     }
 
     /// <summary>
     /// コンストラクタ
     /// </summary>
-    /// <param name="numEnemyDestroyed"></param>
     internal BattleRepo(
-      AutoProp<int> numEnemyDestroyed,
-      AutoProp<int> score
+      AutoValue<int> numEnemyDestroyed,
+      AutoValue<int> score
     )
     {
         _numEnemyDestroyed = numEnemyDestroyed;
@@ -189,7 +287,7 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public void ScoreCountUp(int score)
     {
-        _score.OnNext(_score.Value + score);
+        _score.Value = _score.Value + score;
     }
 
     /// <summary>
@@ -197,13 +295,12 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public void NumEnemyDestroyedCountUp()
     {
-        _numEnemyDestroyed.OnNext(_numEnemyDestroyed.Value + 1);
+        _numEnemyDestroyed.Value = _numEnemyDestroyed.Value + 1;
     }
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="baseBullet"></param>
     public void StartBulletHitting(IBaseBullet baseBullet)
     {
         BulletHittingStarted?.Invoke(baseBullet);
@@ -212,33 +309,68 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="numEnemyDestroyed"></param>
     public void SetNumEnemyDestroyed(int numEnemyDestroyed)
     {
-        _numEnemyDestroyed.OnNext(numEnemyDestroyed);
+        _numEnemyDestroyed.Value = numEnemyDestroyed;
     }
 
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="baseEnemy"></param>
     public void OnEnemyDestroyed(IBaseEnemy baseEnemy)
     {
+        _spPercent = Math.Min(100f, _spPercent + 5f);
+        SpPercentChanged?.Invoke(_spPercent);
         EnemyDestroyed?.Invoke(baseEnemy);
     }
 
+    public void ActivateSP()
+    {
+        if (_spPercent < 100f) return;
+        SPActivated?.Invoke();
+        _spPercent = 0f;
+        SpPercentChanged?.Invoke(_spPercent);
+    }
+
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
-    /// <param name="baseBullet"></param>
     public void OnBulletDestroyed(IBaseBullet baseBullet)
     {
         BulletDestroyed?.Invoke(baseBullet);
     }
 
-    public float ReduceEnemyDurability(float curDurability, float damage)
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyShipHpChanged(float currentHp, float maxHp)
     {
-        return curDurability - damage * AtkMultiplier;
+        ShipHpChanged?.Invoke(currentHp, maxHp);
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyGameOver()
+    {
+        GameOverOccurred?.Invoke();
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void RequestShipHeal(float amount)
+    {
+        ShipHealRequested?.Invoke(amount);
+    }
+
+    public float ReduceEnemyDurability(float curDurability, float bulletAtk, float bulletDef, float enemyDef)
+    {
+        float baseDamage = (bulletAtk * BulletAtkMultiplier) * WeaponAtkMultiplier;
+        float shipCorrected = baseDamage * (1f + ShipAtkBonus);
+        float effectiveDef = Math.Max(0f, enemyDef - (bulletDef + BulletDefBonus));
+        float finalDamage = shipCorrected * (100f / (100f + effectiveDef));
+        return curDurability - finalDamage;
     }
 
     public float ReduceBulletDurability(float curDurability, float damage)
@@ -254,8 +386,7 @@ public class BattleRepo : IBattleRepo
         {
             if (disposing)
             {
-                // Dispose managed objects.
-                _numEnemyDestroyed.OnCompleted();
+                _score.Dispose();
                 _numEnemyDestroyed.Dispose();
             }
 
@@ -268,7 +399,6 @@ public class BattleRepo : IBattleRepo
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-
 
     #endregion Internals
 }

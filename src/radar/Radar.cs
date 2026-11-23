@@ -3,6 +3,7 @@ namespace EternalJourney.Radar;
 using System.Collections.Generic;
 using System.Linq;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Cores.Consts;
@@ -28,6 +29,11 @@ public interface IRadar : IArea2D
     /// 敵未発見イベント
     /// </summary>
     public event Radar.NotSearchedEventHandler NotSearched;
+
+    /// <summary>
+    /// 検知対象のコリジョンマスク
+    /// </summary>
+    public uint TargetMask { get; set; }
 };
 
 /// <summary>
@@ -58,6 +64,12 @@ public partial class Radar : Area2D, IRadar
     public List<Area2D> OnAreaEnemies { get; set; } = new List<Area2D>();
 
     /// <summary>
+    /// 検知対象のコリジョンマスク（デフォルト：Enemy）
+    /// </summary>
+    [Export]
+    public uint TargetMask { get; set; } = CollisionEntity.Enemy;
+
+    /// <summary>
     /// レーダーロジック
     /// </summary>
     public IRadarLogic RadarLogic { get; set; } = default!;
@@ -65,7 +77,7 @@ public partial class Radar : Area2D, IRadar
     /// <summary>
     /// レーダーロジックバインド
     /// </summary>
-    public RadarLogic.IBinding RadarLogicBinding { get; set; } = default!;
+    public LogicBlock.Binding RadarLogicBinding { get; set; } = default!;
 
     /// <summary>
     /// <inheritdoc/>
@@ -79,7 +91,7 @@ public partial class Radar : Area2D, IRadar
         // サーチエリアコリジョンレイヤ
         CollisionLayer = CollisionEntity.Radar;
         // サーチエリアコリジョンマスク
-        CollisionMask = CollisionEntity.Enemy;
+        CollisionMask = TargetMask;
     }
 
     /// <summary>
@@ -88,23 +100,23 @@ public partial class Radar : Area2D, IRadar
     public void OnResolved()
     {
 
-        RadarLogicBinding.Handle((in RadarLogic.Output.StatusChanged output) =>
+        RadarLogicBinding.OnOutput((in RadarLogic.Output.StatusChanged output) =>
         {
         });
-        RadarLogicBinding.When((RadarLogic.State.Idle _) =>
+        RadarLogicBinding.OnState<RadarState.Idle>(_ =>
         {
             AreaEntered += OnAreaEntered;
             EmitSignal(SignalName.NotSearched);
             SetPhysicsProcess(false);
         });
         // Monitor a specific type of state:
-        RadarLogicBinding.When((RadarLogic.State.EnemySearched _) =>
+        RadarLogicBinding.OnState<RadarState.EnemySearched>(_ =>
         {
             AreaEntered -= OnAreaEntered;
             EmitSignal(SignalName.Searched);
             SetPhysicsProcess(true);
         });
-        RadarLogic.Start();
+        RadarLogic.Start<RadarState.Idle>();
     }
 
     /// <summary>
@@ -114,7 +126,7 @@ public partial class Radar : Area2D, IRadar
     public void OnPhysicsProcess(double delta)
     {
         OnAreaEnemies = GetOverlappingAreas()
-            .Where(enemy => enemy.CollisionLayer == CollisionEntity.Enemy)
+            .Where(e => (e.CollisionLayer & TargetMask) != 0)
             .OrderBy(enemy => GlobalPosition.DistanceTo(enemy.GlobalPosition))
             .ToList();
         // ロジックブロックにオーバーラップしている敵のArea2Dノードリストを入力

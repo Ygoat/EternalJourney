@@ -1,0 +1,7 @@
+@startuml ResultUIState
+state "ResultUIState" as EternalJourney_ResultUI_State_ResultUIState {
+  state "Waiting" as EternalJourney_ResultUI_State_ResultUIState_Waiting
+}
+
+EternalJourney_ResultUI_State_ResultUIState_Waiting : OnGameOver() → UpdateDisplay
+@enduml

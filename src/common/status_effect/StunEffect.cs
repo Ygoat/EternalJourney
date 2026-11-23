@@ -2,6 +2,7 @@ namespace EternalJourney.Common.StatusEffect;
 
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
+using Chickensoft.LogicBlocks;
 using EternalJourney.Common.StatusEffect.State;
 using Godot;
 
@@ -42,7 +43,7 @@ public partial class StunEffect : StatusEffect, IStunEffect
     /// <summary>
     /// スタンバインド
     /// </summary>
-    public StunEffectLogic.IBinding StunEffectBinding { get; set; } = default!;
+    public LogicBlock.Binding StunEffectBinding { get; set; } = default!;
 
     /// <summary>
     /// スタンタイマー
@@ -78,25 +79,25 @@ public partial class StunEffect : StatusEffect, IStunEffect
     public void OnResolved()
     {
         StunEffectBinding
-            .Handle((in StunEffectLogic.Output.Activated _) =>
+            .OnOutput((in StunEffectLogic.Output.Activated _) =>
             {
                 StunTimer.Start();
                 EmitSignal(SignalName.Stunned);
             })
-            .Handle((in StunEffectLogic.Output.Deactivated _) =>
+            .OnOutput((in StunEffectLogic.Output.Deactivated _) =>
             {
                 StunTimer.Stop();
                 StunTimer.WaitTime = StunDuration;
                 EmitSignal(SignalName.StunEnded);
             })
-            .Watch((in StunEffectLogic.Input.Apply _) =>
+            .OnInput((in StunEffectLogic.Input.Apply _) =>
             {
                 // 重ねがけ：タイマーをリセットして延長
                 StunTimer.Stop();
                 StunTimer.WaitTime = StunDuration;
                 StunTimer.Start();
             });
-        StunEffectLogic.Start();
+        StunEffectLogic.Start<StunEffectState.InActive>();
     }
 
     /// <summary>

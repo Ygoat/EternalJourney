@@ -1,6 +1,7 @@
 namespace EternalJourney.App;
 
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.App.Domain;
@@ -61,19 +62,16 @@ public partial class App : CanvasLayer, IApp
     /// <summary>
     /// AppRepoプロバイダー
     /// </summary>
-    /// <returns></returns>
     IAppRepo IProvide<IAppRepo>.Value() => AppRepo;
 
     /// <summary>
     /// クルーCSVリーダ
     /// </summary>
-    /// <returns></returns>
     ICrewCsvReader IProvide<ICrewCsvReader>.Value() => CrewCsvReader;
 
     /// <summary>
     /// シーンインスタンス化部品
     /// </summary>
-    /// <returns></returns>
     IInstantiator IProvide<IInstantiator>.Value() => Instantiator;
 
     /// <summary>
@@ -89,7 +87,7 @@ public partial class App : CanvasLayer, IApp
     /// <summary>
     /// アプリケーションロジックステートバインド
     /// </summary>
-    public AppLogic.IBinding AppBinding { get; set; } = default!;
+    public LogicBlock.Binding AppBinding { get; set; } = default!;
 
     /// <summary>
     /// NodeがReady状態になる前の初期処理
@@ -105,6 +103,9 @@ public partial class App : CanvasLayer, IApp
 
         // メニュー：スタートゲームシグナル受信時のイベント設定
         Menu.StartGame += OnStartGame;
+
+        // メニュー：デバッグモードゲームスタートシグナル受信時のイベント設定
+        Menu.StartDebugGame += OnStartDebugGame;
 
         // アプリケーションレポジトリインスタンス化
         AppRepo = new AppRepo();
@@ -129,53 +130,43 @@ public partial class App : CanvasLayer, IApp
 
         AppBinding
             // ShowSplashScreen（スプラッシュ表示）が出力された時の処理
-            .Handle((in AppLogic.Output.ShowSplashScreen _) =>
+            .OnOutput((in AppLogic.Output.ShowSplashScreen _) =>
             {
-                // 表示されているメニューを閉じる
                 HideMenus();
-                // ブランク画面を閉じる（フェードイン用の画面のためいらない）
                 BlankScreen.Hide();
-                // スプラッシュ表示
                 Splash.Show();
             })
             // HideSplashScreen（スプラッシュ非表示）が出力された時の処理
-            .Handle((in AppLogic.Output.HideSplashScreen _) =>
+            .OnOutput((in AppLogic.Output.HideSplashScreen _) =>
             {
-                // SplashFinished（スプラッシュ完了）を入力
                 AppLogic.Input(new AppLogic.Input.SplashFinished());
             })
             // ShowMainMenu（メインメニュー表示）が出力された時の処理
-            .Handle((in AppLogic.Output.ShowMainMenu _) =>
+            .OnOutput((in AppLogic.Output.ShowMainMenu _) =>
             {
-                // 表示されているメニューを閉じる
                 HideMenus();
-                // メニューを表示する
                 Menu.Show();
             })
             // SetupGameScene（ゲームシーンセットアップ）が出力された時の処理
-            .Handle((in AppLogic.Output.SetupGameScene _) =>
+            .OnOutput((in AppLogic.Output.SetupGameScene _) =>
             {
-                // ゲームシーンをインスタンス化
-                Game = Instantiator.LoadAndInstantiate<Game>(Const.GameNodePath);
+                Game = Instantiator.LoadAndInstantiate<Game>(Const.GAME_NODE_PATH);
             })
             // ShowGame（ゲームシーン表示）が出力された時の処理
-            .Handle((in AppLogic.Output.ShowGame _) =>
+            .OnOutput((in AppLogic.Output.ShowGame _) =>
             {
-                // ビューポートにシーンを表示
                 GameView.AddChildEx(Game);
-                // メニュー非表示
                 HideMenus();
             })
             // RemoveExistingGame（ゲーム終了）が出力された時の処理
-            .Handle((in AppLogic.Output.RemoveExistingGame _) =>
+            .OnOutput((in AppLogic.Output.RemoveExistingGame _) =>
             {
-                // 未実装
-                //   Game.QueueFree();
-                //   Game = default!;
+                Game.QueueFree();
+                Game = default!;
             });
 
         // 初期状態（SplashScreen）開始
-        AppLogic.Start();
+        AppLogic.Start<AppState.SplashScreen>();
     }
 
     /// <summary>
@@ -183,7 +174,15 @@ public partial class App : CanvasLayer, IApp
     /// </summary>
     public void OnStartGame()
     {
-        // StartGame（ゲームスタート）を入力
+        AppLogic.Input(new AppLogic.Input.StartGame());
+    }
+
+    /// <summary>
+    /// デバッグモードゲーム開始イベント
+    /// </summary>
+    public void OnStartDebugGame()
+    {
+        AppRepo.StartDebugMode();
         AppLogic.Input(new AppLogic.Input.StartGame());
     }
 
@@ -194,5 +193,17 @@ public partial class App : CanvasLayer, IApp
     {
         Splash.Hide();
         Menu.Hide();
+    }
+
+    /// <summary>
+    /// ノードがツリーから離脱する時の後始末
+    /// </summary>
+    public void OnTreeExiting()
+    {
+        Menu.StartGame -= OnStartGame;
+        Menu.StartDebugGame -= OnStartDebugGame;
+        AppBinding.Dispose();
+        ((System.IDisposable)AppLogic).Dispose();
+        AppRepo.Dispose();
     }
 }

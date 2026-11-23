@@ -2,6 +2,7 @@ namespace EternalJourney.Enemy.Base;
 
 using System;
 using Chickensoft.AutoInject;
+using Chickensoft.LogicBlocks;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Common.BaseEntity;
@@ -31,6 +32,11 @@ public interface IBaseEnemy : IBaseEntity, IStatusEffectTarget
     /// <param name="shotGlobalPosition"></param>
     /// <param name="shotGlobalAngle"></param>
     public void Spawn(Vector2 spawnGlobalPosition, float spawnGlobalAngle);
+
+    /// <summary>
+    /// ダメージを受ける
+    /// </summary>
+    public void TakeDamage(float damage);
 }
 
 /// <summary>
@@ -44,12 +50,12 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
     /// <summary>
     /// ベースエネミーロジック
     /// </summary>
-    public BaseEnemyLogic BaseEnemyLogic { get; set; } = default!;
+    public IBaseEnemyLogic BaseEnemyLogic { get; set; } = default!;
 
     /// <summary>
     /// ベースエネミーバインド
     /// </summary>
-    public BaseEnemyLogic.IBinding BaseEnemyBinding { get; set; } = default!;
+    public LogicBlock.Binding BaseEnemyBinding { get; set; } = default!;
 
     /// <summary>
     /// ヒットシグナル
@@ -68,33 +74,36 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
     [Dependency]
     public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
 
-    public virtual void OnReady()
+    public override void OnReady()
     {
+        base.OnReady();
         AddChild(StatusEffectReceiverManager);
     }
 
-    public virtual void Setup()
+    public override void Setup()
     {
+        base.Setup();
         BaseEnemyLogic = new BaseEnemyLogic();
         BaseEnemyBinding = BaseEnemyLogic.Bind();
         BaseEnemyLogic.Set(this as IBaseEnemy);
     }
 
-    public virtual void OnResolved()
+    public override void OnResolved()
     {
+        base.OnResolved();
         // DI解決後に依存を設定
         BaseEnemyLogic.Set(BattleRepo);
         StatusEffectReceiverManager.Get<PoisonEffect>()!.Damaged += OnPoisonDamaged;
         StatusEffectReceiverManager.Get<StunEffect>()!.Stunned += OnStunned;
         StatusEffectReceiverManager.Get<StunEffect>()!.StunEnded += OnStunEnded;
         BaseEnemyBinding
-            .Handle((in BaseEnemyLogic.Output.ReduceDurability output) =>
+            .OnOutput((in BaseEnemyLogic.Output.ReduceDurability output) =>
             {
                 Status.CurrentDur = output.ReducedDurability;
             })
-            .Handle((in BaseEnemyLogic.Output.StunStart _) => OnStunStart())
-            .Handle((in BaseEnemyLogic.Output.StunEnd _) => OnStunEnd());
-        BaseEnemyLogic.Start();
+            .OnOutput((in BaseEnemyLogic.Output.StunStart _) => OnStunStart())
+            .OnOutput((in BaseEnemyLogic.Output.StunEnd _) => OnStunEnd());
+        BaseEnemyLogic.Start<BaseEnemyState.DummyState>();
     }
 
     /// <summary>
@@ -125,6 +134,9 @@ public partial class BaseEnemy : BaseEntity, IBaseEnemy, IPoolable
     {
         throw new NotImplementedException();
     }
+
+    public void TakeDamage(float damage) =>
+        BaseEnemyLogic.Input(new BaseEnemyLogic.Input.SPDamage(damage));
 
     private void OnPoisonDamaged(float damage)
     {

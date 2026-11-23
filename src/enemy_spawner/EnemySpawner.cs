@@ -1,12 +1,9 @@
 namespace EternalJourney.EnemySpawner;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.Cores.Repositories;
 using EternalJourney.EnemyFactory;
 using Godot;
 
@@ -37,22 +34,35 @@ public partial class EnemySpawner : Node2D, IEnemySpawner
     public IPathFollow2D PathFollow2D { get; set; } = default!;
 
     /// <summary>
-    /// エネミーファクトリ
+    /// 通常エネミーファクトリ
     /// </summary>
     [Node]
-    public IEnemyFactory EnemyFactory { get; set; } = default!;
+    public IEnemyFactory NormalEnemyFactory { get; set; } = default!;
+
+    /// <summary>
+    /// サインウェーブエネミーファクトリ
+    /// </summary>
+    [Node]
+    public IEnemyFactory SineWaveEnemyFactory { get; set; } = default!;
+
+    /// <summary>
+    /// ホーミングエネミーファクトリ
+    /// </summary>
+    [Node]
+    public IEnemyFactory HomingEnemyFactory { get; set; } = default!;
+
+    /// <summary>
+    /// ストップアンドゴーエネミーファクトリ
+    /// </summary>
+    [Node]
+    public IEnemyFactory StopAndGoEnemyFactory { get; set; } = default!;
     #endregion  Nodes
 
     #region State
     /// <summary>
-    /// エネミー設定リーダー
+    /// エネミーファクトリ一覧（ランダム選択用）
     /// </summary>
-    private readonly EnemyConfigReader _enemyConfigReader = new();
-
-    /// <summary>
-    /// 利用可能なエネミーIDリスト
-    /// </summary>
-    private List<string> _enemyIds = new();
+    private IEnemyFactory[] _enemyFactories = default!;
 
     /// <summary>
     /// 乱数生成器
@@ -81,8 +91,6 @@ public partial class EnemySpawner : Node2D, IEnemySpawner
     public void Initialize()
     {
         this.Provide();
-        // JSONから利用可能なエネミーIDを読み込み
-        _enemyIds = _enemyConfigReader.GetMany().Select(e => e.Id).ToList();
         SetPhysicsProcess(true);
     }
 
@@ -91,6 +99,13 @@ public partial class EnemySpawner : Node2D, IEnemySpawner
     /// </summary>
     public void OnReady()
     {
+        _enemyFactories = new[]
+        {
+            NormalEnemyFactory,
+            SineWaveEnemyFactory,
+            HomingEnemyFactory,
+            StopAndGoEnemyFactory,
+        };
     }
 
     /// <summary>
@@ -102,22 +117,17 @@ public partial class EnemySpawner : Node2D, IEnemySpawner
         // Path2D経路上の進行度を更新
         PathFollow2D.ProgressRatio += (float)delta;
 
-        // JSONから読み込んだエネミーをランダムにスポーン
-        string enemyId = GetRandomEnemyId();
-        EnemyFactory.SpawnEnemy(enemyId);
+        // エネミーファクトリをランダムに選んでスポーン
+        GetRandomEnemyFactory().SpawnEnemy();
     }
 
     /// <summary>
-    /// ランダムなエネミーIDを取得
+    /// ランダムなエネミーファクトリを取得
     /// </summary>
-    /// <returns>エネミーID</returns>
-    private string GetRandomEnemyId()
+    /// <returns>エネミーファクトリ</returns>
+    private IEnemyFactory GetRandomEnemyFactory()
     {
-        if (_enemyIds.Count == 0)
-        {
-            return "normal_enemy";
-        }
-        int index = _random.Next(_enemyIds.Count);
-        return _enemyIds[index];
+        int index = _random.Next(_enemyFactories.Length);
+        return _enemyFactories[index];
     }
 }
