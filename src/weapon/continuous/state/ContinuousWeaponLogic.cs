@@ -3,6 +3,8 @@ namespace EternalJourney.Weapon.Continuous.State;
 using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
+using EternalJourney.Battle.Domain;
+using EternalJourney.Cores.Models.Research;
 
 /// <summary>
 /// 継続照射武器ロジックインターフェース
@@ -132,17 +134,21 @@ public abstract partial record ContinuousWeaponState : LogicBlockState
         public Type On(in ContinuousWeaponLogic.Input.PhysicsProcess input)
         {
             ContinuousWeaponLogic.Settings settings = Get<ContinuousWeaponLogic.Settings>();
+            ResearchBonus research = Get<IBattleRepo>().Research.Value;
             float delta = (float)input.Delta;
+            // 研究効果（射程延長・連射強化）を反映する
+            float maxReach = settings.MaxReach * research.ReachMultiplier;
+            float damageInterval = settings.DamageInterval * research.FireIntervalMultiplier;
 
             // 到達距離は一定速度で伸び、最大距離と障害物の手前で止まる
-            _reach = Math.Min(_reach + settings.ExtendSpeed * delta, settings.MaxReach);
+            _reach = Math.Min(_reach + settings.ExtendSpeed * delta, maxReach);
             _reach = Math.Min(_reach, input.ObstructionDistance);
             Output(new ContinuousWeaponLogic.Output.ReachChanged(_reach));
 
             _damageElapsed += delta;
-            if (_damageElapsed >= settings.DamageInterval)
+            if (_damageElapsed >= damageInterval)
             {
-                _damageElapsed -= settings.DamageInterval;
+                _damageElapsed -= damageInterval;
                 Output(new ContinuousWeaponLogic.Output.DamageTick());
             }
             return ToSelf();

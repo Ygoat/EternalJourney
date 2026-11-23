@@ -8,6 +8,7 @@ using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.BattleUI.State;
 using EternalJourney.Cores.Models.Skill;
+using EternalJourney.ResearchUI;
 using EternalJourney.Game.Domain;
 using EternalJourney.SkillButton;
 using EternalJourney.Skills;
@@ -45,6 +46,13 @@ public partial class BattleUI : Control, IBattleUI
     /// <summary>スクラップラベル</summary>
     [Node]
     public ILabel ScrapLabel { get; set; } = default!;
+
+    /// <summary>取得済み研究カード一覧</summary>
+    [Node]
+    public IVBoxContainer AcquiredCardList { get; set; } = default!;
+
+    /// <summary>取得済みカード一覧の文字サイズ</summary>
+    private const int ACQUIRED_FONT_SIZE = 16;
 
     /// <summary>スキルボタン1</summary>
     [Node]
@@ -158,6 +166,17 @@ public partial class BattleUI : Control, IBattleUI
             {
                 LeftSPGauge.AnchorRight = output.Ratio;
                 SPButton.Disabled = output.Ratio < 1.0f;
+            })
+            .OnOutput((in BattleUILogic.Output.SkillCooldownChanged output) =>
+            {
+                foreach (ISkillButton button in new[] { SkillButton1, SkillButton2, SkillButton3, SkillButton4 })
+                {
+                    button.SetCooldownMultiplier(output.Multiplier);
+                }
+            })
+            .OnOutput((in BattleUILogic.Output.AcquiredCardsChanged output) =>
+            {
+                SetAcquiredCards(output.Rows);
             });
         SPButton.Pressed += OnSPButtonPressed;
         SPButton.Disabled = true;
@@ -172,6 +191,29 @@ public partial class BattleUI : Control, IBattleUI
     public void SetScrapLabel(int scrap)
     {
         ScrapLabel.Text = $"Scrap: {scrap}";
+    }
+
+    /// <summary>
+    /// 取得済み研究カード一覧を作り直す
+    /// </summary>
+    public void SetAcquiredCards(IReadOnlyList<BattleUILogic.AcquiredCardRow> rows)
+    {
+        foreach (Node child in AcquiredCardList.GetChildren())
+        {
+            AcquiredCardList.RemoveChild(child);
+            child.QueueFree();
+        }
+        foreach (BattleUILogic.AcquiredCardRow row in rows)
+        {
+            var label = new Label
+            {
+                Text = row.Text,
+                Modulate = ResearchCardStyle.RarityColor(row.Rarity),
+                MouseFilter = MouseFilterEnum.Ignore,
+            };
+            label.AddThemeFontSizeOverride("font_size", ACQUIRED_FONT_SIZE);
+            AcquiredCardList.AddChild(label);
+        }
     }
 
     public void SetScoreLabel(int score)

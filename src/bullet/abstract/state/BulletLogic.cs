@@ -129,6 +129,16 @@ public abstract partial record BulletState : LogicBlockState
             float spd = baseBullet.Status.Spd * battleRepo.BulletSpdMultiplier;
             Output(new BulletLogic.Output.SpdUpdated(spd));
 
+            // プレイヤーの弾は研究の貫通強化だけ耐久（＝貫通できる回数）を増やす
+            if (baseBullet.IsPlayerOwned)
+            {
+                int pierce = battleRepo.Research.Value.PierceBonus;
+                if (pierce > 0)
+                {
+                    Output(new BulletLogic.Output.CurrentDurChange(baseBullet.Status.CurrentDur + pierce));
+                }
+            }
+
             // 事前確保済みのInFlightステートに発射情報を設定してから遷移
             InFlight inFlight = Get<InFlight>();
             inFlight.ShotGlobalPosition = input.ShotGlobalPosition;

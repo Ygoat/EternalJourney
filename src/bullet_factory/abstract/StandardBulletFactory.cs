@@ -71,6 +71,12 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     [Export]
     public float BulletScale { get; set; } = 1.0f;
 
+    /// <summary>
+    /// 多連射時の弾同士の角度差（度）
+    /// </summary>
+    [Export]
+    public float MultiShotSpreadDeg { get; set; } = 8f;
+
     #endregion Exports
 
     #region Dependencies
@@ -183,10 +189,30 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
             return;
         }
 
+        // プレイヤーの弾は研究の多連射で同時に複数発撃つ（扇状に角度をずらす）
+        int shots = IsPlayerBullet ? 1 + BattleRepo.Research.Value.ExtraShots : 1;
+        float spread = Mathf.DegToRad(MultiShotSpreadDeg);
+        for (int i = 0; i < shots; i++)
+        {
+            float offset = (i - (shots - 1) / 2f) * spread;
+            if (!EmitOne(GlobalRotation + offset))
+            {
+                return;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 弾丸を1発射出する
+    /// </summary>
+    /// <param name="globalRotation">射出角度</param>
+    /// <returns>プールから取得できたか</returns>
+    private bool EmitOne(float globalRotation)
+    {
         // プールから弾丸を取得
         StandardBullet? bullet = AcquireFromPool();
         if (bullet == null)
-            return;
+            return false;
 
         // 陣営ごとのコリジョンレイヤーを適用（敵味方の弾が互いに当たらないようにする）
         bullet.CollisionLayer = IsPlayerBullet ? CollisionEntity.PlayerBullet : CollisionEntity.EnemyBullet;
@@ -201,7 +227,8 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         GetBulletContainer().AddChild(bullet);
 
         // 弾丸射出
-        bullet.Emit(GlobalPosition, GlobalRotation);
+        bullet.Emit(GlobalPosition, globalRotation);
+        return true;
     }
 
     /// <summary>

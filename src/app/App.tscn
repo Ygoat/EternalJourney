@@ -8,6 +8,7 @@
 script = ExtResource("1_tus4s")
 
 [node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+process_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -16,6 +17,7 @@ grow_vertical = 2
 
 [node name="GameView" type="SubViewport" parent="SubViewportContainer"]
 unique_name_in_owner = true
+process_mode = 1
 handle_input_locally = false
 size = Vector2i(720, 1280)
 render_target_update_mode = 4

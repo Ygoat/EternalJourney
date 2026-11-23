@@ -1,8 +1,11 @@
 namespace EternalJourney.Battle.Domain;
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Chickensoft.Sync.Primitives;
 using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Cores.Models.Research;
 using EternalJourney.Enemy.Base;
 
 /// <summary>
@@ -45,6 +48,47 @@ public interface IBattleRepo : IDisposable
     /// スクラップ所持数（バトル中のみ保持）
     /// </summary>
     public IAutoValue<int> Scrap { get; }
+
+    /// <summary>
+    /// 次回の研究コスト（スクラップ）
+    /// </summary>
+    public IAutoValue<int> ResearchCost { get; }
+
+    /// <summary>
+    /// 研究による累計強化値
+    /// </summary>
+    public IAutoValue<ResearchBonus> Research { get; }
+
+    /// <summary>
+    /// 取得済みの研究カード一覧
+    /// </summary>
+    public IAutoValue<IReadOnlyList<AcquiredCard>> AcquiredCards { get; }
+
+    /// <summary>
+    /// 研究開始イベント
+    /// </summary>
+    public event Action? ResearchStarted;
+
+    /// <summary>
+    /// 研究による強化値の変化イベント（AutoValue を購読しないプール運用ノード向け）
+    /// </summary>
+    public event Action? ResearchChanged;
+
+    /// <summary>
+    /// スクラップが足りれば消費して研究を開始する
+    /// </summary>
+    /// <returns>開始できたか</returns>
+    public bool TryStartResearch();
+
+    /// <summary>
+    /// 選択した研究カードの効果を適用する
+    /// </summary>
+    public void ApplyResearchCard(ResearchCard card);
+
+    /// <summary>
+    /// SPスキルのダメージ（研究効果込み）を計算する
+    /// </summary>
+    public float CalcSpSkillDamage(float baseDamage);
 
     /// <summary>
     /// 弾丸がヒットした際に呼び出されるイベント
@@ -232,6 +276,52 @@ public class BattleRepo : IBattleRepo
     private readonly AutoValue<int> _scrap;
 
     /// <summary>
+    /// 初回の研究コスト
+    /// </summary>
+    public const int INITIAL_RESEARCH_COST = 10;
+
+    /// <summary>
+    /// 研究1回ごとのコスト増加量
+    /// </summary>
+    public const int RESEARCH_COST_STEP = 5;
+
+    /// <summary>
+    /// 撃破1体あたりの基本SP獲得量（%）
+    /// </summary>
+    public const float BASE_SP_GAIN = 5f;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public IAutoValue<int> ResearchCost => _researchCost;
+
+    private readonly AutoValue<int> _researchCost = new(INITIAL_RESEARCH_COST);
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public IAutoValue<ResearchBonus> Research => _research;
+
+    private readonly AutoValue<ResearchBonus> _research = new(new ResearchBonus());
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public IAutoValue<IReadOnlyList<AcquiredCard>> AcquiredCards => _acquiredCards;
+
+    private readonly AutoValue<IReadOnlyList<AcquiredCard>> _acquiredCards = new(Array.Empty<AcquiredCard>());
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? ResearchStarted;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? ResearchChanged;
+
+    /// <summary>
     /// <inheritdoc/>
     /// </summary>
     public event Action<IBaseBullet>? BulletHittingStarted;
@@ -328,6 +418,49 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    public bool TryStartResearch()
+    {
+        int cost = _researchCost.Value;
+        if (_scrap.Value < cost)
+        {
+            return false;
+        }
+        _scrap.Value = _scrap.Value - cost;
+        _researchCost.Value = cost + RESEARCH_COST_STEP;
+        ResearchStarted?.Invoke();
+        return true;
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void ApplyResearchCard(ResearchCard card)
+    {
+        // 同じ種類・レアリティは回数を加算し、新しいリストとして公開する（AutoValue の変化検知のため）
+        List<AcquiredCard> list = _acquiredCards.Value.ToList();
+        int index = list.FindIndex(c => c.Type == card.Type && c.Rarity == card.Rarity);
+        if (index >= 0)
+        {
+            list[index] = list[index] with { Count = list[index].Count + 1 };
+        }
+        else
+        {
+            list.Add(new AcquiredCard(card.Type, card.Rarity, 1));
+        }
+        _acquiredCards.Value = list;
+        _research.Value = _research.Value.Apply(card);
+        ResearchChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public float CalcSpSkillDamage(float baseDamage) =>
+        baseDamage * (1f + _research.Value.SpDamageRate);
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public void StartBulletHitting(IBaseBullet baseBullet)
     {
         BulletHittingStarted?.Invoke(baseBullet);
@@ -346,7 +479,7 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public void OnEnemyDestroyed(IBaseEnemy baseEnemy)
     {
-        _spPercent = Math.Min(100f, _spPercent + 5f);
+        _spPercent = Math.Min(100f, _spPercent + BASE_SP_GAIN * (1f + _research.Value.SpGainRate));
         SpPercentChanged?.Invoke(_spPercent);
         EnemyDestroyed?.Invoke(baseEnemy);
     }
@@ -388,13 +521,14 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public void RequestShipHeal(float amount)
     {
-        ShipHealRequested?.Invoke(amount);
+        // スキルによる回復だけがここを通るため、研究の回復強化を掛ける
+        ShipHealRequested?.Invoke(amount * (1f + _research.Value.HealRate));
     }
 
     public float ReduceEnemyDurability(float curDurability, float bulletAtk, float bulletDef, float enemyDef)
     {
         float baseDamage = (bulletAtk * BulletAtkMultiplier) * WeaponAtkMultiplier;
-        float shipCorrected = baseDamage * (1f + ShipAtkBonus);
+        float shipCorrected = baseDamage * (1f + ShipAtkBonus) * (1f + _research.Value.AtkRate);
         float effectiveDef = Math.Max(0f, enemyDef - (bulletDef + BulletDefBonus));
         float finalDamage = shipCorrected * (100f / (100f + effectiveDef));
         return curDurability - finalDamage;
@@ -416,6 +550,9 @@ public class BattleRepo : IBattleRepo
                 _score.Dispose();
                 _numEnemyDestroyed.Dispose();
                 _scrap.Dispose();
+                _researchCost.Dispose();
+                _research.Dispose();
+                _acquiredCards.Dispose();
             }
 
             _disposedValue = true;

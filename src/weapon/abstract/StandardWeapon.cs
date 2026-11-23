@@ -168,6 +168,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         StandardWeaponLogic.Start<StandardWeaponState.Idle>();
 
         BattleRepo.WeaponSpdMultiplierChanged += UpdateWaitTime;
+        BattleRepo.ResearchChanged += UpdateWaitTime;
         UpdateWaitTime();
     }
 
@@ -221,7 +222,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     private void UpdateWaitTime()
     {
         StandardBulletFactory.WaitTime = IsPlayerOwned
-            ? Status.Spd / BattleRepo.WeaponSpdMultiplier
+            ? Status.Spd / BattleRepo.WeaponSpdMultiplier * BattleRepo.Research.Value.FireIntervalMultiplier
             : Status.Spd;
     }
 

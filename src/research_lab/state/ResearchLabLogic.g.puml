@@ -1,0 +1,9 @@
+@startuml ResearchLabState
+state "ResearchLabState" as EternalJourney_ResearchLab_State_ResearchLabState {
+  state "Watching" as EternalJourney_ResearchLab_State_ResearchLabState_Watching
+}
+
+EternalJourney_ResearchLab_State_ResearchLabState_Watching --> EternalJourney_ResearchLab_State_ResearchLabState_Watching : Pressed
+
+EternalJourney_ResearchLab_State_ResearchLabState_Watching : Notify() → AvailabilityChanged
+@enduml

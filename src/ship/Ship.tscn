@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://brbkk7msm1p13"]
+[gd_scene load_steps=11 format=3 uid="uid://brbkk7msm1p13"]
 
 [ext_resource type="Script" path="res://src/ship/Ship.cs" id="1_78rl6"]
 [ext_resource type="PackedScene" uid="uid://hce48dum5bam" path="res://src/common/base_entity/BaseEntity.tscn" id="1_y0q76"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://src/weapon/06_FlameWeapon.tscn" id="8_flame"]
 [ext_resource type="Texture2D" uid="uid://tew8q5534ewg" path="res://assets/Ship.png" id="5_ylh8n"]
 [ext_resource type="PackedScene" path="res://src/magnet_pulse/MagnetPulse.tscn" id="6_pulse"]
+[ext_resource type="PackedScene" path="res://src/research_lab/ResearchLab.tscn" id="7_lab"]
 
 [sub_resource type="Resource" id="Resource_qo710"]
 script = ExtResource("3_lsy2c")
@@ -66,3 +67,5 @@ position = Vector2(90, 154)
 scale = Vector2(2, 2)
 
 [node name="MagnetPulse" parent="." instance=ExtResource("6_pulse")]
+
+[node name="ResearchLab" parent="." instance=ExtResource("7_lab")]

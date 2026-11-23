@@ -34,9 +34,14 @@ public abstract partial class StatusUpSkillBase : Node, ISkillNode
     protected abstract void ApplyEffect(int stackCount);
     protected abstract void ResetEffect();
 
+    /// <summary>
+    /// バフの基本持続時間（秒）
+    /// </summary>
+    public const float BASE_BUFF_DURATION = 10.0f;
+
     public void OnResolved()
     {
-        BuffTimer.WaitTime = 10.0f;
+        BuffTimer.WaitTime = BASE_BUFF_DURATION;
         BuffTimer.OneShot = true;
         BuffTimer.Timeout += () => Logic.Input(new StatusUpSkillLogic.Input.Remove());
         Logic.Set(new StatusUpSkillLogic.StackState());
@@ -45,6 +50,8 @@ public abstract partial class StatusUpSkillBase : Node, ISkillNode
             {
                 ApplyEffect(o.StackCount);
                 BuffTimer.Stop();
+                // 研究の効果延長を発動時点で反映する
+                BuffTimer.WaitTime = BASE_BUFF_DURATION + BattleRepo.Research.Value.BuffDuration;
                 BuffTimer.Start();
             })
             .OnOutput((in StatusUpSkillLogic.Output.Deactivated _) => ResetEffect());

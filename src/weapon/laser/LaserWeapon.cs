@@ -89,6 +89,8 @@ public partial class LaserWeapon : ContinuousWeapon, ILaserWeapon
             return float.PositiveInfinity;
         }
 
+        // 研究の射程延長を反映した長さで探す
+        Ray.TargetPosition = new Vector2(MaxReach * BattleRepo.Research.Value.ReachMultiplier, 0f);
         Ray.ForceRaycastUpdate();
         if (!Ray.IsColliding())
         {

@@ -6,6 +6,7 @@ using Chickensoft.AutoInject;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
+using EternalJourney.Battle.Domain;
 using EternalJourney.Radar;
 using EternalJourney.Weapon.Abstract.Base;
 using EternalJourney.Weapon.Continuous.State;
@@ -113,6 +114,14 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
     public ContinuousDamageArea DamageArea { get; set; } = default!;
     #endregion Nodes
 
+    #region Dependencies
+    /// <summary>
+    /// バトルリポジトリ（研究効果の参照に使う）
+    /// </summary>
+    [Dependency]
+    public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
+    #endregion Dependencies
+
     public override void Setup()
     {
         base.Setup();
@@ -125,6 +134,7 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
         base.OnResolved();
 
         ContinuousWeaponLogic.Set(new ContinuousWeaponLogic.Settings(ExtendSpeed, MaxReach, DamageInterval));
+        ContinuousWeaponLogic.Set(BattleRepo);
 
         // 継続ダメージ判定に効果を伝える
         DamageArea.Atk = Atk;

@@ -12,7 +12,7 @@ EternalJourney_Bullet_Abstract_State_BulletState_EmitWait --> EternalJourney_Bul
 EternalJourney_Bullet_Abstract_State_BulletState_InFlight --> EternalJourney_Bullet_Abstract_State_BulletState_EmitWait : Miss
 
 EternalJourney_Bullet_Abstract_State_BulletState_Blast : OnBlastTimerTimeout → RemoveSelf
-EternalJourney_Bullet_Abstract_State_BulletState_EmitWait : OnEmit → SpdUpdated
+EternalJourney_Bullet_Abstract_State_BulletState_EmitWait : OnEmit → CurrentDurChange, SpdUpdated
 EternalJourney_Bullet_Abstract_State_BulletState_InFlight : CheckUnderZeroDurability() → Collapse, RemoveSelf
 EternalJourney_Bullet_Abstract_State_BulletState_InFlight : OnEnemyHit → CurrentDurChange
 EternalJourney_Bullet_Abstract_State_BulletState_InFlight : OnMiss → RemoveSelf

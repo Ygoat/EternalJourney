@@ -19,6 +19,14 @@ public partial class SpSkillEffectArea : Area2D, ISpSkillEffectArea
 {
     public override void _Notification(int what) => this.Notify(what);
 
+    #region Exports
+    /// <summary>
+    /// SPスキルの基本ダメージ
+    /// </summary>
+    [Export]
+    public float Damage { get; set; } = 100f;
+    #endregion Exports
+
     #region Nodes
     [Node]
     public CollisionShape2D CollisionShape2D { get; set; } = default!;
@@ -59,7 +67,7 @@ public partial class SpSkillEffectArea : Area2D, ISpSkillEffectArea
         {
             return;
         }
-        enemy.TakeDamage(100f);
+        enemy.TakeDamage(BattleRepo.CalcSpSkillDamage(Damage));
         enemy.StatusEffectReceiverManager.Get<StunEffect>()?.Apply();
     }
 

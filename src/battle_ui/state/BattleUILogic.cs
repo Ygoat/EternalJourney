@@ -1,10 +1,12 @@
 namespace EternalJourney.BattleUI.State;
 
 using System;
+using System.Collections.Generic;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using Chickensoft.Sync.Primitives;
 using EternalJourney.Battle.Domain;
+using EternalJourney.Cores.Models.Research;
 using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Game.Domain;
 using EternalJourney.SkillButton;
@@ -88,6 +90,36 @@ public partial class BattleUILogic : LogicBlock, IBattleUILogic
         /// SPパーセント変化
         /// </summary>
         public readonly record struct SpPercentChanged(float Ratio);
+
+        /// <summary>
+        /// スキルのクールダウン倍率変化（研究効果）
+        /// </summary>
+        public readonly record struct SkillCooldownChanged(float Multiplier);
+
+        /// <summary>
+        /// 取得済み研究カードの変化
+        /// </summary>
+        public readonly record struct AcquiredCardsChanged(IReadOnlyList<AcquiredCardRow> Rows);
+    }
+
+    /// <summary>
+    /// 取得済みカード一覧の1行分の表示内容
+    /// </summary>
+    public readonly record struct AcquiredCardRow(string Text, ResearchRarity Rarity);
+
+    /// <summary>
+    /// 取得済みカードを一覧の表示行に変換する
+    /// </summary>
+    public static IReadOnlyList<AcquiredCardRow> ToRows(IReadOnlyList<AcquiredCard> cards)
+    {
+        var rows = new AcquiredCardRow[cards.Count];
+        for (int i = 0; i < cards.Count; i++)
+        {
+            AcquiredCard card = cards[i];
+            string name = ResearchCardCatalog.Get(card.Type).Name;
+            rows[i] = new AcquiredCardRow($"[{ResearchCardCatalog.RarityLabel(card.Rarity)}] {name} ×{card.Count}", card.Rarity);
+        }
+        return rows;
     }
 
     // 不必要なヒープの割り当てを減らすために、入力と出力は読み取り専用のレコード構造体（readonly record struct）にすべき
@@ -143,6 +175,16 @@ public abstract partial record BattleUIState : LogicBlockState
         /// </summary>
         private AutoValue<int>.Binding? _scrapBinding;
 
+        /// <summary>
+        /// 研究効果購読用バインディング
+        /// </summary>
+        private AutoValue<ResearchBonus>.Binding? _researchBinding;
+
+        /// <summary>
+        /// 取得済みカード購読用バインディング
+        /// </summary>
+        private AutoValue<IReadOnlyList<AcquiredCard>>.Binding? _acquiredBinding;
+
         public Active()
         {
             this.OnEnter(() =>
@@ -153,6 +195,10 @@ public abstract partial record BattleUIState : LogicBlockState
                 _scoreBinding.OnValue(OnScoreCountUp);
                 _scrapBinding = battleRepo.Scrap.Bind();
                 _scrapBinding.OnValue(OnScrapCountUp);
+                _researchBinding = battleRepo.Research.Bind();
+                _researchBinding.OnValue(OnResearchChanged);
+                _acquiredBinding = battleRepo.AcquiredCards.Bind();
+                _acquiredBinding.OnValue(OnAcquiredCardsChanged);
                 battleRepo.ShipHpChanged += OnShipHpChanged;
                 battleRepo.GameOverOccurred += OnGameOver;
                 battleRepo.SpPercentChanged += OnSpPercentChanged;
@@ -164,6 +210,10 @@ public abstract partial record BattleUIState : LogicBlockState
                 _scoreBinding = null;
                 _scrapBinding?.Dispose();
                 _scrapBinding = null;
+                _researchBinding?.Dispose();
+                _researchBinding = null;
+                _acquiredBinding?.Dispose();
+                _acquiredBinding = null;
                 battleRepo.ShipHpChanged -= OnShipHpChanged;
                 battleRepo.GameOverOccurred -= OnGameOver;
                 battleRepo.SpPercentChanged -= OnSpPercentChanged;
@@ -175,6 +225,12 @@ public abstract partial record BattleUIState : LogicBlockState
 
         public void OnScrapCountUp(int currentScrap) =>
             Output(new BattleUILogic.Output.ScrapChanged(currentScrap));
+
+        public void OnResearchChanged(ResearchBonus bonus) =>
+            Output(new BattleUILogic.Output.SkillCooldownChanged(bonus.CooldownMultiplier));
+
+        public void OnAcquiredCardsChanged(IReadOnlyList<AcquiredCard> cards) =>
+            Output(new BattleUILogic.Output.AcquiredCardsChanged(BattleUILogic.ToRows(cards)));
 
         public void OnShipHpChanged(float currentHp, float maxHp) =>
             Output(new BattleUILogic.Output.ShipHpChanged(CalcHpGaugeRatio(currentHp, maxHp)));

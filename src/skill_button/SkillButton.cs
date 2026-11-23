@@ -13,6 +13,11 @@ public interface ISkillButton : IControl
     public event SkillButton.ActivatedEventHandler Activated;
 
     void SetLabel(string text);
+
+    /// <summary>
+    /// クールダウンの倍率を設定する（次回の発動から反映）
+    /// </summary>
+    void SetCooldownMultiplier(float multiplier);
 }
 
 [Meta(typeof(IAutoNode))]
@@ -25,6 +30,12 @@ public partial class SkillButton : Control, ISkillButton
     /// </summary>
     [Signal]
     public delegate void ActivatedEventHandler();
+
+    /// <summary>
+    /// 基本クールダウン（秒）
+    /// </summary>
+    [Export]
+    public float BaseCooldown { get; set; } = 5f;
 
     [Node]
     public ITimer Timer { get; set; } = default!;
@@ -56,7 +67,8 @@ public partial class SkillButton : Control, ISkillButton
     {
         Button.Pressed += OnPressed;
         Timer.OneShot = true;
-        Timer.WaitTime = 5;
+        _cooldown = BaseCooldown;
+        Timer.WaitTime = _cooldown;
         Timer.Timeout += OnTimerTimeout;
     }
 
@@ -70,6 +82,7 @@ public partial class SkillButton : Control, ISkillButton
     {
         EmitSignal(SignalName.Activated);
         Button.Disabled = true;
+        Timer.WaitTime = _cooldown;
         Timer.Start();
         Control.Show();
         CooldownLabel.Text = Timer.TimeLeft.ToString();
@@ -84,6 +97,17 @@ public partial class SkillButton : Control, ISkillButton
     }
 
     public void SetLabel(string text) => ButtonLabel.Text = text;
+
+    public void SetCooldownMultiplier(float multiplier)
+    {
+        // クールダウン中に変えると残り時間表示の比率が崩れるため、次回の発動時に反映する
+        _cooldown = BaseCooldown * multiplier;
+    }
+
+    /// <summary>
+    /// 次回の発動で使うクールダウン（秒）
+    /// </summary>
+    private float _cooldown;
 
     private float CalcRectHeightRatio(double waitTime, double timeLeft)
     {

@@ -8,4 +8,5 @@ EternalJourney_Ship_State_ShipState_Alive --> EternalJourney_Ship_State_ShipStat
 
 EternalJourney_Ship_State_ShipState_Alive : ApplyDamage() → Dead, HpChanged
 EternalJourney_Ship_State_ShipState_Alive : ApplyHeal() → HpChanged
+EternalJourney_Ship_State_ShipState_Alive : OnResearchChanged() → HpChanged
 @enduml

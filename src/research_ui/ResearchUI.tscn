@@ -1,0 +1,71 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/research_ui/ResearchUI.cs" id="1_rui"]
+
+[node name="ResearchUI" type="CanvasLayer"]
+process_mode = 3
+layer = 10
+script = ExtResource("1_rui")
+
+[node name="Root" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Overlay" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="Center" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Root/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "研究中..."
+horizontal_alignment = 1
+
+[node name="Spinner" type="ColorRect" parent="Root/Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+pivot_offset = Vector2(40, 40)
+color = Color(0.3, 1, 0.7, 0.9)
+
+[node name="ProgressBar" type="ProgressBar" parent="Root/Center"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(400, 20)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+max_value = 1.0
+step = 0.001
+show_percentage = false
+
+[node name="CardList" type="HBoxContainer" parent="Root/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 1
