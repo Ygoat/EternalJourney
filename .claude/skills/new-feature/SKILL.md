@@ -22,6 +22,7 @@ EternalJourney の規約に沿って新機能一式を作成する手順。詳�
    - 子ノードは `[Node]` + インターフェース型（`ICollisionShape2D` 等、具象型は使わない）
    - Logic はインターフェース型（`I{Feature}Logic`）で保持する
    - **View に条件分岐によるゲームルールを書かない**。判断はすべて LogicBlock へ、横断ルールは Repo へ
+   - **表示用データは Logic が作って Output で渡す**。View でマスタ/カタログを参照したり `$"..."` で表示文字列を組み立てたりしない。View の仕事は Godot ノードの生成と Godot 型（`Color` 等）の適用だけ
 
 3. **ライフサイクルの分担を守る**:
    - `Setup()`: Logic の生成・`Bind()`（DI 依存には触らない）
@@ -49,6 +50,7 @@ EternalJourney の規約に沿って新機能一式を作成する手順。詳�
 - 最小の LogicBlock 例: `src/common/status_effect/state/StunEffectLogic.cs`
 - View + Logic の分離: `src/ship/Ship.cs` + `src/ship/state/ShipLogic.cs`
 - AutoValue 購読（OnEnter/OnExit）: `src/battle_ui/state/BattleUILogic.cs` の `Active` ステート
+- 表示用データへの変換: `BattleUILogic.ToRows`（取得カード → `AcquiredCardRow`）と `BattleUI.SetAcquiredCards`
 - 遷移前にステートへ値を渡す: `src/bullet/abstract/state/BulletLogic.cs`（EmitWait → InFlight）
 - Repo イベント連携: `src/battle/domain/BattleRepo.cs` と `src/game/state/GameLogic.cs`
 - ストラテジー切替: `src/bullet/strategies/` + `data/masters/BulletConfig.json`

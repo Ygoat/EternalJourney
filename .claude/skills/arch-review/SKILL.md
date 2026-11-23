@@ -15,7 +15,7 @@ description: 現在の差分（またはブランチ）を EternalJourney のア
 
 ## チェックリスト
 
-1. **View にロジックがないか** — 条件分岐によるゲームルール判定・ダメージ計算・スポーン判定などが View（Node派生クラス）にあれば LogicBlock / Repo へ移すよう指摘。`OnPhysicsProcess` 内の判断ロジックは特に注意。
+1. **View にロジックがないか** — 条件分岐によるゲームルール判定・ダメージ計算・スポーン判定などが View（Node派生クラス）にあれば LogicBlock / Repo へ移すよう指摘。`OnPhysicsProcess` 内の判断ロジックは特に注意。View 内の `XxxCatalog.Get` / `XxxConfigReader` 参照や、`$"..."` による表示文字列の組み立ても指摘し、Logic で表示用データ（文字列・行モデル）に変換して Output で渡すよう推奨する（例: `BattleUILogic.ToRows`）。
 2. **状態 vs フラグ** — 新しい bool フラグ（`_isDead`, `CanAttack`, `IsLoading` 等）は「状態」ではないか。状態なら LogicBlock の record 状態として表現させる。
 3. **メッセージ型** — Input/Output が `readonly record struct` か。ハンドラは `in` 引数か。
 4. **インターフェース** — 新しいノード・Logic・Repo に `I` プレフィックスのインターフェースがあるか。View が Logic/子ノードを具象型で保持していないか（テスト容易性）。
@@ -36,5 +36,5 @@ description: 現在の差分（またはブランチ）を EternalJourney のア
 ## 重大度の目安
 
 - **高**: Dispose 漏れ（リーク）、View へのルール直書き、Logic 間直接参照、ステートの `Set` 漏れ、OnEnter/OnExit の購読順序の誤り
-- **中**: bool フラグ状態、具象型依存、Setup での DI 使用
+- **中**: bool フラグ状態、具象型依存、Setup での DI 使用、View でのマスタ参照・表示文字列の組み立て
 - **低**: 命名・タイポ・マジックナンバー・デバッグ残骸

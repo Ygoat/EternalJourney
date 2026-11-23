@@ -108,8 +108,8 @@ end note
 
 | 層 | 実体 | 持つもの | 持たないもの |
 | --- | --- | --- | --- |
-| View | `Node` 派生 + `[Meta(typeof(IAutoNode))]` | シグナル受信、`Logic.Input()` 転送、`OnOutput` での表示更新、Godot API 呼び出し | 条件分岐によるゲームルール、状態フラグ |
-| Logic | `LogicBlock` 派生 + 状態 record 群(`XState : LogicBlockState`) | 状態遷移、ゲームルール、`Output()` 発行、Repo 呼び出し | Godot ノード操作(インターフェース経由の読み取りは可) |
+| View | `Node` 派生 + `[Meta(typeof(IAutoNode))]` | シグナル受信、`Logic.Input()` 転送、`OnOutput` での表示更新、Godot API 呼び出し | 条件分岐によるゲームルール、状態フラグ、マスタ/カタログの参照、表示文字列の組み立て |
+| Logic | `LogicBlock` 派生 + 状態 record 群(`XState : LogicBlockState`) | 状態遷移、ゲームルール、`Output()` 発行、Repo 呼び出し、表示用データ(文字列・行モデル等)への変換 | Godot ノード操作(インターフェース経由の読み取りは可) |
 | Domain | POCO(`IDisposable`) | 横断的な状態(`AutoValue`)、ドメインイベント(`AutoChannel`)、純粋ロジック | シーンツリーへの参照、View の知識 |
 
 ---
@@ -212,6 +212,8 @@ GameView -> GameView : WinMenu.Show(); WinMenu.FadeIn()
 
 - View → Logic は `Input`(`readonly record struct`)のみ。
 - Logic → View は `Output`(`readonly record struct`)のみ。ハンドラは `(in Output.X output) => ...`。
+- Output には表示にそのまま使える値(文字列・比率・行モデル)を載せる。マスタ/カタログの参照や `$"..."` による文字列の組み立ては Logic で行い、View は Godot ノードの生成と Godot 型(`Color` 等)の適用だけを行う。
+  - 例: `BattleUILogic.ToRows` が取得カードを `AcquiredCardRow(Text, Rarity)` に変換し、`BattleUI.SetAcquiredCards` は Label を並べて色を当てるだけ
 - Logic 同士は直接参照しない。Repo の `AutoChannel`(イベント)/ `AutoValue<T>`(観測可能値)を介す。
 - Repo の購読は、それを必要とするステートの `OnEnter` で登録し、`OnExit` で解除する。こうすると、そのステートにいる間だけイベントが届く。
   - `OnEnter` では **購読を先に登録し、その後 `Output`** する。`Output` を受けた View が同期的に Repo イベントを起こすことがあり、購読が後だとその遷移入力を取りこぼす。
@@ -822,7 +824,7 @@ public void MovesOnMoveOutput()
 
 このアーキテクチャ基準でのレビュー観点(全項目がプロジェクト内の実例に基づく):
 
-- [ ] **View にロジックがないか** — 条件分岐・ルール判定が View にあれば LogicBlock へ移す
+- [ ] **View にロジックがないか** — 条件分岐・ルール判定が View にあれば LogicBlock へ移す。マスタ/カタログの参照や表示文字列の組み立ても対象(Logic で表示用データに変換して Output する)
 - [ ] **新しい状態はセットが揃っているか** — Logic の ctor で `Set(new XState.X())` されているか(漏れると遷移時に `KeyNotFoundException`)/ `IGet<>` 宣言 / 対応するテスト
 - [ ] **OnEnter / OnExit の順序** — `OnEnter` は購読 → Output、`OnExit` は Output → 購読解除の順か。再利用されるステートの可変フィールドを `OnEnter` で初期化しているか
 - [ ] **Start 前 Input** — `Logic.Start<T>()` より前に `Input()` していないか(`LogicBlockException`)
