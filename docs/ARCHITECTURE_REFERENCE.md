@@ -249,8 +249,8 @@ Tree -->> Player : 依存解決コールバック
 Player -> Player : OnResolved()\nPlayerLogic.Set(GameRepo)\nBinding 定義\nPlayerLogic.Start<Disabled>()
 
 == 終了時 ==
-Tree -> Player : OnTreeExiting()\nBinding.Dispose() / Logic.Dispose()
-Tree -> Game : OnTreeExiting()\nBinding.Dispose() / Logic.Dispose() / Repo.Dispose()
+Tree -> Player : OnExitTree()\nBinding.Dispose() / Logic.Dispose()
+Tree -> Game : OnExitTree()\nBinding.Dispose() / Logic.Dispose() / Repo.Dispose()
 @enduml
 ```
 
@@ -304,7 +304,7 @@ public partial class MyFeature : Node3D, IMyFeature
   }
 
   // 後始末: イベント購読解除 → Binding → Logic の順で Dispose(自分が生成したものだけ)
-  public void OnTreeExiting()
+  public void OnExitTree()
   {
     Binding.Dispose();
     Logic.Dispose();
@@ -320,7 +320,7 @@ public partial class MyFeature : Node3D, IMyFeature
 | `OnReady()` | `_Ready` 相当 | Godot 固有の初期化(`SetPhysicsProcess(true)` 等) |
 | `OnResolved()` | `[Dependency]` がすべて解決した後 | 依存の `Logic.Set(...)`、Binding 定義、`this.Provide()`、`Logic.Start<T>()` |
 | `OnPhysicsProcess(double)` | 物理ティック | `Logic.Input(new Input.PhysicsTick(delta))` の転送のみ |
-| `OnTreeExiting()` | ツリー離脱時 | イベント購読解除、`Binding.Dispose()`、`Logic.Dispose()`、所有 Repo の `Dispose()` |
+| `OnExitTree()` | ツリー離脱時 | イベント購読解除、`Binding.Dispose()`、`Logic.Dispose()`、所有 Repo の `Dispose()` |
 
 ---
 
@@ -611,7 +611,7 @@ public partial class Gem : Node3D, IGem
     }
   }
 
-  public void OnTreeExiting()
+  public void OnExitTree()
   {
     GemBinding.Dispose();
     GemLogic.Dispose();
@@ -828,7 +828,7 @@ public void MovesOnMoveOutput()
 - [ ] **Start 前 Input** — `Logic.Start<T>()` より前に `Input()` していないか(`LogicBlockException`)
 - [ ] **依存の受け方** — 子ノードは `[Node]` + インターフェース型、祖先依存は `[Dependency]` + `IProvide` + `this.Provide()`
 - [ ] **メッセージ型** — Input/Output は `readonly record struct`、ハンドラは `in` 引数
-- [ ] **後始末** — `OnTreeExiting()` でシグナル購読解除・`Binding.Dispose()`・`Logic.Dispose()`・所有 Repo の `Dispose()` が揃っているか。`AutoValue` の Binding と値本体の両方を Dispose しているか
+- [ ] **後始末** — `OnExitTree()` でシグナル購読解除・`Binding.Dispose()`・`Logic.Dispose()`・所有 Repo の `Dispose()` が揃っているか。`AutoValue` の Binding と値本体の両方を Dispose しているか
 - [ ] **命名** — 定数 `ALL_UPPER`、private `_camelCase`、インターフェース `I` プレフィックス
 - [ ] **switch 式** — 網羅 + `_ =>` フォールバックがあるか(未知の enum 値のテストも)
 - [ ] **状態 vs フラグ** — 新しい bool フラグが実は「状態」ではないか(ローディング・処理中は state にする)

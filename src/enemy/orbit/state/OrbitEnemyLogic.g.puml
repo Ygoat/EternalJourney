@@ -1,0 +1,31 @@
+@startuml OrbitEnemyState
+state "OrbitEnemyState" as EternalJourney_Enemy_Orbit_State_OrbitEnemyState {
+  state "Alive" as EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Alive {
+    state "Approaching" as EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Approaching
+    state "Fleeing" as EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Fleeing
+    state "Orbiting" as EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Orbiting
+  }
+  state "SpawnWait" as EternalJourney_Enemy_Orbit_State_OrbitEnemyState_SpawnWait
+}
+
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Alive --> EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Alive : BulletHit
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Approaching --> EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Approaching : PhysicsProcess
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Approaching --> EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Orbiting : PhysicsProcess
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Fleeing --> EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Fleeing : PhysicsProcess
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Fleeing --> EternalJourney_Enemy_Orbit_State_OrbitEnemyState_SpawnWait : OutOfArea
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Orbiting --> EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Fleeing : PhysicsProcess
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Orbiting --> EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Orbiting : PhysicsProcess
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_SpawnWait --> EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Approaching : Spawn
+
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Alive : Kill() → Destroyed
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Alive : OnBulletHit → CurrentDurChange
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Alive : UpdateColor() → UpdateColor
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Approaching : OnEnter → WeaponEnabled
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Approaching : OnPhysicsProcess → Move
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Fleeing : OnEnter → WeaponEnabled
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Fleeing : OnOutOfArea → Escaped
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Fleeing : OnPhysicsProcess → Move
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Orbiting : OnEnter → WeaponEnabled
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_Orbiting : OnPhysicsProcess → Move
+EternalJourney_Enemy_Orbit_State_OrbitEnemyState_SpawnWait : OnSpawn → StartInvade
+@enduml

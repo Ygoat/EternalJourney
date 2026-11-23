@@ -34,6 +34,11 @@ public interface IRadar : IArea2D
     /// 検知対象のコリジョンマスク
     /// </summary>
     public uint TargetMask { get; set; }
+
+    /// <summary>
+    /// 索敵の有効・無効を切り替える（無効の間は敵を検知しない）
+    /// </summary>
+    public void SetActive(bool active);
 };
 
 /// <summary>
@@ -125,12 +130,29 @@ public partial class Radar : Area2D, IRadar
     /// <param name="delta"></param>
     public void OnPhysicsProcess(double delta)
     {
+        // 無効化されている間は何も検知していない扱いにする（監視オフ中は重なりを取得できない）
+        if (!Monitoring)
+        {
+            OnAreaEnemies = new List<Area2D>();
+            RadarLogic.Input(new RadarLogic.Input.PhysicProcess(new List<Node2D>()));
+            return;
+        }
+
         OnAreaEnemies = GetOverlappingAreas()
             .Where(e => (e.CollisionLayer & TargetMask) != 0)
             .OrderBy(enemy => GlobalPosition.DistanceTo(enemy.GlobalPosition))
             .ToList();
         // ロジックブロックにオーバーラップしている敵のArea2Dノードリストを入力
         RadarLogic.Input(new RadarLogic.Input.PhysicProcess(GetOverlappingAreas().ToList<Node2D>()));
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void SetActive(bool active)
+    {
+        // 物理クエリ中に呼ばれる可能性があるため遅延設定する
+        SetDeferred(Area2D.PropertyName.Monitoring, active);
     }
 
     /// <summary>

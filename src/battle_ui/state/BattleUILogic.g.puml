@@ -11,6 +11,7 @@ EternalJourney_BattleUI_State_BattleUIState_InActive --> EternalJourney_BattleUI
 EternalJourney_BattleUI_State_BattleUIState_Active : OnGameOver() → GameOver
 EternalJourney_BattleUI_State_BattleUIState_Active : OnPhysicsProcess → TikCount
 EternalJourney_BattleUI_State_BattleUIState_Active : OnScoreCountUp() → ScoreChanged
+EternalJourney_BattleUI_State_BattleUIState_Active : OnScrapCountUp() → ScrapChanged
 EternalJourney_BattleUI_State_BattleUIState_Active : OnShipHpChanged() → ShipHpChanged
 EternalJourney_BattleUI_State_BattleUIState_Active : OnSpPercentChanged() → SpPercentChanged
 EternalJourney_BattleUI_State_BattleUIState_InActive : OnBattleStarted → ActivateBattleUI

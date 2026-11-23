@@ -28,6 +28,11 @@ public interface IStandardWeapon : IBaseWeapon
     /// プレイヤー所有フラグを設定する
     /// </summary>
     void SetPlayerOwned(bool isPlayer);
+
+    /// <summary>
+    /// 攻撃の有効・無効を切り替える（無効の間は索敵せず、射撃しない）
+    /// </summary>
+    void SetActive(bool active);
 }
 
 /// <summary>
@@ -197,6 +202,14 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         Radar.TargetMask = mask;
         Radar.CollisionMask = mask;
         StandardBulletFactory.BulletCollisionMask = mask;
+    }
+
+    /// <summary>
+    /// 攻撃の有効・無効を切り替える
+    /// </summary>
+    public void SetActive(bool active)
+    {
+        Radar.SetActive(active);
     }
 
     public void SetPlayerOwned(bool isPlayer)

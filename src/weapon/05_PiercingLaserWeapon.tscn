@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://src/weapon/laser/LaserWeapon.tscn" id="1_laser"]
+
+[node name="05_PiercingLaserWeapon" instance=ExtResource("1_laser")]
+Piercing = true
+Thickness = 4.0
+ExtendSpeed = 400.0
+Atk = 0.6
+BeamColor = Color(0.4, 0.8, 1, 0.9)

@@ -5,8 +5,10 @@
 [ext_resource type="PackedScene" uid="uid://bf7204x00kgdy" path="res://src/weapon/01_NormalWeapon.tscn" id="2_ceogd"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="3_lsy2c"]
 [ext_resource type="PackedScene" uid="uid://ckea0f5qnrrrv" path="res://src/weapon/03_ExplosionWeapon.tscn" id="4_expwp"]
-[ext_resource type="PackedScene" uid="uid://cfpsts638espo" path="res://src/weapon/02_PenetrateWeapon.tscn" id="4_pntrw"]
+[ext_resource type="PackedScene" path="res://src/weapon/04_LaserWeapon.tscn" id="4_pntrw"]
+[ext_resource type="PackedScene" path="res://src/weapon/06_FlameWeapon.tscn" id="8_flame"]
 [ext_resource type="Texture2D" uid="uid://tew8q5534ewg" path="res://assets/Ship.png" id="5_ylh8n"]
+[ext_resource type="PackedScene" path="res://src/magnet_pulse/MagnetPulse.tscn" id="6_pulse"]
 
 [sub_resource type="Resource" id="Resource_qo710"]
 script = ExtResource("3_lsy2c")
@@ -49,11 +51,9 @@ position = Vector2(-90, -154)
 scale = Vector2(2, 2)
 BulletScale = 1.0
 
-[node name="02_PenetrateWeapon" parent="." index="6" instance=ExtResource("4_pntrw")]
+[node name="04_LaserWeapon" parent="." index="6" instance=ExtResource("4_pntrw")]
 position = Vector2(-90, 154)
 scale = Vector2(2, 2)
-RotationSpeed = 0.05
-BulletScale = 1.0
 
 [node name="03_ExplosionWeapon" parent="." index="7" instance=ExtResource("4_expwp")]
 position = Vector2(91, -154)
@@ -61,7 +61,8 @@ scale = Vector2(2, 2)
 RotationSpeed = 0.05
 BulletScale = 1.0
 
-[node name="01_NormalWeapon4" parent="." index="8" instance=ExtResource("2_ceogd")]
+[node name="06_FlameWeapon" parent="." index="8" instance=ExtResource("8_flame")]
 position = Vector2(90, 154)
 scale = Vector2(2, 2)
-BulletScale = 1.0
+
+[node name="MagnetPulse" parent="." instance=ExtResource("6_pulse")]

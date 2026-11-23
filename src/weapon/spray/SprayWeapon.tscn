@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://src/weapon/continuous/ContinuousWeapon.tscn" id="1_base"]
+[ext_resource type="Script" path="res://src/weapon/spray/SprayWeapon.cs" id="2_spray"]
+
+[node name="SprayWeapon" instance=ExtResource("1_base")]
+script = ExtResource("2_spray")
+
+[node name="ConeShape" type="CollisionPolygon2D" parent="DamageArea" index="0"]
+unique_name_in_owner = true
+
+[node name="Cone" type="Polygon2D" parent="." index="5"]
+unique_name_in_owner = true
+position = Vector2(11, 0)

@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://src/weapon/spray/SprayWeapon.tscn" id="1_spray"]
+
+[node name="07_ColdWeapon" instance=ExtResource("1_spray")]
+SpreadAngle = 70.0
+ExtendSpeed = 220.0
+MaxReach = 120.0
+DamageInterval = 0.25
+Atk = 0.3
+StunEnabled = true
+ConeColor = Color(0.4, 0.8, 1, 0.55)

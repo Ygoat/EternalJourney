@@ -42,6 +42,10 @@ public partial class BattleUI : Control, IBattleUI
     [Node]
     public ILabel ScoreLabel { get; set; } = default!;
 
+    /// <summary>スクラップラベル</summary>
+    [Node]
+    public ILabel ScrapLabel { get; set; } = default!;
+
     /// <summary>スキルボタン1</summary>
     [Node]
     public ISkillButton SkillButton1 { get; set; } = default!;
@@ -112,6 +116,7 @@ public partial class BattleUI : Control, IBattleUI
     {
         TimerLabel.Text = "Timer";
         ScoreLabel.Text = "Score";
+        ScrapLabel.Text = "Scrap: 0";
         SetPhysicsProcess(false);
         BattleUILogic = new BattleUILogic();
     }
@@ -126,6 +131,10 @@ public partial class BattleUI : Control, IBattleUI
             .OnOutput((in BattleUILogic.Output.ScoreChanged output) =>
             {
                 SetScoreLabel(output.CurrentScore);
+            })
+            .OnOutput((in BattleUILogic.Output.ScrapChanged output) =>
+            {
+                SetScrapLabel(output.CurrentScrap);
             })
             .OnOutput((in BattleUILogic.Output.ShipHpChanged output) =>
             {
@@ -158,6 +167,11 @@ public partial class BattleUI : Control, IBattleUI
     public void OnPhysicsProcess(double delta)
     {
         BattleUILogic.Input(new BattleUILogic.Input.PhysicsProcess());
+    }
+
+    public void SetScrapLabel(int scrap)
+    {
+        ScrapLabel.Text = $"Scrap: {scrap}";
     }
 
     public void SetScoreLabel(int score)

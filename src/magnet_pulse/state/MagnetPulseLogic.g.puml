@@ -1,0 +1,14 @@
+@startuml MagnetPulseState
+state "MagnetPulseState" as EternalJourney_MagnetPulse_State_MagnetPulseState {
+  state "Expanding" as EternalJourney_MagnetPulse_State_MagnetPulseState_Expanding
+  state "Waiting" as EternalJourney_MagnetPulse_State_MagnetPulseState_Waiting
+}
+
+EternalJourney_MagnetPulse_State_MagnetPulseState_Expanding --> EternalJourney_MagnetPulse_State_MagnetPulseState_Expanding : PhysicsProcess
+EternalJourney_MagnetPulse_State_MagnetPulseState_Expanding --> EternalJourney_MagnetPulse_State_MagnetPulseState_Waiting : PhysicsProcess
+EternalJourney_MagnetPulse_State_MagnetPulseState_Waiting --> EternalJourney_MagnetPulse_State_MagnetPulseState_Expanding : PhysicsProcess
+EternalJourney_MagnetPulse_State_MagnetPulseState_Waiting --> EternalJourney_MagnetPulse_State_MagnetPulseState_Waiting : PhysicsProcess
+
+EternalJourney_MagnetPulse_State_MagnetPulseState_Expanding : OnPhysicsProcess → Expanded
+EternalJourney_MagnetPulse_State_MagnetPulseState_Waiting : OnEnter → Ended
+@enduml

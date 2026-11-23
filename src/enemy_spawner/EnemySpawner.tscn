@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://cm857nw2uc4w0" path="res://src/enemy/02_SineWaveEnemy.tscn" id="4_swenm"]
 [ext_resource type="PackedScene" path="res://src/enemy/03_HomingEnemy.tscn" id="5_hmenm"]
 [ext_resource type="PackedScene" uid="uid://bof0uts1i6te" path="res://src/enemy/04_StopAndGoEnemy.tscn" id="6_sgenm"]
+[ext_resource type="PackedScene" path="res://src/enemy/05_OrbitEnemy.tscn" id="7_orbit"]
 
 [sub_resource type="Curve2D" id="Curve2D_na73r"]
 _data = {
@@ -40,3 +41,7 @@ EnemyScene = ExtResource("5_hmenm")
 [node name="StopAndGoEnemyFactory" parent="Path2D/PathFollow2D" instance=ExtResource("2_1ihsb")]
 unique_name_in_owner = true
 EnemyScene = ExtResource("6_sgenm")
+
+[node name="OrbitEnemyFactory" parent="Path2D/PathFollow2D" instance=ExtResource("2_1ihsb")]
+unique_name_in_owner = true
+EnemyScene = ExtResource("7_orbit")

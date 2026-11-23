@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" uid="uid://dtymbdwgg4tmh" path="res://src/enemy/base/BaseEnemy.tscn" id="1_base"]
+[ext_resource type="Script" path="res://src/enemy/orbit/OrbitEnemy.cs" id="2_orbit"]
+[ext_resource type="Texture2D" uid="uid://drcrsiah206r5" path="res://assets/enemies/enemyBlack1.png" id="3_tex"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_orbit"]
+size = Vector2(66, 40)
+
+[node name="OrbitEnemy" instance=ExtResource("1_base")]
+script = ExtResource("2_orbit")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+rotation = -1.57079
+scale = Vector2(0.445042, 0.445042)
+texture = ExtResource("3_tex")
+region_rect = Rect2(324.975, 738.959, 98.3397, 75.0042)
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="."]
+unique_name_in_owner = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-13, 0)
+shape = SubResource("RectangleShape2D_orbit")

@@ -1,0 +1,24 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://src/weapon/continuous/ContinuousWeapon.tscn" id="1_base"]
+[ext_resource type="Script" path="res://src/weapon/laser/LaserWeapon.cs" id="2_laser"]
+
+[node name="LaserWeapon" instance=ExtResource("1_base")]
+script = ExtResource("2_laser")
+
+[node name="BeamShape" type="CollisionShape2D" parent="DamageArea" index="0"]
+unique_name_in_owner = true
+
+[node name="Beam" type="Line2D" parent="." index="5"]
+unique_name_in_owner = true
+position = Vector2(11, 0)
+points = PackedVector2Array(0, 0, 0, 0)
+width = 6.0
+default_color = Color(1, 0.3, 0.3, 0.9)
+
+[node name="Ray" type="RayCast2D" parent="." index="6"]
+unique_name_in_owner = true
+position = Vector2(11, 0)
+target_position = Vector2(250, 0)
+collide_with_areas = true
+collide_with_bodies = false

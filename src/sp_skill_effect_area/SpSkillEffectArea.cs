@@ -32,7 +32,7 @@ public partial class SpSkillEffectArea : Area2D, ISpSkillEffectArea
     public void Setup()
     {
         // コリジョンレイヤをエネミーに設定
-        CollisionLayer = CollisionEntity.Bullet;
+        CollisionLayer = CollisionEntity.PlayerBullet;
         // コリジョンマスクを船と弾丸に設定
         CollisionMask = CollisionEntity.Enemy;
     }

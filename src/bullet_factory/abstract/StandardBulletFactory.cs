@@ -181,6 +181,8 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         if (bullet == null)
             return;
 
+        // 陣営ごとのコリジョンレイヤーを適用（敵味方の弾が互いに当たらないようにする）
+        bullet.CollisionLayer = IsPlayerBullet ? CollisionEntity.PlayerBullet : CollisionEntity.EnemyBullet;
         // 武器所有者に応じたコリジョンマスクを適用
         bullet.CollisionMask = BulletCollisionMask;
         // プレイヤー所有フラグを適用

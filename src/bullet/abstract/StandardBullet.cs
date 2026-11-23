@@ -94,8 +94,7 @@ public partial class StandardBullet : BaseBullet, IStandardBullet
         BulletLogic = new BulletLogic();
         BulletBinding = BulletLogic.Bind();
         BulletLogic.Set(this as IBaseBullet);
-        // コリジョンレイヤーを弾丸
-        CollisionLayer = CollisionEntity.Bullet;
+        // コリジョンレイヤーは陣営ごとに異なるため、弾丸ファクトリーが射出時に設定する
     }
 
     /// <summary>

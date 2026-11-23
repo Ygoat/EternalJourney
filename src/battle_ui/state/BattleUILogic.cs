@@ -60,6 +60,11 @@ public partial class BattleUILogic : LogicBlock, IBattleUILogic
         public readonly record struct ScoreChanged(int CurrentScore);
 
         /// <summary>
+        /// スクラップ変化
+        /// </summary>
+        public readonly record struct ScrapChanged(int CurrentScrap);
+
+        /// <summary>
         /// ゲーム終了
         /// </summary>
         public readonly record struct GameOver;
@@ -133,6 +138,11 @@ public abstract partial record BattleUIState : LogicBlockState
         /// </summary>
         private AutoValue<int>.Binding? _scoreBinding;
 
+        /// <summary>
+        /// スクラップ購読用バインディング
+        /// </summary>
+        private AutoValue<int>.Binding? _scrapBinding;
+
         public Active()
         {
             this.OnEnter(() =>
@@ -141,6 +151,8 @@ public abstract partial record BattleUIState : LogicBlockState
                 // 購読登録時に現在値が即時通知される
                 _scoreBinding = battleRepo.Score.Bind();
                 _scoreBinding.OnValue(OnScoreCountUp);
+                _scrapBinding = battleRepo.Scrap.Bind();
+                _scrapBinding.OnValue(OnScrapCountUp);
                 battleRepo.ShipHpChanged += OnShipHpChanged;
                 battleRepo.GameOverOccurred += OnGameOver;
                 battleRepo.SpPercentChanged += OnSpPercentChanged;
@@ -150,6 +162,8 @@ public abstract partial record BattleUIState : LogicBlockState
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 _scoreBinding?.Dispose();
                 _scoreBinding = null;
+                _scrapBinding?.Dispose();
+                _scrapBinding = null;
                 battleRepo.ShipHpChanged -= OnShipHpChanged;
                 battleRepo.GameOverOccurred -= OnGameOver;
                 battleRepo.SpPercentChanged -= OnSpPercentChanged;
@@ -158,6 +172,9 @@ public abstract partial record BattleUIState : LogicBlockState
 
         public void OnScoreCountUp(int currentScore) =>
             Output(new BattleUILogic.Output.ScoreChanged(currentScore));
+
+        public void OnScrapCountUp(int currentScrap) =>
+            Output(new BattleUILogic.Output.ScrapChanged(currentScrap));
 
         public void OnShipHpChanged(float currentHp, float maxHp) =>
             Output(new BattleUILogic.Output.ShipHpChanged(CalcHpGaugeRatio(currentHp, maxHp)));

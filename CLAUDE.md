@@ -291,7 +291,9 @@ LogicBinding
 Logic.Start<FooState.Idle>();
 ```
 
-`OnTreeExiting` で必ず `LogicBinding.Dispose()` と `Logic.Dispose()` を呼ぶこと。
+`OnExitTree`（AutoInject が呼ぶフック名。`OnTreeExiting` という名前のメソッドは呼ばれない）で必ず `LogicBinding.Dispose()` と `Logic.Dispose()` を呼ぶこと。
+
+**例外**: プールで使い回すノード（弾・敵・スクラップ）は、返却のたびにツリーから外れるため `OnExitTree` で Dispose しない。破棄はファクトリがプールごと解放する時に行う（例: `src/scrap_factory/ScrapFactory.cs`）。
 
 ### ノードクラステンプレート
 

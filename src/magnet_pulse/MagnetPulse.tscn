@@ -1,0 +1,15 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/magnet_pulse/MagnetPulse.cs" id="1_pulse"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_pulse"]
+resource_local_to_scene = true
+radius = 1.0
+
+[node name="MagnetPulse" type="Area2D"]
+script = ExtResource("1_pulse")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+unique_name_in_owner = true
+shape = SubResource("CircleShape2D_pulse")
+disabled = true

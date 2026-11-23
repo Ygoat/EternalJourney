@@ -42,6 +42,11 @@ public interface IBattleRepo : IDisposable
     public IAutoValue<int> NumEnemyDestroyed { get; }
 
     /// <summary>
+    /// スクラップ所持数（バトル中のみ保持）
+    /// </summary>
+    public IAutoValue<int> Scrap { get; }
+
+    /// <summary>
     /// 弾丸がヒットした際に呼び出されるイベント
     /// </summary>
     public event Action<IBaseBullet>? BulletHittingStarted;
@@ -115,6 +120,11 @@ public interface IBattleRepo : IDisposable
     /// エネミー撃破数カウントアップ
     /// </summary>
     public void NumEnemyDestroyedCountUp();
+
+    /// <summary>
+    /// スクラップを加算する
+    /// </summary>
+    public void AddScrap(int amount);
 
     /// <summary>
     /// 敵が倒されたことをバトルに通知する
@@ -217,6 +227,13 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    public IAutoValue<int> Scrap => _scrap;
+
+    private readonly AutoValue<int> _scrap;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public event Action<IBaseBullet>? BulletHittingStarted;
 
     /// <summary>
@@ -268,6 +285,7 @@ public class BattleRepo : IBattleRepo
     {
         _numEnemyDestroyed = new AutoValue<int>(0);
         _score = new AutoValue<int>(0);
+        _scrap = new AutoValue<int>(0);
     }
 
     /// <summary>
@@ -280,6 +298,7 @@ public class BattleRepo : IBattleRepo
     {
         _numEnemyDestroyed = numEnemyDestroyed;
         _score = score;
+        _scrap = new AutoValue<int>(0);
     }
 
     /// <summary>
@@ -296,6 +315,14 @@ public class BattleRepo : IBattleRepo
     public void NumEnemyDestroyedCountUp()
     {
         _numEnemyDestroyed.Value = _numEnemyDestroyed.Value + 1;
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void AddScrap(int amount)
+    {
+        _scrap.Value = _scrap.Value + amount;
     }
 
     /// <summary>
@@ -388,6 +415,7 @@ public class BattleRepo : IBattleRepo
             {
                 _score.Dispose();
                 _numEnemyDestroyed.Dispose();
+                _scrap.Dispose();
             }
 
             _disposedValue = true;

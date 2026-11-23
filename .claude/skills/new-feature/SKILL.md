@@ -26,7 +26,7 @@ EternalJourney の規約に沿って新機能一式を作成する手順。詳�
 3. **ライフサイクルの分担を守る**:
    - `Setup()`: Logic の生成・`Bind()`（DI 依存には触らない）
    - `OnResolved()`: `Logic.Set(依存)` → Binding の `.OnState<>()` / `.OnOutput()` / `.OnInput()` 定義 → `Start<XState.Initial>()`
-   - `OnTreeExiting()`: `LogicBinding.Dispose()` と `Logic.Dispose()` を必ず呼ぶ。イベント購読があれば解除。Repo を所有しているなら `Repo.Dispose()` も
+   - `OnExitTree()`（AutoInject が呼ぶ名前。`OnTreeExiting` は呼ばれない）: `LogicBinding.Dispose()` と `Logic.Dispose()` を必ず呼ぶ。プール運用するノードは返却のたびにツリーから外れるため Dispose しない（ファクトリが解放する）。イベント購読があれば解除。Repo を所有しているなら `Repo.Dispose()` も
 
 4. **LogicBlock を作る**: CLAUDE.md「LogicBlocksパターン」のプロジェクト流儀に従う。
    - `[Meta] partial class XLogic : LogicBlock`、ステートは Logic の外に `[StateDiagram] abstract partial record XState : LogicBlockState` として定義し、ctor で `Set(new XState.A())` 事前確保（可変フィールドは `OnEnter` で初期化）

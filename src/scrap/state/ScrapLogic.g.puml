@@ -1,0 +1,18 @@
+@startuml ScrapState
+state "ScrapState" as EternalJourney_Scrap_State_ScrapState {
+  state "Attracted" as EternalJourney_Scrap_State_ScrapState_Attracted
+  state "Drifting" as EternalJourney_Scrap_State_ScrapState_Drifting
+  state "Idle" as EternalJourney_Scrap_State_ScrapState_Idle
+}
+
+EternalJourney_Scrap_State_ScrapState_Attracted --> EternalJourney_Scrap_State_ScrapState_Attracted : PhysicsProcess
+EternalJourney_Scrap_State_ScrapState_Drifting --> EternalJourney_Scrap_State_ScrapState_Attracted : PulseTouched
+EternalJourney_Scrap_State_ScrapState_Drifting --> EternalJourney_Scrap_State_ScrapState_Drifting : PhysicsProcess
+EternalJourney_Scrap_State_ScrapState_Drifting --> EternalJourney_Scrap_State_ScrapState_Idle : PhysicsProcess
+EternalJourney_Scrap_State_ScrapState_Idle --> EternalJourney_Scrap_State_ScrapState_Drifting : Drop
+
+EternalJourney_Scrap_State_ScrapState : Collect() → RemoveSelf
+EternalJourney_Scrap_State_ScrapState_Attracted : OnPhysicsProcess → Move
+EternalJourney_Scrap_State_ScrapState_Drifting : OnPhysicsProcess → Move, RemoveSelf
+EternalJourney_Scrap_State_ScrapState_Idle : OnDrop → Place
+@enduml

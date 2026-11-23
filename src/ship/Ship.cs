@@ -91,7 +91,7 @@ public partial class Ship : BaseEntity, IShip
 
         CollisionLayer = CollisionEntity.Ship;
         // 敵弾検知のためBulletを追加
-        CollisionMask = CollisionEntity.Enemy | CollisionEntity.Bullet;
+        CollisionMask = CollisionEntity.Enemy | CollisionEntity.EnemyBullet;
 
         Status.MaxDur = 500f;
         Status.CurrentDur = 500f;

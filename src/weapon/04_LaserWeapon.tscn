@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://src/weapon/laser/LaserWeapon.tscn" id="1_laser"]
+
+[node name="04_LaserWeapon" instance=ExtResource("1_laser")]
+Piercing = false
+Thickness = 6.0
+ExtendSpeed = 600.0
+Atk = 1.0

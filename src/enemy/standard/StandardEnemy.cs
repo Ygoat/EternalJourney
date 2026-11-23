@@ -128,7 +128,7 @@ public partial class StandardEnemy : BaseEnemy, IStandardEnemy
         // コリジョンレイヤをエネミーに設定
         CollisionLayer = CollisionEntity.Enemy;
         // コリジョンマスクを船と弾丸に設定
-        CollisionMask = CollisionEntity.Ship | CollisionEntity.Bullet;
+        CollisionMask = CollisionEntity.Ship | CollisionEntity.PlayerBullet;
 
         TopLevel = true;
     }

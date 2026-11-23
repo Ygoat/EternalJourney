@@ -56,6 +56,12 @@ public partial class EnemySpawner : Node2D, IEnemySpawner
     /// </summary>
     [Node]
     public IEnemyFactory StopAndGoEnemyFactory { get; set; } = default!;
+
+    /// <summary>
+    /// 周回エネミーファクトリ
+    /// </summary>
+    [Node]
+    public IEnemyFactory OrbitEnemyFactory { get; set; } = default!;
     #endregion  Nodes
 
     #region State
@@ -105,6 +111,7 @@ public partial class EnemySpawner : Node2D, IEnemySpawner
             SineWaveEnemyFactory,
             HomingEnemyFactory,
             StopAndGoEnemyFactory,
+            OrbitEnemyFactory,
         };
     }
 
