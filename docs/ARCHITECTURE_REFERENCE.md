@@ -1,8 +1,9 @@
 # Chickensoft流 ゲームアーキテクチャ・リファレンス
 
 > **目的**: GameDemo と同じ品質・同じアーキテクチャで別プロジェクトを立ち上げ、進められるようにするための実践リファレンス。
-> **出典**: [Chickensoft GameDemo](https://github.com/chickensoft-games/GameDemo)(Godot 4.x + .NET 8 + C#)の実コードに基づく。
-> 図はすべて PlantUML 形式。コード例は LogicBlocks 6.x / AutoInject 2.x の実 API に準拠。
+> **出典**: [Chickensoft GameDemo](https://github.com/chickensoft-games/GameDemo)の設計に基づき、本プロジェクトの構成に合わせている。
+> 図はすべて PlantUML 形式。コード例は **LogicBlocks 6.2.3 / AutoInject 2.14.18 / Chickensoft.Sync 3.0.1 / Godot 4.7.2** の API に準拠。
+> 本プロジェクト固有の書き方(Input/Output を Logic クラス内に置く、全ステートを 1 ファイルにまとめる等)は `CLAUDE.md` の「LogicBlocksパターン」を参照。
 
 ---
 
@@ -15,7 +16,7 @@
 5. [初期化ライフサイクルとDI](#5-初期化ライフサイクルとdi)
 6. [状態機械設計ガイド](#6-状態機械設計ガイド)
 7. [新機能追加の完全な一例(Gem)](#7-新機能追加の完全な一例gem)
-8. [セーブシステム](#8-セーブシステム)
+8. [セーブ・ロード](#8-セーブロード)
 9. [命名規約・スタイル早見表](#9-命名規約スタイル早見表)
 10. [テスト戦略](#10-テスト戦略)
 11. [ツール・CI チェックリスト](#11-ツールci-チェックリスト)
@@ -29,13 +30,12 @@
 
 | 項目 | 内容 |
 | --- | --- |
-| エンジン | Godot 4.x(C#/.NET 対応ビルド) |
+| エンジン | Godot 4.7.2(C#/.NET 対応ビルド、`global.json` で固定) |
 | ランタイム | .NET 8(`Nullable=enable`, `ImplicitUsings=disable`) |
 | 状態管理 | Chickensoft.LogicBlocks(階層型ステートマシン) |
 | DI | Chickensoft.AutoInject(シーンツリーベース) |
 | リアクティブ | Chickensoft.Sync(`AutoValue<T>` / `AutoChannel`) |
-| セーブ | Chickensoft.Serialization + SaveFileBuilder |
-| テスト | Chickensoft.GoDotTest + GodotNodeInterfaces + Moq + Shouldly |
+| テスト | Chickensoft.GoDotTest + GodotTestDriver + GodotNodeInterfaces + Shouldly + LightMoq(LightMock.Generator) |
 
 ### 核となる設計原則(移植時に守るべきこと)
 
@@ -109,63 +109,44 @@ end note
 | 層 | 実体 | 持つもの | 持たないもの |
 | --- | --- | --- | --- |
 | View | `Node` 派生 + `[Meta(typeof(IAutoNode))]` | シグナル受信、`Logic.Input()` 転送、`OnOutput` での表示更新、Godot API 呼び出し | 条件分岐によるゲームルール、状態フラグ |
-| Logic | `AutoBlock` 派生 + 状態 record 群 | 状態遷移、ゲームルール、`Output()` 発行、Repo 呼び出し | Godot ノード操作(インターフェース経由の読み取りは可) |
+| Logic | `LogicBlock` 派生 + 状態 record 群(`XState : LogicBlockState`) | 状態遷移、ゲームルール、`Output()` 発行、Repo 呼び出し | Godot ノード操作(インターフェース経由の読み取りは可) |
 | Domain | POCO(`IDisposable`) | 横断的な状態(`AutoValue`)、ドメインイベント(`AutoChannel`)、純粋ロジック | シーンツリーへの参照、View の知識 |
 
 ---
 
 ## 3. ディレクトリテンプレート
 
-機能(フィーチャー)単位でシーン・スクリプト・アセット・状態機械を同居させる。**テストは `test/src/` に同一パスでミラー**する。
+機能(フィーチャー)単位でシーン・スクリプト・状態機械を同居させる。テストは `test/src/` に置く。
 
 ```text
-project/
+EternalJourney/
 ├── src/
-│   ├── Main.cs                # エントリポイント(テスト実行判定 → App.tscn へ)
-│   ├── Main.tscn
-│   ├── app/                   # アプリ全体の状態(スプラッシュ→メニュー→ゲーム)
+│   ├── Main.cs / Main.tscn        # エントリポイント(テスト実行判定 → App へ)
+│   ├── app/                       # アプリ全体の状態(Splash → Menu → Game)
 │   │   ├── App.tscn
-│   │   ├── App.cs                     # View
-│   │   ├── AppLogic.cs                # LogicBlock 本体(購読定義)
-│   │   ├── AppLogic.Data.cs           # ブラックボードデータ
+│   │   ├── App.cs                 # View
 │   │   ├── domain/
-│   │   │   └── AppRepo.cs             # ドメインリポジトリ
+│   │   │   └── AppRepo.cs         # ドメインリポジトリ
 │   │   └── state/
-│   │       ├── AppLogicState.cs        # 抽象基底 state
-│   │       ├── AppLogicState.Input.cs  # 入力メッセージ定義
-│   │       ├── AppLogicState.Output.cs # 出力メッセージ定義
-│   │       └── states/                 # 1状態1ファイル
-│   │           ├── SplashScreen.cs
-│   │           ├── MainMenu.cs
-│   │           └── InGame.cs
-│   ├── game/                  # ゲームセッション(Playing/Paused/Won/Lost...)
-│   ├── player/                # プレイヤー(HSM の代表例)
-│   ├── <feature>/             # 機能ごとに追加(coin, jumpshroom, map...)
-│   │   ├── Feature.tscn
-│   │   ├── Feature.cs
-│   │   ├── FeatureData.cs             # セーブデータ(必要な場合)
-│   │   ├── FeatureLogic.cs
-│   │   ├── FeatureLogic.Data.cs
-│   │   └── state/...
-│   ├── traits/                # 能力インターフェース(IKillable 等)
-│   └── utils/                 # 小さなユーティリティ(Instantiator 等)
-├── test/
-│   └── src/                   # src/ を完全ミラー。<対象>Test.cs
-├── docs/                      # 画像・ドキュメント(.gdignore で Godot から隠す)
-├── badges/                    # カバレッジバッジ(.gdignore)
-├── .editorconfig              # Chickensoft スタイル(全ルール warning)
-├── CodeAnalyzers.ruleset      # 遅いアナライザのみ無効化
-├── GameDemo.csproj            # テスト条件付き参照を含む
-├── global.json                # .NET SDK + Godot.NET.Sdk バージョン固定
-├── coverage.ps1 / coverage.sh # カバレッジ収集スクリプト
-└── .github/workflows/         # CI(実 Godot テスト・spellcheck・version PR)
+│   │       ├── AppLogic.cs        # Logic + Input/Output + 全ステート
+│   │       └── AppLogic.g.puml    # [StateDiagram] による自動生成
+│   ├── game/ battle/ ...          # 機能ごとに同じ構成
+│   ├── <entity>/abstract/         # 抽象基底を持つ entity(bullet / weapon / bullet_factory)
+│   │   ├── base/                  # 基底クラス
+│   │   └── state/{Name}Logic.cs
+│   ├── <entity>/strategies/       # JSON 設定で切り替える挙動(movement / collision 等)
+│   ├── common/                    # 共通基底・トレイト・状態異常・耐久値モジュール
+│   └── cores/                     # 定数・ヘルパー・モデル・プール・設定リーダー
+├── data/masters/                  # マスターデータ(JSON / CSV)
+├── test/src/                      # GoDotTest のテスト
+├── global.json                    # .NET SDK + Godot.NET.Sdk のバージョン固定
+└── EternalJourney.csproj
 ```
 
 ### 構成のポイント
 
-- namespace はフォルダ構造と一致させなくてよい(全型を単一 namespace に置く。`dotnet_style_namespace_match_folder = false`)。
-- 入れ子 partial 型はドット区切りファイル名で分割する: `PlayerLogic.State.Alive.Airborne.Falling.cs`。
-- フォルダ名は Godot 慣習の `snake_case`、C# ファイル名は型名に合わせ `PascalCase`。
+- `src/{entity}/state/{Name}Logic.cs` の 1 ファイルに、Logic・Input/Output・全ステートをまとめる。
+- フォルダ名は Godot 慣習の `snake_case`、C# ファイル名は型名に合わせて `PascalCase` にする。
 
 ---
 
@@ -215,9 +196,11 @@ CoinLogic -> GameRepo : OnFinishCoinCollection(coin)
 GameRepo -> GameRepo : 全コイン収集済みなら\nOnGameEnded(Won)
 GameRepo -->> GameLogic : AutoChannel.Send(new Ended(Won))
 note right of GameLogic
-  OnStartSubscriptions() で購読済み:
-  .On((in IGameRepo.Ended m) =>
-    (State as Playing)?.OnEnded(m.Reason))
+  Playing の OnEnter で購読済み:
+  _binding = Get<IGameRepo>().AutoChannel.Bind();
+  _binding.On((in IGameRepo.Ended m) =>
+    Input(new Input.EndGame(m.Reason)));
+  (OnExit で _binding.Dispose())
 end note
 GameLogic -> GameLogic : Playing.On(EndGame) → To<Won>()
 GameLogic -->> GameView : Output(new Output.ShowWonScreen())
@@ -230,7 +213,10 @@ GameView -> GameView : WinMenu.Show(); WinMenu.FadeIn()
 - View → Logic は `Input`(`readonly record struct`)のみ。
 - Logic → View は `Output`(`readonly record struct`)のみ。ハンドラは `(in Output.X output) => ...`。
 - Logic 同士は直接参照しない。Repo の `AutoChannel`(イベント)/ `AutoValue<T>`(観測可能値)を介す。
-- 購読時は「現在の状態にだけ届ける」安全キャストを使う: `(State as Playing)?.OnEnded(...)`。
+- Repo の購読は、それを必要とするステートの `OnEnter` で登録し、`OnExit` で解除する。こうすると、そのステートにいる間だけイベントが届く。
+  - `OnEnter` では **購読を先に登録し、その後 `Output`** する。`Output` を受けた View が同期的に Repo イベントを起こすことがあり、購読が後だとその遷移入力を取りこぼす。
+  - `OnExit` では **`Output` を先に出し、購読解除は最後** にする。
+- `AutoValue<T>` の `Bind().OnValue(cb)` は、登録した時点で現在値を即時に通知する。
 
 ---
 
@@ -248,23 +234,23 @@ participant Player as "Player.cs\n[Dependency] IGameRepo"
 
 == フェーズ1: Setup(値の生成) ==
 Tree -> Game : _Ready 相当(Notify 経由)
-Game -> Game : Setup()\nGameRepo = new GameRepo()\nGameLogic = new GameLogic()\nGameLogic.Set(GameRepo)
+Game -> Game : Setup()\nGameRepo = new GameRepo()\nGameLogic = new GameLogic()\nBinding = GameLogic.Bind()
 Tree -> Player : _Ready 相当
-Player -> Player : Setup()\nPlayerLogic = new PlayerLogic()\nPlayerLogic.Set(GameRepo)  ※まだ未解決
+Player -> Player : Setup()\nPlayerLogic = new PlayerLogic()\nBinding = PlayerLogic.Bind()  ※DI 未解決
 note right of Player
   Player の [Dependency] は
   祖先の Provide() を待機する
 end note
 
 == フェーズ2: 依存の提供と解決 ==
-Game -> Game : OnResolved()\nBinding 構築 → Logic.Start<初期状態>()
+Game -> Game : OnResolved()\nGameLogic.Set(GameRepo)\nBinding 定義 → Logic.Start<初期状態>()
 Game -> Tree : this.Provide()
 Tree -->> Player : 依存解決コールバック
-Player -> Player : OnResolved()\nGameChunk.AddChunk(PlayerChunk)\nBinding 構築\nthis.Provide()\nPlayerLogic.Start<Disabled>()
+Player -> Player : OnResolved()\nPlayerLogic.Set(GameRepo)\nBinding 定義\nPlayerLogic.Start<Disabled>()
 
 == 終了時 ==
-Tree -> Player : OnExitTree()\nLogic.Stop() / Binding.Dispose()
-Tree -> Game : OnExitTree()\nLogic.Stop() / Binding.Dispose() / Repo.Dispose()
+Tree -> Player : OnTreeExiting()\nBinding.Dispose() / Logic.Dispose()
+Tree -> Game : OnTreeExiting()\nBinding.Dispose() / Logic.Dispose() / Repo.Dispose()
 @enduml
 ```
 
@@ -301,26 +287,27 @@ public partial class MyFeature : Node3D, IMyFeature
   public LogicBlock.Binding Binding { get; set; } = default!;
   #endregion State
 
-  // フェーズ1: 自分が使う値を生成する(テスト時はスキップされ、フェイクが入る)
+  // フェーズ1: DI 未解決。自分が所有するものだけを生成する
   public void Setup()
   {
     Logic = new MyFeatureLogic();
-    Logic.Set(GameRepo);
+    Binding = Logic.Bind();
   }
 
-  // フェーズ2: 依存解決後。Binding 構築 → Provide → Start の順
+  // フェーズ2: 依存解決後。Set → Binding 定義 → Start の順
   public void OnResolved()
   {
-    Binding = Logic.Bind();
-    Binding.OnOutput((in MyFeatureLogicState.Output.DoSomething _) => { /* 表示更新 */ });
-    Logic.Start<MyFeatureLogicState.Idle>();
+    Logic.Set(GameRepo);
+    Binding.OnOutput((in MyFeatureLogic.Output.DoSomething _) => { /* 表示更新 */ });
+    // Start 前に Input() すると LogicBlockException になる
+    Logic.Start<MyFeatureState.Idle>();
   }
 
-  // 後始末: 購読解除 → Stop → Dispose(自分が生成したものだけ)
-  public void OnExitTree()
+  // 後始末: イベント購読解除 → Binding → Logic の順で Dispose(自分が生成したものだけ)
+  public void OnTreeExiting()
   {
-    Logic.Stop();
     Binding.Dispose();
+    Logic.Dispose();
   }
 }
 ```
@@ -329,11 +316,11 @@ public partial class MyFeature : Node3D, IMyFeature
 
 | メソッド | タイミング | やること |
 | --- | --- | --- |
-| `Setup()` | `_Ready` 相当・依存解決前 | 自分が所有するオブジェクトの生成。テスト時はスキップされる |
+| `Setup()` | 依存解決前 | 自分が所有するオブジェクトの生成(Logic・`Bind()`)。DI 依存には触らない |
 | `OnReady()` | `_Ready` 相当 | Godot 固有の初期化(`SetPhysicsProcess(true)` 等) |
-| `OnResolved()` | `[Dependency]` がすべて解決した後 | Binding 構築、SaveChunk 登録、`this.Provide()`、`Logic.Start<T>()` |
+| `OnResolved()` | `[Dependency]` がすべて解決した後 | 依存の `Logic.Set(...)`、Binding 定義、`this.Provide()`、`Logic.Start<T>()` |
 | `OnPhysicsProcess(double)` | 物理ティック | `Logic.Input(new Input.PhysicsTick(delta))` の転送のみ |
-| `OnExitTree()` | ツリー離脱時 | イベント購読解除、`Logic.Stop()`、`Binding.Dispose()`、所有 Repo の `Dispose()` |
+| `OnTreeExiting()` | ツリー離脱時 | イベント購読解除、`Binding.Dispose()`、`Logic.Dispose()`、所有 Repo の `Dispose()` |
 
 ---
 
@@ -341,7 +328,7 @@ public partial class MyFeature : Node3D, IMyFeature
 
 ### 6.1 階層型ステートマシン(HSM)の設計
 
-共通の振る舞いは親状態に置き、子状態は差分だけを定義する。GameDemo の Player が代表例:
+共通の振る舞いは親状態に置き、子状態は差分だけを定義する。例:
 
 ```plantuml
 @startuml
@@ -378,11 +365,13 @@ Dead --> [*]
 
 ### 6.2 状態クラスの書き方ルール
 
-- **1状態1ファイル**。ファイル名は入れ子構造をドットで表現。
-- 状態は `partial record`、`[Meta]` を付与(セーブ対象なら `[Meta, Id("...")]`)。
-- 処理できる入力を `IGet<Input.X>` で宣言し、`public Type On(in Input.X input)` で遷移先の型を返す。
+- `{Name}Logic.cs` の 1 ファイルに、Logic と全ステートをまとめる。
+- 基底ステートは Logic クラスの**外**に `[StateDiagram] public abstract partial record XState : LogicBlockState` として置く。`State` という名前は `LogicBlock.State` プロパティと衝突するので使えない。
+- 処理できる入力を `IGet<XLogic.Input.X>` で宣言し、`public Type On(in XLogic.Input.X input)` で遷移先の型を返す。
   - 遷移: `To<NextState>()` / 自己遷移: `ToSelf()`
 - 副作用は `this.OnEnter(...)` / `this.OnExit(...)` と `Output(...)` に限定する。
+  - `OnEnter` は購読登録を先にし、その後 `Output` する。`OnExit` は `Output` を先にし、購読解除を最後にする(§4.3)。
+- ステートのインスタンスは使い回されるため、可変フィールドは `OnEnter` で初期化する。
 - 依存はブラックボードから取得: `Get<IGameRepo>()`, `Get<MyLogic.Data>()`, `Get<MyLogic.Settings>()`。
 - 状態内から入力を投げ直してよい: `Input(new Input.HitFloor(...))`(物理判定 → 論理イベント変換のパターン)。
 - switch 式は必ず網羅し、`_ =>` フォールバックを付ける(未知の enum 値もテストする)。
@@ -394,24 +383,31 @@ using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 
-public partial record MyFeatureLogicState
+[StateDiagram]
+public abstract partial record MyFeatureState : LogicBlockState
 {
-  [Meta]
-  public partial record Active : MyFeatureLogicState, IGet<Input.Deactivated>
+  public record Active : MyFeatureState, IGet<MyFeatureLogic.Input.Deactivated>
   {
     public Active()
     {
-      this.OnEnter(() => Output(new Output.PlayActivateEffect()));
+      // 購読 → Output の順
+      this.OnEnter(() => Get<IGameRepo>().Ended += OnEnded);
+      this.OnEnter(() => Output(new MyFeatureLogic.Output.PlayActivateEffect()));
+      this.OnExit(() => Get<IGameRepo>().Ended -= OnEnded);
     }
 
-    public Type On(in Input.Deactivated input) => To<Inactive>();
+    private void OnEnded() => Input(new MyFeatureLogic.Input.Deactivated());
+
+    public Type On(in MyFeatureLogic.Input.Deactivated input) => To<Inactive>();
   }
 }
 ```
 
 ### 6.3 パフォーマンス規約(ゲーム特有)
 
-- LogicBlock のコンストラクタで `Preallocate<TState>()` を呼び、状態インスタンスを事前確保する(実行中の GC 回避)。
+- LogicBlock のコンストラクタで、全ステートを `Set(new XState.A())` で事前確保する(実行中の GC を避けるため)。
+  - **Set していないステートへ遷移すると `KeyNotFoundException`**(`Data of type ... not found in the blackboard`)になる。ステートを追加したら ctor への追加を忘れない。
+  - 遷移前にステートへ値を渡すときは、`Get<NextState>()` で取り出してプロパティを設定してから `To<NextState>()` する(実例: `src/bullet/abstract/state/BulletLogic.cs` の EmitWait → InFlight)。
 - `Input` / `Output` は `readonly record struct` にし、ハンドラは `in` 引数で受ける(ボックス化・コピー回避)。
 - ホットパスの小さな述語には `[MethodImpl(MethodImplOptions.AggressiveInlining)]` を検討する。
 
@@ -419,110 +415,53 @@ public partial record MyFeatureLogicState
 
 ## 7. 新機能追加の完全な一例(Gem)
 
-「プレイヤーが触れると吸い寄せられて消える宝石(Gem)」を追加する場合の**最小フルセット**。GameDemo の Coin 実装(実コード)をベースにしたテンプレート。
+「プレイヤーが触れると吸い寄せられて消える宝石(Gem)」を追加する場合の**最小フルセット**。
 
 ### 7.1 追加するファイル一覧
 
 ```text
 src/gem/
 ├── Gem.tscn
-├── Gem.cs                          # View
-├── GemLogic.cs                     # LogicBlock 本体 + セーブデータ定義
-├── GemLogic.Data.cs                # ブラックボードデータ
+├── Gem.cs                  # View
 └── state/
-    ├── GemLogicState.cs            # 抽象基底
-    ├── GemLogicState.Input.cs
-    ├── GemLogicState.Output.cs
-    └── states/
-        ├── GemLogic.State.Idle.cs
-        └── GemLogic.State.Collecting.cs
+    ├── GemLogic.cs         # LogicBlock 本体 + Input/Output + Data/Settings + GemState
+    └── GemState.g.puml     # [StateDiagram] による自動生成(手動編集禁止)
 test/src/gem/
-├── GemTest.cs                      # View テスト
-└── state/states/
-    ├── GemLogic.State.IdleTest.cs
-    └── GemLogic.State.CollectingTest.cs
+└── GemTest.cs              # View / Logic テスト
 ```
 
-### 7.2 LogicBlock 本体 — `GemLogic.cs`
+### 7.2 LogicBlock 本体 — `state/GemLogic.cs`
 
 ```csharp
 namespace MyGame;
 
+using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
-using Chickensoft.LogicBlocks.Auto;
-using Chickensoft.Serialization;
+using Godot;
 
-public interface IGemLogic : IAutoLogicBlock;
+public interface IGemLogic : ILogicBlock;
 
-[Meta, Id("gem_logic")]
-public partial class GemLogic : AutoBlock, IGemLogic
+[Meta]
+public partial class GemLogic : LogicBlock, IGemLogic
 {
   public GemLogic()
   {
-    Preallocate<GemLogicState>();
+    // 全ステートを事前確保(Set 漏れは遷移時に KeyNotFoundException)
+    Set(new GemState.Idle());
+    Set(new GemState.Collecting());
   }
 
   // 状態から Get<GemLogic.Settings>() で参照する不変設定
   public record Settings(double CollectionTimeInSeconds);
 
-  // ステートマシン自体をセーブ可能にする(セーブ不要な機能なら省略可)
-  public override ILogicBlockSaveData Serialize(LogicBlockData data) =>
-    new GemLogicSaveData { Data = data };
-}
-
-[Meta, Id("gem_logic_save_data")]
-public partial class GemLogicSaveData : ILogicBlockSaveData
-{
-  [Save("data")]
-  public required LogicBlockData Data { get; init; }
-}
-```
-
-### 7.3 ブラックボードデータ — `GemLogic.Data.cs`
-
-```csharp
-namespace MyGame;
-
-using Chickensoft.Introspection;
-using Chickensoft.Serialization;
-
-public partial class GemLogic
-{
-  [Meta, Id("gem_logic_data")]
-  public partial class Data
+  // 状態から Get<GemLogic.Data>() で参照する可変データ
+  public class Data
   {
-    /// <summary>Id of the entity that is collecting us, if any.</summary>
-    [Save("target")]
-    public string? Target { get; set; }
-
-    [Save("elapsed_time")]
+    public ICoinCollector? Target { get; set; }
     public double ElapsedTime { get; set; }
   }
-}
-```
 
-### 7.4 状態の基底と Input/Output — `state/`
-
-```csharp
-// GemLogicState.cs — [StateDiagram] で puml 図が自動生成される
-namespace MyGame;
-
-using Chickensoft.Introspection;
-using Chickensoft.LogicBlocks;
-
-[Meta, StateDiagram]
-public abstract partial record GemLogicState : LogicBlockState;
-```
-
-```csharp
-// GemLogicState.Input.cs
-namespace MyGame;
-
-using Godot;
-
-public abstract partial record GemLogicState
-{
   public static class Input
   {
     public readonly record struct StartCollection(ICoinCollector Target);
@@ -530,91 +469,63 @@ public abstract partial record GemLogicState
       double Delta, Vector3 GlobalPosition
     );
   }
-}
-```
 
-```csharp
-// GemLogicState.Output.cs
-namespace MyGame;
-
-using Godot;
-
-public abstract partial record GemLogicState
-{
   public static class Output
   {
     public readonly record struct Move(Vector3 GlobalPosition);
-    public readonly record struct SelfDestruct();
+    public readonly record struct SelfDestruct;
   }
 }
 ```
 
-### 7.5 各状態 — `state/states/`
+### 7.3 ステート — 同じ `state/GemLogic.cs` 内
 
 ```csharp
-// GemLogic.State.Idle.cs
-namespace MyGame;
-
-using System;
-using Chickensoft.Introspection;
-using Chickensoft.LogicBlocks;
-
-public partial record GemLogicState
+[StateDiagram]
+public abstract partial record GemState : LogicBlockState
 {
-  [Meta, Id("gem_logic_state_idle")]
-  public partial record Idle : GemLogicState, IGet<Input.StartCollection>
+  public record Idle : GemState, IGet<GemLogic.Input.StartCollection>
   {
-    public Type On(in Input.StartCollection input)
+    public Type On(in GemLogic.Input.StartCollection input)
     {
-      Get<GemLogic.Data>().Target = input.Target.Name;
+      Get<GemLogic.Data>().Target = input.Target;
       return To<Collecting>();
     }
   }
-}
-```
 
-```csharp
-// GemLogic.State.Collecting.cs
-namespace MyGame;
-
-using System;
-using Chickensoft.Collections;
-using Chickensoft.Introspection;
-using Chickensoft.LogicBlocks;
-
-public partial record GemLogicState
-{
-  [Meta, Id("gem_logic_state_collecting")]
-  public partial record Collecting : GemLogicState, IGet<Input.PhysicsProcess>
+  public record Collecting : GemState, IGet<GemLogic.Input.PhysicsProcess>
   {
     public Collecting()
     {
-      // 副作用は OnEnter に集約。ドメインへの通知もここから。
+      // 副作用は OnEnter に集約する。ドメインへの通知もここから行う。
       // ※ IGameRepo に対応するメソッド(StartGemCollection 等)を追加すること。
-      this.OnEnter(() => Get<IGameRepo>().StartGemCollection(Get<IGem>()));
+      this.OnEnter(() =>
+      {
+        // インスタンスは使い回されるので、可変値はここで初期化する
+        Get<GemLogic.Data>().ElapsedTime = 0;
+        Get<IGameRepo>().StartGemCollection(Get<IGem>());
+      });
     }
 
-    public Type On(in Input.PhysicsProcess input)
+    public Type On(in GemLogic.Input.PhysicsProcess input)
     {
       var settings = Get<GemLogic.Settings>();
       var data = Get<GemLogic.Data>();
-      var entityTable = Get<EntityTable>();
 
       data.ElapsedTime += input.Delta;
 
       if (data.ElapsedTime >= settings.CollectionTimeInSeconds)
       {
-        Output(new Output.SelfDestruct());
+        Output(new GemLogic.Output.SelfDestruct());
       }
 
-      // EntityTable で id → エンティティ参照を復元(セーブ復帰後も安全)
-      if (entityTable.Get<ICoinCollector>(data.Target) is { } target)
+      if (data.Target is { } target)
       {
         var nextPosition = input.GlobalPosition.Lerp(
           target.CenterOfMass,
           (float)(data.ElapsedTime / settings.CollectionTimeInSeconds)
         );
-        Output(new Output.Move(nextPosition));
+        Output(new GemLogic.Output.Move(nextPosition));
       }
 
       return ToSelf();
@@ -623,13 +534,12 @@ public partial record GemLogicState
 }
 ```
 
-### 7.6 View — `Gem.cs`
+### 7.4 View — `Gem.cs`
 
 ```csharp
 namespace MyGame;
 
 using Chickensoft.AutoInject;
-using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
@@ -645,169 +555,88 @@ public partial class Gem : Node3D, IGem
 {
   public override void _Notification(int what) => this.Notify(what);
 
-  #region Nodes
-  [Node("%AnimationPlayer")] public IAnimationPlayer AnimationPlayer { get; set; } = default!;
-  #endregion Nodes
-
   #region Exports
   public double CollectionTimeInSeconds { get; set; } = 1.0f;
   #endregion Exports
 
-  #region State
-  [Dependency] public EntityTable EntityTable => this.DependOn<EntityTable>();
-  [Dependency] public IGameRepo GameRepo => this.DependOn<IGameRepo>();
+  #region Nodes
+  [Node("%AnimationPlayer")] public IAnimationPlayer AnimationPlayer { get; set; } = default!;
+  #endregion Nodes
 
+  #region Dependencies
+  [Dependency] public IGameRepo GameRepo => this.DependOn<IGameRepo>();
+  #endregion Dependencies
+
+  #region State
   public IGemLogic GemLogic { get; set; } = default!;
-  public GemLogic.Settings Settings { get; set; } = default!;
   public LogicBlock.Binding GemBinding { get; set; } = default!;
   #endregion State
 
+  // DI 未解決: 自分が所有するものだけを生成する
   public void Setup()
   {
-    Settings = new GemLogic.Settings(CollectionTimeInSeconds);
     GemLogic = new GemLogic();
-
-    GemLogic.Set(this as IGem);
-    GemLogic.Set(Settings);
-    GemLogic.Set(GameRepo);
-    GemLogic.Save(() => new GemLogic.Data());
-    GemLogic.Set(EntityTable);
+    GemBinding = GemLogic.Bind();
   }
 
+  // DI 解決済み: 依存を Set → Binding 定義 → Start
   public void OnResolved()
   {
-    EntityTable.Set(Name, this);
-    GemBinding = GemLogic.Bind();
+    GemLogic.Set(this as IGem);
+    GemLogic.Set(new GemLogic.Settings(CollectionTimeInSeconds));
+    GemLogic.Set(new GemLogic.Data());
+    GemLogic.Set(GameRepo);
 
     GemBinding
-      .OnState<GemLogicState.Collecting>(_ =>
+      .OnState<GemState.Collecting>(_ =>
       {
         SetPhysicsProcess(true);
         AnimationPlayer.Play("collect");
       })
-      .OnOutput((in GemLogicState.Output.Move output) =>
+      .OnOutput((in GemLogic.Output.Move output) =>
         GlobalPosition = output.GlobalPosition)
-      .OnOutput((in GemLogicState.Output.SelfDestruct _) => QueueFree());
+      .OnOutput((in GemLogic.Output.SelfDestruct _) => QueueFree());
 
-    GemLogic.Start<GemLogicState.Idle>();
+    GemLogic.Start<GemState.Idle>();
   }
 
   public void OnPhysicsProcess(double delta) =>
-    GemLogic.Input(new GemLogicState.Input.PhysicsProcess(delta, GlobalPosition));
+    GemLogic.Input(new GemLogic.Input.PhysicsProcess(delta, GlobalPosition));
 
   public void OnCollectorBodyEntered(Node body)
   {
     if (body is ICoinCollector target)
     {
-      GemLogic.Input(new GemLogicState.Input.StartCollection(target));
+      GemLogic.Input(new GemLogic.Input.StartCollection(target));
     }
   }
 
-  public void OnExitTree()
+  public void OnTreeExiting()
   {
-    GemLogic.Stop();
     GemBinding.Dispose();
-    EntityTable.Remove(Name);
+    GemLogic.Dispose();
   }
 }
 ```
 
-### 7.7 チェック: 新機能追加の手順まとめ
+### 7.5 チェック: 新機能追加の手順まとめ
 
-1. `src/<feature>/` を作り、View / Logic / Data / State(Input/Output/states)を上記テンプレートで揃える
-2. 依存(Repo・EntityTable 等)は `[Dependency]` で受け、`Setup()` で `Logic.Set(...)` する
-3. セーブ対象なら `[Meta, Id]` + `[Save]` を付け、親の SaveChunk に登録する(→ §8)
-4. `test/src/<feature>/` に View テストと状態テストを同時に追加する(→ §10)
-5. `dotnet build` で警告ゼロを確認(全スタイルルールが warning になっている)
+1. `src/<feature>/` を作り、View と `state/{Feature}Logic.cs`(Logic + Input/Output + ステート)を上記テンプレートで揃える
+2. Logic の ctor で全ステートを `Set(new XState.A())` で事前確保する
+3. 依存(Repo 等)は `[Dependency]` で受け、`OnResolved()` で `Logic.Set(...)` する(`Setup()` は DI 未解決)
+4. `test/src/<feature>/` にテストを追加する(→ §10)
+5. `dotnet build` で警告が増えていないことと、`.g.puml` が再生成されることを確認する
 
 ---
 
-## 8. セーブシステム
+## 8. セーブ・ロード
 
-### 8.1 構造: SaveChunk ツリーがシーンツリーをミラーする
+本プロジェクトはセーブ機能が未実装。実装するときは以下に従う。
 
-```plantuml
-@startuml
-title SaveChunk ツリーとシーンツリーの対応
-
-package "シーンツリー" {
-  [Game] as GNode
-  [Map] as MNode
-  [Player] as PNode
-  [PlayerCamera] as CNode
-  GNode --> MNode
-  GNode --> PNode
-  GNode --> CNode
-}
-
-package "SaveChunk ツリー" {
-  [SaveFile<GameData>] as SF
-  [SaveChunk<GameData>] as GC
-  [SaveChunk<MapData>] as MC
-  [SaveChunk<PlayerData>] as PC
-  [SaveChunk<PlayerCameraData>] as CC
-  SF --> GC : root
-  GC --> MC
-  GC --> PC
-  GC --> CC
-}
-
-GNode ..> GC : 生成し IProvide で提供
-MNode ..> MC : OnResolved() で\nGameChunk.AddChunk(MapChunk)
-PNode ..> PC
-CNode ..> CC
-
-note bottom of PC
-  PlayerData には
-  ステートマシンの状態
-  (ILogicBlockSaveData)も含む
-end note
-@enduml
-```
-
-### 8.2 実装ルール
-
-- **セーブデータは record** + `[Meta, Id("snake_case_id")]` + `[Save("snake_case_key")]`:
-
-```csharp
-[Meta, Id("player_data")]
-public partial record PlayerData
-{
-  [Save("global_transform")]
-  public required Transform3D GlobalTransform { get; init; }
-  [Save("state_machine")]
-  public required ILogicBlockSaveData StateMachine { get; init; }
-  [Save("velocity")]
-  public required Vector3 Velocity { get; init; }
-}
-```
-
-- **ルートノード(Game)** が `SaveFile<GameData>` と root chunk を生成し、`JsonSerializerOptions` に `SerializableTypeConverter` / `SerializableTypeResolver` を設定。ファイル I/O は **`System.IO.Abstractions.IFileSystem` 経由**(テストでモックするため)。
-- **各ノード**は `OnResolved()` で自分の chunk を親 chunk に登録:
-
-```csharp
-PlayerChunk = new SaveChunk<PlayerData>(
-  onSave: (chunk) => new PlayerData()
-  {
-    GlobalTransform = GlobalTransform,
-    StateMachine = PlayerLogic.GetSaveData(),  // ステートマシンごと保存
-    Velocity = Velocity
-  },
-  onLoad: (chunk, data) =>
-  {
-    GlobalTransform = data.GlobalTransform;
-    Velocity = data.Velocity;
-    PlayerLogic.Stop();
-    PlayerLogic.Start(data.StateMachine.Data); // 保存時の状態から再開
-  }
-);
-GameChunk.AddChunk(PlayerChunk);
-```
-
-- **非同期セーブ中は入力をブロックする状態に遷移**する(`Paused.Saving` のように状態として表現)。完了は `Input(new Input.SaveCompleted())` で通知。
-- ロードは専用状態(`LoadingSaveFile`)+ 完了シグナルで扱う。**ローディングフラグ変数を作らない**。
-- セーブファイル欠如は正常系として扱う(ログ出力 + null 返却)。
-- 動的エンティティの参照は `EntityTable`(名前 → エンティティ)で保存・復元する。
+- ステートマシンの再開には `Logic.Start(LogicBlockData)` を使う。
+- 非同期のセーブ・ロード中は、入力をブロックするステートに遷移させる(例: `Saving` / `LoadingSaveFile`)。完了は `Input(new Input.SaveCompleted())` で通知する。**ローディングフラグ変数は作らない**。
+- セーブファイルがないことは正常系として扱う(ログ出力 + null 返却)。
+- ファイル I/O はインターフェース経由にし、テストでフェイクに差し替えられるようにする。
 
 ---
 
@@ -824,7 +653,6 @@ Microsoft 公式規約から**意図的に逸脱**している箇所があるの
 | ジェネリック型引数 | `T` プレフィックス | `TState` |
 | Input/Output メッセージ | `readonly record struct`、名は出来事/命令 | `Input.Jumped`, `Output.MovementComputed` |
 | Repo の通知メソッド | `On<出来事>` / 設定系は `Set<値>` | `OnGameEnded`, `SetIsMouseCaptured` |
-| セーブキー・型 Id | `snake_case` | `[Save("last_velocity")]`, `[Id("player_logic")]` |
 | ファイル名 | 型名と一致。入れ子はドット区切り | `PlayerLogic.State.Alive.cs` |
 | フォルダ名 | `snake_case`(Godot 慣習) | `in_game_ui/` |
 | テストクラス | `<対象>Test`、`test/src/` にミラー配置 | `PlayingTest.cs` |
@@ -845,54 +673,63 @@ Microsoft 公式規約から**意図的に逸脱**している箇所があるの
 
 **すべてのクラスに対応するテストを書く**(カバレッジバッジを README に掲示するのが Chickensoft 流)。テストは 2 種類に大別される。
 
-### 10.1 状態テスト(純粋・高速)— `StateTester`
+### 10.1 Logic テスト(純粋・高速)
 
-状態を単体で生成し、ブラックボードにモックを差して、入力 → 遷移/出力を検証する。
+実際の LogicBlock を生成し、ブラックボードにフェイク依存を `Set` してから `Start<T>()` → `Input()` → `State` / Output を検証する。
 
 ```csharp
 namespace MyGame.Tests;
 
 using Chickensoft.GoDotTest;
+using Chickensoft.LogicBlocks;
 using Godot;
-using Moq;
-using Shouldly;
 
-public class GemIdleTest : TestClass
+public class GemLogicTest : TestClass
 {
-  private StateTester _context = default!;
-  private GemLogicState.Idle _state = default!;
+  private GemLogic _logic = default!;
+  private LogicBlock.Binding _binding = default!;
   private GemLogic.Data _data = default!;
 
-  public GemIdleTest(Node testScene) : base(testScene) { }
+  public GemLogicTest(Node testScene) : base(testScene) { }
 
   [Setup]
   public void Setup()
   {
-    _state = new GemLogicState.Idle();
-    _context = _state.Test();          // StateTester を取得
+    _logic = new GemLogic();
     _data = new GemLogic.Data();
-    _context.Set(_data);               // ブラックボードへ依存を注入
+    _logic.Set(_data);                         // ブラックボードへ依存を注入
+    _logic.Set(new GemLogic.Settings(1.0));
+    _logic.Set<IGameRepo>(new FakeGameRepo()); // 手書きフェイク
+    _binding = _logic.Bind();
+  }
+
+  [Cleanup]
+  public void Cleanup()
+  {
+    _binding.Dispose();
+    _logic.Dispose();
   }
 
   [Test]
   public void StartsCollectingOnStartCollection()
   {
-    var target = new Mock<ICoinCollector>();
-    target.Setup(t => t.Name).Returns((StringName)"Player");
+    _logic.Start<GemState.Idle>();
+    _logic.Input(new GemLogic.Input.StartCollection(new FakeCollector()));
 
-    _state.On(new GemLogicState.Input.StartCollection(target.Object))
-      .ShouldBe(typeof(GemLogicState.Collecting)); // 遷移先の型を検証
-
-    _data.Target.ShouldBe("Player");
+    // 遷移先ステートと Data の変化を検証
+    if (_logic.State is not GemState.Collecting)
+    {
+      throw new System.Exception("Collecting に遷移していない");
+    }
   }
 }
 ```
 
 検証ポイント:
 
-- `_state.On(input)` の戻り値(遷移先 `Type`)を `ShouldBe(typeof(...))`
-- `_state.Enter()` 後の `_context.Outputs` / `_context.Inputs` の中身
-- モック Repo の `Verify(...)` でドメイン呼び出し
+- 遷移後の `_logic.State` の型
+- `_binding.OnOutput((in GemLogic.Output.X o) => ...)` で受け取った Output
+- フェイク Repo に記録された呼び出し(購読・解除の対称性も含む)
 
 ### 10.2 View テスト — フェイク注入 + `FakeBinding`
 
@@ -925,14 +762,15 @@ public void Setup()
 public void MovesOnMoveOutput()
 {
   _gem.OnResolved();
-  _binding.Output(new GemLogicState.Output.Move(Vector3.One)); // 出力を偽装
+  _binding.Output(new GemLogic.Output.Move(Vector3.One)); // 出力を偽装
   _gem.GlobalPosition.ShouldBe(Vector3.One);
 }
 ```
 
 - 実シーンツリーが必要なテストのみ `GodotTestDriver` の `Fixture` で `await fixture.AddToRoot(node)`。
 - 入力転送の検証は `_logic.Setup(l => l.Input(in It.Ref<Input.X>.IsAny))` + `VerifyAll()`。
-- `Mock<IGameRepo>` の `AutoValue` プロパティは実物の `AutoValue<T>` を返し、`[Cleanup]` で `Dispose()` する。
+- Repo フェイクの `IAutoValue<T>` プロパティは実物の `AutoValue<T>` を返し、`[Cleanup]` で `Dispose()` する。
+- `LogicBlock.CreateFakeBinding()` で `Output` / `Input` / `SetState` / `EnterState` / `ExitState` / `Start` / `Stop` を偽装できる。
 
 ### 10.3 テスト実行の仕組み
 
@@ -985,11 +823,12 @@ public void MovesOnMoveOutput()
 このアーキテクチャ基準でのレビュー観点(全項目がプロジェクト内の実例に基づく):
 
 - [ ] **View にロジックがないか** — 条件分岐・ルール判定が View にあれば LogicBlock へ移す
-- [ ] **新しい状態はセットが揃っているか** — 1状態1ファイル / `[Meta]`(セーブ対象なら `[Meta, Id]`)/ `IGet<>` 宣言 / 対応するテスト
+- [ ] **新しい状態はセットが揃っているか** — Logic の ctor で `Set(new XState.X())` されているか(漏れると遷移時に `KeyNotFoundException`)/ `IGet<>` 宣言 / 対応するテスト
+- [ ] **OnEnter / OnExit の順序** — `OnEnter` は購読 → Output、`OnExit` は Output → 購読解除の順か。再利用されるステートの可変フィールドを `OnEnter` で初期化しているか
+- [ ] **Start 前 Input** — `Logic.Start<T>()` より前に `Input()` していないか(`LogicBlockException`)
 - [ ] **依存の受け方** — 子ノードは `[Node]` + インターフェース型、祖先依存は `[Dependency]` + `IProvide` + `this.Provide()`
 - [ ] **メッセージ型** — Input/Output は `readonly record struct`、ハンドラは `in` 引数
-- [ ] **セーブ** — 対象データに `[Save]`/`[Id]` があるか、SaveChunk 登録は `OnResolved()` で行っているか、動的参照は `EntityTable` 経由か
-- [ ] **後始末** — `OnExitTree()` でシグナル購読解除・`Logic.Stop()`・`Binding.Dispose()`・所有 Repo の `Dispose()` が揃っているか
+- [ ] **後始末** — `OnTreeExiting()` でシグナル購読解除・`Binding.Dispose()`・`Logic.Dispose()`・所有 Repo の `Dispose()` が揃っているか。`AutoValue` の Binding と値本体の両方を Dispose しているか
 - [ ] **命名** — 定数 `ALL_UPPER`、private `_camelCase`、インターフェース `I` プレフィックス
 - [ ] **switch 式** — 網羅 + `_ =>` フォールバックがあるか(未知の enum 値のテストも)
 - [ ] **状態 vs フラグ** — 新しい bool フラグが実は「状態」ではないか(ローディング・処理中は state にする)
@@ -1064,13 +903,39 @@ public class ScoreRepo : IScoreRepo
 }
 ```
 
-LogicBlock 側での購読(`OnStartSubscriptions()`):
+LogicBlock 側での購読(購読が必要なステートの `OnEnter` で登録し、`OnExit` で `Dispose` する):
 
 ```csharp
-public override IEnumerable<IDisposable> OnStartSubscriptions()
+public record Playing : MyState, IGet<MyLogic.Input.HighScore>
 {
-  yield return Get<IScoreRepo>().AutoChannel.Bind()
-    .On((in IScoreRepo.HighScoreReached message) =>
-      (State as MyLogicState.Playing)?.OnHighScore(message.Score));
+  private AutoValue<int>.Binding? _scoreBinding;
+  private AutoChannel.Binding? _channelBinding;
+
+  public Playing()
+  {
+    this.OnEnter(() =>
+    {
+      var repo = Get<IScoreRepo>();
+      // AutoValue: 登録時に現在値が即時通知される
+      _scoreBinding = repo.Score.Bind();
+      _scoreBinding.OnValue(score => Output(new MyLogic.Output.ScoreChanged(score)));
+
+      _channelBinding = repo.AutoChannel.Bind();
+      _channelBinding.On((in IScoreRepo.HighScoreReached m) =>
+        Input(new MyLogic.Input.HighScore(m.Score)));
+    });
+    // 購読解除は OnExit の最後に
+    this.OnExit(() =>
+    {
+      _scoreBinding?.Dispose();
+      _scoreBinding = null;
+      _channelBinding?.Dispose();
+      _channelBinding = null;
+    });
+  }
+
+  public Type On(in MyLogic.Input.HighScore input) => To<Celebrating>();
 }
 ```
+
+実例: `src/battle_ui/state/BattleUILogic.cs`(`Active` ステートの `_scoreBinding`)。

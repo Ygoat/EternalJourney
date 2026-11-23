@@ -27,9 +27,14 @@ description: 現在の差分（またはブランチ）を EternalJourney のア
 10. **マジックナンバー** — ダメージ量・時間・半径などの数値リテラルは定数化または `data/masters/` の設定へ外出しされているか。
 11. **デバッグ残骸** — `GD.Print` のデバッグ出力、コメントアウトされたコード、未使用変数が残っていないか。
 12. **.g.puml** — 自動生成ファイルを手動編集していないか（差分に手動変更が含まれていたら警告）。
+13. **ステートの事前確保** — 追加・改名したステートが Logic の ctor で `Set(new XState.X())` されているか。漏れると遷移時に `KeyNotFoundException`（`Data of type ... not found in the blackboard`）になる。
+14. **OnEnter / OnExit の順序** — `OnEnter` は購読登録 → `Output`、`OnExit` は `Output` → 購読解除の順か。逆にすると、Output を受けた View が同期的に発火させた Repo イベントを取りこぼし、遷移が止まる。
+15. **ステートの再利用** — ステートは使い回されるため、可変フィールド（カウンタ・スタック数・Binding 等）を `OnEnter` で初期化しているか。遷移前に値を渡すときは `Get<NextState>()` でプロパティを設定してから `To<NextState>()` しているか。
+16. **Start 前の Input** — `Logic.Start<XState.Initial>()` より前に `Input()` していないか（`LogicBlockException`）。
+17. **AutoValue（Chickensoft.Sync）** — `Bind().OnValue(...)` で得た `Binding` と `AutoValue` 本体の両方を `Dispose` しているか。`OnValue` は登録時に現在値を即時通知するので、初回呼び出しが副作用を起こさないか確認する。
 
 ## 重大度の目安
 
-- **高**: Dispose 漏れ（リーク）、View へのルール直書き、Logic 間直接参照
+- **高**: Dispose 漏れ（リーク）、View へのルール直書き、Logic 間直接参照、ステートの `Set` 漏れ、OnEnter/OnExit の購読順序の誤り
 - **中**: bool フラグ状態、具象型依存、Setup での DI 使用
 - **低**: 命名・タイポ・マジックナンバー・デバッグ残骸

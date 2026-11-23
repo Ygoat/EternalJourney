@@ -6,6 +6,20 @@
 
 EternalJourneyは **Godot 4.7.2（バージョン固定）** と **C#（.NET 8.0）** で開発された放置型オートシューティングゲームです。[Chickensoft](https://chickensoft.games/) エコシステムを多用しています。
 
+### 使用ライブラリ（`EternalJourney.csproj` / `global.json` 準拠）
+
+| パッケージ | バージョン |
+| --- | --- |
+| Godot.NET.Sdk | 4.7.2 |
+| Chickensoft.AutoInject | 2.14.18 |
+| Chickensoft.LogicBlocks / DiagramGenerator | 6.2.3 |
+| Chickensoft.Sync | 3.0.1 |
+| Chickensoft.Introspection / Generator | 3.0.3 |
+| Chickensoft.GodotNodeInterfaces | 3.0.46 |
+| Chickensoft.GoDotTest | 2.0.52 |
+| Chickensoft.GodotTestDriver | 3.1.90 |
+| Shouldly / LightMock.Generator / LightMoq（テスト） | 4.2.1 / 1.2.2 / 0.1.0 |
+
 設計判断・コードレビュー時は `docs/ARCHITECTURE_REFERENCE.md`（Chickensoft GameDemo流アーキテクチャ・リファレンス）を正とします。
 
 ## ビルドコマンド
@@ -40,12 +54,21 @@ Godot 4.7.2（.NET版）のインストールが必要です。VSCodeからデ�
 全ノードで以下のオーバーライドが必須です: `public override void _Notification(int what) => this.Notify(what);`
 
 **2. LogicBlocks** — ステートマシンフレームワーク。各エンティティの振る舞いは `LogicBlock` で管理されます。
-- v6系: `LogicBlock` は非ジェネリック。ステートは Logic クラスの**外**に `{Name}State : LogicBlockState`（抽象レコード）として定義し、その中に具象ステートをネストする（`LogicBlock.State` プロパティと名前衝突するため `State` という名前は使えない）
+- `LogicBlock` は非ジェネリック。ステートは Logic クラスの**外**に `{Name}State : LogicBlockState`（抽象レコード）として定義し、その中に具象ステートをネストする（`LogicBlock.State` プロパティと名前衝突するため `State` という名前は使えない）
 - ステートはコンストラクタで `Set(new XState.A())` により**事前確保**する（インスタンスは再利用されるため、可変フィールドは `OnEnter` で初期化すること）
 - ステートは `IGet<XLogic.Input.X>` を実装して入力を処理し、ハンドラは `Type` を返す: `To<NewState>()` または `ToSelf()`
-- 開始は `Logic.Start<XState.Initial>()`。ステート進入/退出は `this.OnEnter(...)` / `this.OnExit(...)`（v5 の `OnAttach/OnDetach` は廃止）
+- 開始は `Logic.Start<XState.Initial>()`。ステート進入/退出は `this.OnEnter(...)` / `this.OnExit(...)`
+- `Start` より前に `Input()` すると `LogicBlockException` になる
+- `OnEnter` は「Repo イベント購読 → `Output`」、`OnExit` は「`Output` → 購読解除」の順に登録する（Output を受けた View が同期的に Repo イベントを起こすため、順序が逆だと遷移入力を取りこぼす）
+- ctor で `Set` していないステートへ遷移すると `KeyNotFoundException` になる。遷移前にステートへ値を渡すときは `Get<Next>()` でプロパティを設定してから `To<Next>()` する
 - Outputはバインディングを通じて親ノードで処理される
 - 基底ステートに `[StateDiagram]` を付けると `.g.puml` PlantUMLダイアグラムが自動生成される（手動編集不可）
+
+**Chickensoft.Sync（AutoValue）** — Repo の観測可能値。
+
+- 公開は `IAutoValue<T>`、更新は `_value.Value = x`
+- 購読は `var b = value.Bind(); b.OnValue(cb);`。登録した時点で現在値が即時に通知される
+- `Binding` と `AutoValue` 本体の両方を `Dispose` する（例: `src/battle_ui/state/BattleUILogic.cs`、`src/common/durability_module/DurabilityModule.cs`）
 
 **3. GodotNodeInterfaces** — Godotノードのインターフェースラッパー（例: `INode2D`、`IVisibleOnScreenNotifier2D`）。テスト時のモック化を可能にします。
 
@@ -195,9 +218,9 @@ public void Setup() {
 }
 
 public void OnResolved() {
-  // DI解決済み — 依存を渡してバインド開始
+  // DI解決済み — 依存を渡してから開始（Binding に Start はない）
   Logic.Set(GameService);
-  LogicBinding.Start();
+  Logic.Start<FooState.Idle>();
 }
 ```
 

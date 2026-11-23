@@ -31,6 +31,10 @@ EternalJourney の規約に沿って新機能一式を作成する手順。詳�
 4. **LogicBlock を作る**: CLAUDE.md「LogicBlocksパターン」のプロジェクト流儀に従う。
    - `[Meta] partial class XLogic : LogicBlock`、ステートは Logic の外に `[StateDiagram] abstract partial record XState : LogicBlockState` として定義し、ctor で `Set(new XState.A())` 事前確保（可変フィールドは `OnEnter` で初期化）
    - Input/Output は `static class Input / Output` 内の `readonly record struct`
+   - ハンドラは `public Type On(in XLogic.Input.X input)` で `To<Next>()` / `ToSelf()` を返す
+   - `OnEnter` では Repo イベントの購読を**先に**登録してから `Output` する。`OnExit` では `Output` を先にし、購読解除は**最後**にする（逆にすると遷移入力を取りこぼす）
+   - `Start<T>()` より前に `Input()` しない（`LogicBlockException`）
+   - Repo の観測値は Chickensoft.Sync の `AutoValue<T>` を使う。ステートの `OnEnter` で `Bind().OnValue(...)`（登録時に現在値が即時通知される）、`OnExit` で Binding を `Dispose` する
    - 状態は「ロード中」「攻撃中」「死亡」等をすべて record 状態として列挙する。**bool フラグで状態を持たない**
    - Logic 同士は直接参照しない。他の機能との連携は Repo のイベント経由
 
@@ -42,6 +46,9 @@ EternalJourney の規約に沿って新機能一式を作成する手順。詳�
 
 ## 参考実装（模範例）
 
+- 最小の LogicBlock 例: `src/common/status_effect/state/StunEffectLogic.cs`
 - View + Logic の分離: `src/ship/Ship.cs` + `src/ship/state/ShipLogic.cs`
+- AutoValue 購読（OnEnter/OnExit）: `src/battle_ui/state/BattleUILogic.cs` の `Active` ステート
+- 遷移前にステートへ値を渡す: `src/bullet/abstract/state/BulletLogic.cs`（EmitWait → InFlight）
 - Repo イベント連携: `src/battle/domain/BattleRepo.cs` と `src/game/state/GameLogic.cs`
 - ストラテジー切替: `src/bullet/strategies/` + `data/masters/BulletConfig.json`

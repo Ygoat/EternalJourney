@@ -29,7 +29,7 @@ public partial class CLASSNAME : NODETYPE, ICLASSNAME
     #region Dependencies
     #endregion Dependencies
 
-    public void OnInitialized()
+    public void Initialize()
     {
     }
 
@@ -37,11 +37,11 @@ public partial class CLASSNAME : NODETYPE, ICLASSNAME
     {
     }
 
-    public void OnResolved()
+    public void Setup()
     {
     }
 
-    public void Setup()
+    public void OnResolved()
     {
     }
 }
