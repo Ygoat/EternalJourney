@@ -20,6 +20,7 @@ public partial class GameLogic : LogicBlock, IGameLogic
     {
         // ステートを事前確保
         Set(new GameState.SelectSkillPhase());
+        Set(new GameState.SelectSpSkillPhase());
         Set(new GameState.BattleInitPhase());
         Set(new GameState.BattleRunningPhase());
         Set(new GameState.BattleEndingPhase());
@@ -33,6 +34,11 @@ public partial class GameLogic : LogicBlock, IGameLogic
         /// スキル選択完了
         /// </summary>
         public readonly record struct SkillSelected;
+
+        /// <summary>
+        /// SPスキル選択完了
+        /// </summary>
+        public readonly record struct SpSkillSelected;
 
         /// <summary>
         /// バトル初期化完了
@@ -56,6 +62,11 @@ public partial class GameLogic : LogicBlock, IGameLogic
         /// スキル選択画面表示
         /// </summary>
         public readonly record struct ShowSelectSkill;
+
+        /// <summary>
+        /// SPスキル選択画面表示
+        /// </summary>
+        public readonly record struct ShowSelectSpSkill;
 
         /// <summary>
         /// バトル初期化
@@ -97,7 +108,24 @@ public abstract partial record GameState : LogicBlockState
 
         private void OnSkillSelected() => Input(new GameLogic.Input.SkillSelected());
 
-        public Type On(in GameLogic.Input.SkillSelected input) => To<BattleInitPhase>();
+        public Type On(in GameLogic.Input.SkillSelected input) => To<SelectSpSkillPhase>();
+    }
+
+    /// <summary>
+    /// SPスキル選択フェーズ
+    /// </summary>
+    public record SelectSpSkillPhase : GameState, IGet<GameLogic.Input.SpSkillSelected>
+    {
+        public SelectSpSkillPhase()
+        {
+            this.OnEnter(() => Get<IGameRepo>().SpSkillSelected += OnSpSkillSelected);
+            this.OnEnter(() => Output(new GameLogic.Output.ShowSelectSpSkill()));
+            this.OnExit(() => Get<IGameRepo>().SpSkillSelected -= OnSpSkillSelected);
+        }
+
+        private void OnSpSkillSelected() => Input(new GameLogic.Input.SpSkillSelected());
+
+        public Type On(in GameLogic.Input.SpSkillSelected input) => To<BattleInitPhase>();
     }
 
     /// <summary>

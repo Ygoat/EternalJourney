@@ -12,6 +12,7 @@ using EternalJourney.Game.Domain;
 using EternalJourney.Game.State;
 using EternalJourney.Result;
 using EternalJourney.SelectSkill;
+using EternalJourney.SelectUI;
 using Godot;
 
 
@@ -56,6 +57,12 @@ public partial class Game : Node2D, IGame
     public ISelectSkill SelectSkill { get; set; } = default!;
 
     /// <summary>
+    /// SPスキル選択
+    /// </summary>
+    [Node]
+    public ISelectSpSkillUI SelectSpSkill { get; set; } = default!;
+
+    /// <summary>
     /// バトル
     /// </summary>
     [Node]
@@ -98,7 +105,13 @@ public partial class Game : Node2D, IGame
             {
                 Battle.ProcessMode = ProcessModeEnum.Disabled;
                 SelectSkill.Show();
+                SelectSpSkill.Hide();
                 Battle.Hide();
+            })
+            .OnOutput((in GameLogic.Output.ShowSelectSpSkill _) =>
+            {
+                SelectSkill.Hide();
+                SelectSpSkill.Show();
             })
             .OnOutput((in GameLogic.Output.InitializeBattle _) =>
             {
@@ -109,6 +122,7 @@ public partial class Game : Node2D, IGame
             {
                 Battle.ProcessMode = ProcessModeEnum.Inherit;
                 SelectSkill.Hide();
+                SelectSpSkill.Hide();
                 Battle.Show();
                 Battle.StartBattle();
             })

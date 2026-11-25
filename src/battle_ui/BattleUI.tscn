@@ -171,5 +171,6 @@ color = Color(0.639216, 0, 0.662745, 1)
 unique_name_in_owner = true
 custom_minimum_size = Vector2(70, 70)
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 18
 text = "SP"
+autowrap_mode = 3

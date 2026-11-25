@@ -16,5 +16,5 @@ EternalJourney_BattleUI_State_BattleUIState_Active : OnScoreCountUp() → ScoreC
 EternalJourney_BattleUI_State_BattleUIState_Active : OnScrapCountUp() → ScrapChanged
 EternalJourney_BattleUI_State_BattleUIState_Active : OnShipHpChanged() → ShipHpChanged
 EternalJourney_BattleUI_State_BattleUIState_Active : OnSpPercentChanged() → SpPercentChanged
-EternalJourney_BattleUI_State_BattleUIState_InActive : OnBattleStarted → ActivateBattleUI
+EternalJourney_BattleUI_State_BattleUIState_InActive : OnBattleStarted → ActivateBattleUI, SpSkillNameChanged
 @enduml

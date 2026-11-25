@@ -1,0 +1,15 @@
+@startuml SpSkillState
+state "SpSkillState" as EternalJourney_SpSkillEffectArea_State_SpSkillState {
+  state "Debuffing" as EternalJourney_SpSkillEffectArea_State_SpSkillState_Debuffing
+  state "Ready" as EternalJourney_SpSkillEffectArea_State_SpSkillState_Ready
+}
+
+EternalJourney_SpSkillEffectArea_State_SpSkillState --> EternalJourney_SpSkillEffectArea_State_SpSkillState : Activated
+EternalJourney_SpSkillEffectArea_State_SpSkillState --> EternalJourney_SpSkillEffectArea_State_SpSkillState_Debuffing : Activated
+EternalJourney_SpSkillEffectArea_State_SpSkillState_Debuffing --> EternalJourney_SpSkillEffectArea_State_SpSkillState_Debuffing : Process
+EternalJourney_SpSkillEffectArea_State_SpSkillState_Debuffing --> EternalJourney_SpSkillEffectArea_State_SpSkillState_Ready : Process
+
+EternalJourney_SpSkillEffectArea_State_SpSkillState : OnActivated → Burst
+EternalJourney_SpSkillEffectArea_State_SpSkillState_Debuffing : OnEnter → ProcessingChanged
+EternalJourney_SpSkillEffectArea_State_SpSkillState_Ready : OnEnter → ProcessingChanged
+@enduml

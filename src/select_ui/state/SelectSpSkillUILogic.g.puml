@@ -1,0 +1,11 @@
+@startuml SelectSpSkillUIState
+state "SelectSpSkillUIState" as EternalJourney_SelectUI_State_SelectSpSkillUIState {
+  state "Idle" as EternalJourney_SelectUI_State_SelectSpSkillUIState_Idle
+}
+
+EternalJourney_SelectUI_State_SelectSpSkillUIState_Idle --> EternalJourney_SelectUI_State_SelectSpSkillUIState_Idle : ConfirmPressed
+EternalJourney_SelectUI_State_SelectSpSkillUIState_Idle --> EternalJourney_SelectUI_State_SelectSpSkillUIState_Idle : SpSkillToggled
+
+EternalJourney_SelectUI_State_SelectSpSkillUIState_Idle : NotifySelection() → SelectionChanged
+EternalJourney_SelectUI_State_SelectSpSkillUIState_Idle : OnEnter → Initialized
+@enduml

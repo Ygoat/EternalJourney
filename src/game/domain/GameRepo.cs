@@ -21,6 +21,26 @@ public interface IGameRepo : IDisposable
     void SetSelectedSkills(IReadOnlyList<SkillType> skills);
 
     /// <summary>
+    /// 選択済みSPスキル
+    /// </summary>
+    SpSkillType SelectedSpSkill { get; }
+
+    /// <summary>
+    /// 選択済みSPスキルを保存する
+    /// </summary>
+    void SetSelectedSpSkill(SpSkillType type);
+
+    /// <summary>
+    /// SPスキル選択完了イベント
+    /// </summary>
+    event Action? SpSkillSelected;
+
+    /// <summary>
+    /// SPスキル選択完了を通知する
+    /// </summary>
+    void NotifySpSkillSelected();
+
+    /// <summary>
     /// 最終スコア
     /// </summary>
     int FinalScore { get; }
@@ -90,6 +110,26 @@ public class GameRepo : IGameRepo
     /// <inheritdoc/>
     /// </summary>
     public void SetSelectedSkills(IReadOnlyList<SkillType> skills) => SelectedSkills = skills;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public SpSkillType SelectedSpSkill { get; private set; } = SpSkillType.Stun;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void SetSelectedSpSkill(SpSkillType type) => SelectedSpSkill = type;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? SpSkillSelected;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifySpSkillSelected() => SpSkillSelected?.Invoke();
 
     /// <summary>
     /// <inheritdoc/>

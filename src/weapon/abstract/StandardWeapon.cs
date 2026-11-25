@@ -124,8 +124,15 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     public override void OnReady()
     {
         base.OnReady();
-        StandardBulletFactory.WaitTime = Status.Spd;
+        // Status.Spd 未設定（0）のシーンはファクトリ既定の間隔を基準にする（0 だと Timer に設定できず倍率も効かない）
+        _baseFireInterval = Status.Spd > 0f ? Status.Spd : StandardBulletFactory.WaitTime;
+        StandardBulletFactory.WaitTime = _baseFireInterval;
     }
+
+    /// <summary>
+    /// 基準の発射間隔（秒）
+    /// </summary>
+    private float _baseFireInterval;
 
     /// <summary>
     /// <inheritdoc/>
@@ -169,6 +176,8 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
 
         BattleRepo.WeaponSpdMultiplierChanged += UpdateWaitTime;
         BattleRepo.ResearchChanged += UpdateWaitTime;
+        BattleRepo.EnemyDebuffChanged += UpdateWaitTime;
+        _resolved = true;
         UpdateWaitTime();
     }
 
@@ -217,13 +226,23 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     {
         IsPlayerOwned = isPlayer;
         StandardBulletFactory.IsPlayerBullet = isPlayer;
+        // 所有者が DI 解決後に変わった場合も、所有者に応じた発射間隔へ更新する
+        if (_resolved)
+        {
+            UpdateWaitTime();
+        }
     }
+
+    /// <summary>
+    /// DI 解決済みか（BattleRepo を参照できるか）
+    /// </summary>
+    private bool _resolved;
 
     private void UpdateWaitTime()
     {
         StandardBulletFactory.WaitTime = IsPlayerOwned
-            ? Status.Spd / BattleRepo.WeaponSpdMultiplier * BattleRepo.Research.Value.FireIntervalMultiplier
-            : Status.Spd;
+            ? _baseFireInterval / BattleRepo.WeaponSpdMultiplier * BattleRepo.Research.Value.FireIntervalMultiplier
+            : _baseFireInterval * BattleRepo.EnemyFireIntervalMultiplier;
     }
 
     // 注意: プール運用される敵の子として、返却のたびにツリーから外れるため、OnExitTree では Dispose / 購読解除をしない。

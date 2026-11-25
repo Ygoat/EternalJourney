@@ -91,6 +91,26 @@ public interface IBattleRepo : IDisposable
     public float CalcSpSkillDamage(float baseDamage);
 
     /// <summary>
+    /// 敵の攻撃力倍率（SPスキルのデバフ）
+    /// </summary>
+    public float EnemyAtkMultiplier { get; }
+
+    /// <summary>
+    /// 敵の発射間隔倍率（SPスキルのデバフ）
+    /// </summary>
+    public float EnemyFireIntervalMultiplier { get; }
+
+    /// <summary>
+    /// 敵へのデバフを設定する（解除時は 1, 1 を渡す）
+    /// </summary>
+    public void SetEnemyDebuff(float atkMultiplier, float fireIntervalMultiplier);
+
+    /// <summary>
+    /// 敵へのデバフの変化イベント（プール運用される敵武器向け）
+    /// </summary>
+    public event Action? EnemyDebuffChanged;
+
+    /// <summary>
     /// 弾丸がヒットした際に呼び出されるイベント
     /// </summary>
     public event Action<IBaseBullet>? BulletHittingStarted;
@@ -457,6 +477,31 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public float CalcSpSkillDamage(float baseDamage) =>
         baseDamage * (1f + _research.Value.SpDamageRate);
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public float EnemyAtkMultiplier { get; private set; } = 1f;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public float EnemyFireIntervalMultiplier { get; private set; } = 1f;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? EnemyDebuffChanged;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void SetEnemyDebuff(float atkMultiplier, float fireIntervalMultiplier)
+    {
+        EnemyAtkMultiplier = atkMultiplier;
+        EnemyFireIntervalMultiplier = fireIntervalMultiplier;
+        EnemyDebuffChanged?.Invoke();
+    }
 
     /// <summary>
     /// <inheritdoc/>

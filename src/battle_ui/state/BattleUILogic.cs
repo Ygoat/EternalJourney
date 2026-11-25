@@ -97,6 +97,11 @@ public partial class BattleUILogic : LogicBlock, IBattleUILogic
         public readonly record struct SkillCooldownChanged(float Multiplier);
 
         /// <summary>
+        /// 選択中のSPスキル名（SPボタンに表示する）
+        /// </summary>
+        public readonly record struct SpSkillNameChanged(string Name);
+
+        /// <summary>
         /// 取得済み研究カードの変化
         /// </summary>
         public readonly record struct AcquiredCardsChanged(IReadOnlyList<AcquiredCardRow> Rows);
@@ -155,6 +160,7 @@ public abstract partial record BattleUIState : LogicBlockState
                 slots[i].SetLabel(SkillInfo.GetName(skills[i]));
                 slots[i].Activated += battleUI.GetSkill(skills[i]).Activate;
             }
+            Output(new BattleUILogic.Output.SpSkillNameChanged(SpSkillCatalog.Get(Get<IGameRepo>().SelectedSpSkill).Name));
             Output(new BattleUILogic.Output.ActivateBattleUI());
             return To<Active>();
         }

@@ -157,6 +157,10 @@ public partial class BattleUI : Control, IBattleUI
                 Count = 0;
                 SetPhysicsProcess(true);
             })
+            .OnOutput((in BattleUILogic.Output.SpSkillNameChanged output) =>
+            {
+                SPButton.Text = output.Name;
+            })
             .OnOutput((in BattleUILogic.Output.TikCount _) =>
             {
                 Count++;
