@@ -140,7 +140,9 @@ public partial class WeaponTrait : Node2D, IWeaponTrait
     private Color _color = Colors.White;
     private float _blinkTime;
 
-    public bool CanFire => _logic?.State is not WeaponTraitState.Locked;
+    // Released は Locked から Ready へ遷移する途中（状態がまだ Locked の時点）で通知されるため、
+    // 状態ではなく最後に受け取ったゲージの Locked で判定する（再開処理から呼ばれても正しく撃てる）
+    public bool CanFire => !_locked;
 
     public float DamageMultiplier { get; private set; } = 1f;
 
