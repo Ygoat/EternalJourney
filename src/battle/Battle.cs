@@ -6,12 +6,13 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.BattleUI;
+using EternalJourney.Crew.Domain;
 using EternalJourney.SpSkillEffectArea;
 using Godot;
 /// <summary>
 /// バトルインターフェース
 /// </summary>
-public interface IBattle : INode2D, IProvide<IBattleRepo>, IProvide<EntityTable>
+public interface IBattle : INode2D, IProvide<IBattleRepo>, IProvide<EntityTable>, IProvide<ICrewRepo>
 {
     /// <summary>
     /// バトルリポジトリ
@@ -74,6 +75,11 @@ public partial class Battle : Node2D, IBattle
     /// バトルレポジトリ
     /// </summary>
     public IBattleRepo BattleRepo { get; set; } = default!;
+
+    /// <summary>
+    /// クルーレポジトリ
+    /// </summary>
+    public ICrewRepo CrewRepo { get; set; } = default!;
     #endregion State
 
     #region Provisions
@@ -82,12 +88,18 @@ public partial class Battle : Node2D, IBattle
     /// </summary>
     /// <returns></returns>
     IBattleRepo IProvide<IBattleRepo>.Value() => BattleRepo;
+
+    /// <summary>
+    /// クルーレポジトリプロバイダー
+    /// </summary>
+    ICrewRepo IProvide<ICrewRepo>.Value() => CrewRepo;
     #endregion Provisions
 
     public void Setup()
     {
         // バトルレポジトリインタスタンス化
         BattleRepo = new BattleRepo();
+        CrewRepo = new CrewRepo();
 
         SetPhysicsProcess(false);
     }
@@ -108,5 +120,6 @@ public partial class Battle : Node2D, IBattle
     public void OnExitTree()
     {
         BattleRepo.Dispose();
+        CrewRepo.Dispose();
     }
 }

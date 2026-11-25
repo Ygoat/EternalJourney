@@ -1,0 +1,12 @@
+@startuml CrewDeckState
+state "CrewDeckState" as EternalJourney_Crew_State_CrewDeckState {
+  state "Commanding" as EternalJourney_Crew_State_CrewDeckState_Commanding
+  state "Waiting" as EternalJourney_Crew_State_CrewDeckState_Waiting
+}
+
+EternalJourney_Crew_State_CrewDeckState_Commanding --> EternalJourney_Crew_State_CrewDeckState_Commanding : Tick
+EternalJourney_Crew_State_CrewDeckState_Waiting --> EternalJourney_Crew_State_CrewDeckState_Commanding : BattleStarted
+
+EternalJourney_Crew_State_CrewDeckState_Commanding : OnEnter → Embark
+EternalJourney_Crew_State_CrewDeckState_Commanding : OnTick → Assign
+@enduml

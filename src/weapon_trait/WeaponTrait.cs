@@ -47,6 +47,11 @@ public interface IWeaponTrait : INode2D
     void Disable();
 
     /// <summary>
+    /// リロード・停止時間の倍率を変える（ゲージは維持する。クルーのパッシブ用）
+    /// </summary>
+    void SetLockTimeScale(float scale);
+
+    /// <summary>
     /// 1発撃ったことを通知する
     /// </summary>
     void NotifyFired();
@@ -126,6 +131,7 @@ public partial class WeaponTrait : Node2D, IWeaponTrait
     // 再出現時に設定し直すための直近の設定
     private WeaponTraitConfig? _config;
     private float _capacityScale = 1f;
+    private float _lockTimeScale = 1f;
     private bool _configured;
 
     // 描画用の値（Output で更新する）
@@ -175,12 +181,30 @@ public partial class WeaponTrait : Node2D, IWeaponTrait
         _config = config;
         _capacityScale = capacityScale;
         _configured = true;
-        WeaponTraitSettings settings = (config?.ToSettings() ?? WeaponTraitSettings.None).WithCapacityScale(capacityScale);
+        WeaponTraitSettings settings = BuildSettings();
         DamageMultiplier = settings.ShotDamageMultiplier;
         _logic?.Input(new WeaponTraitLogic.Input.Configure(settings));
     }
 
     public void Disable() => Configure(null);
+
+    public void SetLockTimeScale(float scale)
+    {
+        if (Mathf.IsEqualApprox(_lockTimeScale, scale))
+        {
+            return;
+        }
+        _lockTimeScale = scale;
+        _logic?.Input(new WeaponTraitLogic.Input.UpdateSettings(BuildSettings()));
+    }
+
+    /// <summary>
+    /// 現在の設定と倍率から特性の設定値を作る
+    /// </summary>
+    private WeaponTraitSettings BuildSettings() =>
+        (_config?.ToSettings() ?? WeaponTraitSettings.None)
+            .WithCapacityScale(_capacityScale)
+            .WithLockTimeScale(_lockTimeScale);
 
     public void NotifyFired() => _logic?.Input(new WeaponTraitLogic.Input.Fired());
 

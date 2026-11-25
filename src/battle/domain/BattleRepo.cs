@@ -228,6 +228,11 @@ public interface IBattleRepo : IDisposable
     public void RequestShipHeal(float amount);
 
     /// <summary>
+    /// クルーによる船体の修理を要求する（研究の回復強化は乗らない）
+    /// </summary>
+    public void RequestShipRepair(float amount);
+
+    /// <summary>
     /// 敵耐久値減少処理
     /// </summary>
     public float ReduceEnemyDurability(float curDurability, float bulletAtk, float bulletDef, float enemyDef);
@@ -309,6 +314,11 @@ public class BattleRepo : IBattleRepo
     /// 撃破1体あたりの基本SP獲得量（%）
     /// </summary>
     public const float BASE_SP_GAIN = 5f;
+
+    /// <summary>
+    /// 敵の弾が船に与えるダメージの基本倍率（バランス調整用。SPスキルのデバフとは別に掛かる）
+    /// </summary>
+    public const float ENEMY_BASE_ATK_MULTIPLIER = 0.5f;
 
     /// <summary>
     /// <inheritdoc/>
@@ -560,6 +570,11 @@ public class BattleRepo : IBattleRepo
     {
         GameOverOccurred?.Invoke();
     }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void RequestShipRepair(float amount) => ShipHealRequested?.Invoke(amount);
 
     /// <summary>
     /// <inheritdoc/>

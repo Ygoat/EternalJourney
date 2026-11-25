@@ -7,6 +7,8 @@ using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
+using EternalJourney.Cores.Models.Crews;
+using EternalJourney.Crew.Domain;
 using EternalJourney.Radar;
 using EternalJourney.Weapon.Abstract.Base;
 using EternalJourney.Weapon.Continuous.State;
@@ -93,6 +95,18 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
     /// </summary>
     [Export]
     public WeaponTraitConfig? TraitConfig { get; set; }
+
+    /// <summary>
+    /// 銃座番号（船の武器は 0〜3。-1 はクルー不要）
+    /// </summary>
+    [Export]
+    public int StationIndex { get; set; } = -1;
+
+    /// <summary>
+    /// 武器の種類（クルーのパッシブの対象判定に使う）
+    /// </summary>
+    [Export]
+    public WeaponKind Kind { get; set; } = WeaponKind.Laser;
     #endregion Exports
 
     #region Nodes
@@ -133,7 +147,18 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
     /// </summary>
     [Dependency]
     public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
+
+    /// <summary>
+    /// クルーリポジトリ（銃座の操作状況と補正）
+    /// </summary>
+    [Dependency]
+    public ICrewRepo CrewRepo => this.DependOn<ICrewRepo>();
     #endregion Dependencies
+
+    /// <summary>
+    /// 銃座のクルーによる補正
+    /// </summary>
+    private CrewBonus _crewBonus = CrewBonus.None;
 
     public override void Setup()
     {
@@ -172,13 +197,13 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
             })
             .OnOutput((in ContinuousWeaponLogic.Output.DamageTick _) =>
             {
-                // 武器特性で撃てなくなったら照射を止める（撃てるようになったら Released で再開）
-                if (!WeaponTrait.CanFire)
+                // 武器特性で撃てないときは照射を止める（撃てるようになったら再開）
+                if (!CanChannel())
                 {
                     ContinuousWeaponLogic.Input(new ContinuousWeaponLogic.Input.StopChannel());
                     return;
                 }
-                DamageArea.DealDamage(WeaponTrait.DamageMultiplier);
+                DamageArea.DealDamage(WeaponTrait.DamageMultiplier * _crewBonus.AtkMultiplier);
                 WeaponTrait.NotifyFired();
             });
 
@@ -186,6 +211,14 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
         WeaponTrait.EngagedProvider = HasTarget;
         WeaponTrait.Released += OnTraitReleased;
         WeaponTrait.Configure(TraitConfig);
+
+        // クルー: 銃座の操作者が変わったら補正を取り直し、照射の可否を見直す
+        if (StationIndex >= 0)
+        {
+            CrewRepo.StationChanged += OnStationChanged;
+            ApplyCrewBonus();
+            SetProcess(true);
+        }
 
         // 敵発見・未発見イベント
         Radar.Searched += OnSearched;
@@ -234,7 +267,7 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
     public void OnSearched()
     {
         // 武器特性で撃てない間は照射を始めない
-        if (!WeaponTrait.CanFire)
+        if (!CanChannel())
         {
             return;
         }
@@ -249,13 +282,52 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
     /// <summary>
     /// 武器特性が撃てる状態に戻った時、敵がいれば照射を再開する
     /// </summary>
-    private void OnTraitReleased()
+    private void OnTraitReleased() => ResumeIfPossible();
+
+    /// <summary>
+    /// 照射できるか（武器特性が撃てる状態。作業クルー不在時も自動攻撃モードで照射する）
+    /// </summary>
+    private bool CanChannel() => WeaponTrait.CanFire;
+
+    /// <summary>
+    /// 照射できる状態で敵がいれば照射を再開する
+    /// </summary>
+    private void ResumeIfPossible()
     {
-        if (HasTarget())
+        if (CanChannel() && HasTarget())
         {
             ContinuousWeaponLogic.Input(new ContinuousWeaponLogic.Input.StartChannel());
         }
     }
+
+    /// <summary>
+    /// 銃座の操作者の変化
+    /// </summary>
+    private void OnStationChanged(int station)
+    {
+        if (station != StationIndex)
+        {
+            return;
+        }
+        ApplyCrewBonus();
+        ResumeIfPossible();
+    }
+
+    /// <summary>
+    /// クルーの補正をダメージ間隔・停止時間に反映する
+    /// </summary>
+    private void ApplyCrewBonus()
+    {
+        _crewBonus = CrewRepo.BonusFor(StationIndex, Kind);
+        ContinuousWeaponLogic.Overwrite(new ContinuousWeaponLogic.Settings(
+            ExtendSpeed, MaxReach, DamageInterval * _crewBonus.FireIntervalMultiplier));
+        WeaponTrait.SetLockTimeScale(_crewBonus.LockTimeMultiplier);
+    }
+
+    /// <summary>
+    /// 敵の数を報告する（照射していない間も指揮官の判断に使う）
+    /// </summary>
+    public void OnProcess(double delta) => CrewRepo.ReportThreat(StationIndex, Radar.OnAreaEnemies.Count);
 
     /// <summary>
     /// 敵未発見イベントファンクション
@@ -268,6 +340,10 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
     public void OnExitTree()
     {
         WeaponTrait.Released -= OnTraitReleased;
+        if (StationIndex >= 0)
+        {
+            CrewRepo.StationChanged -= OnStationChanged;
+        }
         ContinuousWeaponBinding.Dispose();
         ((IDisposable)ContinuousWeaponLogic).Dispose();
     }

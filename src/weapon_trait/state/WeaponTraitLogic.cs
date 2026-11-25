@@ -77,6 +77,11 @@ public partial class WeaponTraitLogic : LogicBlock, IWeaponTraitLogic
         public readonly record struct Configure(WeaponTraitSettings Settings);
 
         /// <summary>
+        /// 同じ特性のまま設定値だけを差し替える（ゲージは維持する）
+        /// </summary>
+        public readonly record struct UpdateSettings(WeaponTraitSettings Settings);
+
+        /// <summary>
         /// 時間経過
         /// </summary>
         /// <param name="Delta">経過秒数</param>
@@ -110,6 +115,7 @@ public partial class WeaponTraitLogic : LogicBlock, IWeaponTraitLogic
 [StateDiagram]
 public abstract partial record WeaponTraitState : LogicBlockState,
     IGet<WeaponTraitLogic.Input.Configure>,
+    IGet<WeaponTraitLogic.Input.UpdateSettings>,
     IGet<WeaponTraitLogic.Input.Tick>,
     IGet<WeaponTraitLogic.Input.Fired>
 {
@@ -131,6 +137,19 @@ public abstract partial record WeaponTraitState : LogicBlockState,
         };
         Output(new WeaponTraitLogic.Output.GaugeChanged(s.Type, gauge.Ratio(s.Type == WeaponTraitType.Charge), s.Type == WeaponTraitType.Charge));
         return next;
+    }
+
+    public Type On(in WeaponTraitLogic.Input.UpdateSettings input)
+    {
+        WeaponTraitLogic.Gauge gauge = Get<WeaponTraitLogic.Gauge>();
+        if (input.Settings.Type != gauge.Settings.Type)
+        {
+            // 特性の種類が変わるときは設定し直す
+            return On(new WeaponTraitLogic.Input.Configure(input.Settings));
+        }
+        gauge.Settings = input.Settings;
+        gauge.Value = Math.Min(gauge.Value, input.Settings.Capacity);
+        return ToSelf();
     }
 
     public virtual Type On(in WeaponTraitLogic.Input.Tick input) => ToSelf();

@@ -2,6 +2,7 @@ namespace EternalJourney.Game.Domain;
 
 using System;
 using System.Collections.Generic;
+using EternalJourney.Cores.Models.Crews;
 using EternalJourney.Cores.Models.Skill;
 
 /// <summary>
@@ -39,6 +40,31 @@ public interface IGameRepo : IDisposable
     /// SPスキル選択完了を通知する
     /// </summary>
     void NotifySpSkillSelected();
+
+    /// <summary>
+    /// 選択済みの指揮官
+    /// </summary>
+    CrewDefinition SelectedCommander { get; }
+
+    /// <summary>
+    /// 選択済みの作業クルー
+    /// </summary>
+    IReadOnlyList<CrewDefinition> SelectedWorkers { get; }
+
+    /// <summary>
+    /// 選択したクルーを保存する
+    /// </summary>
+    void SetSelectedCrew(CrewDefinition commander, IReadOnlyList<CrewDefinition> workers);
+
+    /// <summary>
+    /// クルー選択完了イベント
+    /// </summary>
+    event Action? CrewSelected;
+
+    /// <summary>
+    /// クルー選択完了を通知する
+    /// </summary>
+    void NotifyCrewSelected();
 
     /// <summary>
     /// 最終スコア
@@ -130,6 +156,35 @@ public class GameRepo : IGameRepo
     /// <inheritdoc/>
     /// </summary>
     public void NotifySpSkillSelected() => SpSkillSelected?.Invoke();
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public CrewDefinition SelectedCommander { get; private set; } = CrewCatalog.DefaultCommander;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public IReadOnlyList<CrewDefinition> SelectedWorkers { get; private set; } = CrewCatalog.DefaultWorkers;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void SetSelectedCrew(CrewDefinition commander, IReadOnlyList<CrewDefinition> workers)
+    {
+        SelectedCommander = commander;
+        SelectedWorkers = workers;
+    }
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? CrewSelected;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyCrewSelected() => CrewSelected?.Invoke();
 
     /// <summary>
     /// <inheritdoc/>

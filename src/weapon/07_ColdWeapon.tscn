@@ -13,6 +13,7 @@ RecoverDelay = 0.3
 LockTime = 2.0
 
 [node name="07_ColdWeapon" instance=ExtResource("1_spray")]
+Kind = 3
 TraitConfig = SubResource("Resource_trait")
 SpreadAngle = 70.0
 ExtendSpeed = 220.0

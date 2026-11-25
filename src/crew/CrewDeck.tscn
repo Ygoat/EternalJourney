@@ -1,0 +1,30 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/crew/CrewDeck.cs" id="1_deck"]
+
+[node name="CrewDeck" type="Node2D"]
+script = ExtResource("1_deck")
+
+[node name="Station0" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(-62, -122)
+
+[node name="Station1" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(-62, 122)
+
+[node name="Station2" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(62, -122)
+
+[node name="Station3" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(62, 122)
+
+[node name="RepairPoint" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(0, 75)
+
+[node name="Bridge" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(0, -78)

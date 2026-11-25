@@ -1,0 +1,18 @@
+@startuml CrewMemberState
+state "CrewMemberState" as EternalJourney_Crew_State_CrewMemberState {
+  state "Manning" as EternalJourney_Crew_State_CrewMemberState_Manning
+  state "Moving" as EternalJourney_Crew_State_CrewMemberState_Moving
+  state "Repairing" as EternalJourney_Crew_State_CrewMemberState_Repairing
+  state "Standby" as EternalJourney_Crew_State_CrewMemberState_Standby
+}
+
+EternalJourney_Crew_State_CrewMemberState --> EternalJourney_Crew_State_CrewMemberState : Assign
+EternalJourney_Crew_State_CrewMemberState --> EternalJourney_Crew_State_CrewMemberState_Moving : Assign
+EternalJourney_Crew_State_CrewMemberState_Repairing --> EternalJourney_Crew_State_CrewMemberState_Repairing : Tick
+
+EternalJourney_Crew_State_CrewMemberState : OnAssign → MoveTo
+EternalJourney_Crew_State_CrewMemberState : OnPlace → PlaceAt
+EternalJourney_Crew_State_CrewMemberState_Manning : OnEnter → Working
+EternalJourney_Crew_State_CrewMemberState_Moving : OnEnter → MoveTo
+EternalJourney_Crew_State_CrewMemberState_Repairing : OnEnter → Working
+@enduml

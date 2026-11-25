@@ -1,0 +1,12 @@
+@startuml SelectCrewUIState
+state "SelectCrewUIState" as EternalJourney_SelectUI_State_SelectCrewUIState {
+  state "Idle" as EternalJourney_SelectUI_State_SelectCrewUIState_Idle
+}
+
+EternalJourney_SelectUI_State_SelectCrewUIState_Idle --> EternalJourney_SelectUI_State_SelectCrewUIState_Idle : CommanderToggled
+EternalJourney_SelectUI_State_SelectCrewUIState_Idle --> EternalJourney_SelectUI_State_SelectCrewUIState_Idle : ConfirmPressed
+EternalJourney_SelectUI_State_SelectCrewUIState_Idle --> EternalJourney_SelectUI_State_SelectCrewUIState_Idle : WorkerToggled
+
+EternalJourney_SelectUI_State_SelectCrewUIState_Idle : NotifySelection() → SelectionChanged
+EternalJourney_SelectUI_State_SelectCrewUIState_Idle : OnEnter → Initialized
+@enduml

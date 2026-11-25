@@ -13,6 +13,7 @@ LockTime = 0.75
 DamageMultiplier = 3.0
 
 [node name="03_ExplosionWeapon" instance=ExtResource("1_fcx7l")]
+Kind = 1
 TraitConfig = SubResource("Resource_trait")
 RotationSpeed = 0.03
 BulletScale = 1.0

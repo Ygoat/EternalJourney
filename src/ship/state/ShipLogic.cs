@@ -153,7 +153,7 @@ public abstract partial record ShipState : LogicBlockState
                 IBattleRepo battleRepo = Get<IBattleRepo>();
                 IShip ship = Get<IShip>();
                 float shipDef = ship.Status.Def + battleRepo.ShipDefBonus + _researchDef;
-                float reducedDamage = bullet.Status.Atk * battleRepo.EnemyAtkMultiplier * (100f / (100f + shipDef));
+                float reducedDamage = bullet.Status.Atk * BattleRepo.ENEMY_BASE_ATK_MULTIPLIER * battleRepo.EnemyAtkMultiplier * (100f / (100f + shipDef));
                 ApplyDamage(reducedDamage);
             }
         }

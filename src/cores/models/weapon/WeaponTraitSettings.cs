@@ -71,4 +71,10 @@ public sealed record WeaponTraitSettings(
         Type is WeaponTraitType.None or WeaponTraitType.Charge
             ? this
             : this with { Capacity = Capacity * scale };
+
+    /// <summary>
+    /// リロード・オーバーヒート・チャージの時間を倍率で変えた設定を返す（クルーのパッシブ用）
+    /// </summary>
+    public WeaponTraitSettings WithLockTimeScale(float scale) =>
+        Type == WeaponTraitType.None ? this : this with { LockTime = LockTime * scale };
 }

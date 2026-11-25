@@ -9,6 +9,8 @@ using Chickensoft.Introspection;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Bullet.Abstract;
 using EternalJourney.Common.Traits;
+using EternalJourney.Cores.Models.Crews;
+using EternalJourney.Crew.Domain;
 using EternalJourney.Radar;
 using EternalJourney.Weapon.Abstract.Base;
 using EternalJourney.Weapon.Abstract.State;
@@ -90,6 +92,18 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// </summary>
     [Export]
     public float EnemyTraitCapacityScale { get; set; } = 0.5f;
+
+    /// <summary>
+    /// 銃座番号（船の武器は 0〜3。-1 はクルー不要＝敵の武器など）
+    /// </summary>
+    [Export]
+    public int StationIndex { get; set; } = -1;
+
+    /// <summary>
+    /// 武器の種類（クルーのパッシブの対象判定に使う）
+    /// </summary>
+    [Export]
+    public WeaponKind Kind { get; set; } = WeaponKind.Bullet;
     #endregion Exports
 
     #region Nodes
@@ -127,7 +141,15 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     #region Dependencies
     [Dependency]
     public IBattleRepo BattleRepo => this.DependOn<IBattleRepo>();
+
+    [Dependency]
+    public ICrewRepo CrewRepo => this.DependOn<ICrewRepo>();
     #endregion Dependencies
+
+    /// <summary>
+    /// 銃座のクルーによる補正
+    /// </summary>
+    private CrewBonus _crewBonus = CrewBonus.None;
 
     /// <summary>
     /// <inheritdoc/>
@@ -203,6 +225,34 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         WeaponTrait.EngagedProvider = () => StandardWeaponLogic.State is StandardWeaponState.Attack;
         ConfigureTrait();
         StandardBulletFactory.Fired += WeaponTrait.NotifyFired;
+
+        // クルー: 銃座の操作者が変わったら補正を取り直す（銃座のない武器は購読しない）
+        if (StationIndex >= 0)
+        {
+            CrewRepo.StationChanged += OnStationChanged;
+            ApplyCrewBonus();
+        }
+    }
+
+    /// <summary>
+    /// 銃座の操作者の変化
+    /// </summary>
+    private void OnStationChanged(int station)
+    {
+        if (station == StationIndex)
+        {
+            ApplyCrewBonus();
+        }
+    }
+
+    /// <summary>
+    /// クルーの補正を発射間隔・リロード時間に反映する
+    /// </summary>
+    private void ApplyCrewBonus()
+    {
+        _crewBonus = CrewRepo.BonusFor(StationIndex, Kind);
+        UpdateWaitTime();
+        WeaponTrait.SetLockTimeScale(_crewBonus.LockTimeMultiplier);
     }
 
     /// <summary>
@@ -225,11 +275,14 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
             GlobalRotation = Mathf.LerpAngle(GlobalRotation, TargetDirection.Angle(), RotationSpeed);
         }
         // 武器特性で撃てない間（リロード・オーバーヒート・チャージ・充電中）は撃たない
+        // 敵の数を報告（指揮官の配置判断に使う）
+        CrewRepo.ReportThreat(StationIndex, Radar.OnAreaEnemies.Count);
+        // 武器特性で撃てない間は撃たない（作業クルー不在時も自動攻撃モードで撃つ）
         if (!WeaponTrait.CanFire)
         {
             return;
         }
-        StandardBulletFactory.DamageMultiplier = WeaponTrait.DamageMultiplier;
+        StandardBulletFactory.DamageMultiplier = WeaponTrait.DamageMultiplier * _crewBonus.AtkMultiplier;
         // 射撃を行う
         Attack();
     }
@@ -278,7 +331,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     private void UpdateWaitTime()
     {
         StandardBulletFactory.WaitTime = IsPlayerOwned
-            ? _baseFireInterval / BattleRepo.WeaponSpdMultiplier * BattleRepo.Research.Value.FireIntervalMultiplier
+            ? _baseFireInterval / BattleRepo.WeaponSpdMultiplier * BattleRepo.Research.Value.FireIntervalMultiplier * _crewBonus.FireIntervalMultiplier
             : _baseFireInterval * BattleRepo.EnemyFireIntervalMultiplier;
     }
 
@@ -305,6 +358,7 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     {
         // StartIdleを入力
         StandardWeaponLogic.Input(new StandardWeaponLogic.Input.StartIdle());
+        CrewRepo.ReportThreat(StationIndex, 0);
     }
 
     /// <summary>
