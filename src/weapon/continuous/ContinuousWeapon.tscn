@@ -1,10 +1,11 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=7 format=3]
 
 [ext_resource type="PackedScene" uid="uid://c5fmt1vkl8j58" path="res://src/weapon/abstract/base/BaseWeapon.tscn" id="1_base"]
 [ext_resource type="Script" path="res://src/weapon/continuous/ContinuousWeapon.cs" id="2_weapon"]
 [ext_resource type="PackedScene" uid="uid://cbcshx5jiliyh" path="res://src/radar/Radar.tscn" id="3_radar"]
 [ext_resource type="Script" path="res://src/weapon/continuous/ContinuousDamageArea.cs" id="4_damage"]
 [ext_resource type="Texture2D" uid="uid://du6ow5ef3daiv" path="res://assets/weapons/gun00.png" id="5_gun"]
+[ext_resource type="PackedScene" path="res://src/weapon_trait/WeaponTrait.tscn" id="6_trait"]
 
 [node name="ContinuousWeapon" instance=ExtResource("1_base")]
 script = ExtResource("2_weapon")
@@ -29,3 +30,6 @@ texture = ExtResource("5_gun")
 unique_name_in_owner = true
 position = Vector2(11, 0)
 script = ExtResource("4_damage")
+
+[node name="WeaponTrait" parent="." instance=ExtResource("6_trait")]
+unique_name_in_owner = true

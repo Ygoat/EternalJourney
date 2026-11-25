@@ -1,8 +1,19 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="PackedScene" path="res://src/weapon/laser/LaserWeapon.tscn" id="1_laser"]
+[ext_resource type="Script" path="res://src/weapon_trait/WeaponTraitConfig.cs" id="9_traitcfg"]
+
+[sub_resource type="Resource" id="Resource_trait"]
+script = ExtResource("9_traitcfg")
+Type = 4
+Capacity = 200.0
+CostPerShot = 2.5
+RecoverRate = 25.0
+RecoverDelay = 0.5
+ResumeRatio = 0.5
 
 [node name="04_LaserWeapon" instance=ExtResource("1_laser")]
+TraitConfig = SubResource("Resource_trait")
 Piercing = false
 Thickness = 6.0
 ExtendSpeed = 600.0

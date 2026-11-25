@@ -1,8 +1,19 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="PackedScene" path="res://src/weapon/spray/SprayWeapon.tscn" id="1_spray"]
+[ext_resource type="Script" path="res://src/weapon_trait/WeaponTraitConfig.cs" id="9_traitcfg"]
+
+[sub_resource type="Resource" id="Resource_trait"]
+script = ExtResource("9_traitcfg")
+Type = 2
+Capacity = 200.0
+CostPerShot = 4.0
+RecoverRate = 30.0
+RecoverDelay = 0.3
+LockTime = 2.0
 
 [node name="07_ColdWeapon" instance=ExtResource("1_spray")]
+TraitConfig = SubResource("Resource_trait")
 SpreadAngle = 70.0
 ExtendSpeed = 220.0
 MaxReach = 120.0

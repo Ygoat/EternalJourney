@@ -1,0 +1,18 @@
+@startuml WeaponTraitState
+state "WeaponTraitState" as EternalJourney_WeaponTrait_State_WeaponTraitState {
+  state "Disabled" as EternalJourney_WeaponTrait_State_WeaponTraitState_Disabled
+  state "Locked" as EternalJourney_WeaponTrait_State_WeaponTraitState_Locked
+  state "Ready" as EternalJourney_WeaponTrait_State_WeaponTraitState_Ready
+}
+
+EternalJourney_WeaponTrait_State_WeaponTraitState --> EternalJourney_WeaponTrait_State_WeaponTraitState : Fired
+EternalJourney_WeaponTrait_State_WeaponTraitState --> EternalJourney_WeaponTrait_State_WeaponTraitState : Tick
+EternalJourney_WeaponTrait_State_WeaponTraitState_Locked --> EternalJourney_WeaponTrait_State_WeaponTraitState_Locked : Tick
+EternalJourney_WeaponTrait_State_WeaponTraitState_Locked --> EternalJourney_WeaponTrait_State_WeaponTraitState_Ready : Tick
+EternalJourney_WeaponTrait_State_WeaponTraitState_Ready --> EternalJourney_WeaponTrait_State_WeaponTraitState_Locked : Fired
+EternalJourney_WeaponTrait_State_WeaponTraitState_Ready --> EternalJourney_WeaponTrait_State_WeaponTraitState_Ready : Fired
+EternalJourney_WeaponTrait_State_WeaponTraitState_Ready --> EternalJourney_WeaponTrait_State_WeaponTraitState_Ready : Tick
+
+EternalJourney_WeaponTrait_State_WeaponTraitState : NotifyGauge() → GaugeChanged
+EternalJourney_WeaponTrait_State_WeaponTraitState : OnConfigure → GaugeChanged
+@enduml

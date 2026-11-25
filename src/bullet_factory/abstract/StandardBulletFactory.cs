@@ -1,5 +1,6 @@
 namespace EternalJourney.Bullet.Abstract;
 
+using System;
 using System.Data;
 using Chickensoft.AutoInject;
 using Chickensoft.LogicBlocks;
@@ -38,6 +39,16 @@ public interface IStandardBulletFactory
     public float BulletScale { get; set; }
 
     /// <summary>
+    /// 射出する弾丸の威力倍率（武器特性のチャージ等）
+    /// </summary>
+    public float DamageMultiplier { get; set; }
+
+    /// <summary>
+    /// 弾丸を射出し終えたときのイベント（多連射でも1回）
+    /// </summary>
+    public event Action? Fired;
+
+    /// <summary>
     /// 弾丸生成
     /// </summary>
     public void GenerateBullet();
@@ -58,6 +69,16 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
     /// </summary>
     [Export]
     public Resource BulletScene { get; set; } = default!;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public float DamageMultiplier { get; set; } = 1f;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? Fired;
 
     /// <summary>
     /// 弾丸名称（弾丸の種類を指定）
@@ -192,13 +213,19 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         // プレイヤーの弾は研究の多連射で同時に複数発撃つ（扇状に角度をずらす）
         int shots = IsPlayerBullet ? 1 + BattleRepo.Research.Value.ExtraShots : 1;
         float spread = Mathf.DegToRad(MultiShotSpreadDeg);
+        bool emitted = false;
         for (int i = 0; i < shots; i++)
         {
             float offset = (i - (shots - 1) / 2f) * spread;
             if (!EmitOne(GlobalRotation + offset))
             {
-                return;
+                break;
             }
+            emitted = true;
+        }
+        if (emitted)
+        {
+            Fired?.Invoke();
         }
     }
 
@@ -222,6 +249,8 @@ public partial class StandardBulletFactory : BaseFactory<StandardBullet>, IStand
         bullet.IsPlayerOwned = IsPlayerBullet;
         // 弾丸サイズを適用（見た目・当たり判定の両方に反映される）
         bullet.Scale = Vector2.One * BulletScale;
+        // 威力倍率を適用（チャージ等）
+        bullet.DamageMultiplier = DamageMultiplier;
 
         // シーンツリーに追加（エネミー撃破後も弾丸が残るよう、IBattleRepoを提供する祖先ノードに追加）
         GetBulletContainer().AddChild(bullet);

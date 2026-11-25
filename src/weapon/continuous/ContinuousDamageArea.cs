@@ -62,7 +62,8 @@ public partial class ContinuousDamageArea : Area2D
     /// <summary>
     /// 重なっている敵へダメージと状態異常を与える
     /// </summary>
-    public void DealDamage()
+    /// <param name="multiplier">威力倍率（武器特性のチャージ等）</param>
+    public void DealDamage(float multiplier = 1f)
     {
         var targets = GetOverlappingAreas()
             .Where(area => area is IBaseEnemy)
@@ -75,7 +76,7 @@ public partial class ContinuousDamageArea : Area2D
                 continue;
             }
 
-            enemy.TakeDamage(Atk);
+            enemy.TakeDamage(Atk * multiplier);
             if (PoisonEnabled)
             {
                 enemy.StatusEffectReceiverManager.Get<PoisonEffect>()?.Apply();

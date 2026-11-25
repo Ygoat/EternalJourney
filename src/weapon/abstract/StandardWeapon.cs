@@ -12,6 +12,7 @@ using EternalJourney.Common.Traits;
 using EternalJourney.Radar;
 using EternalJourney.Weapon.Abstract.Base;
 using EternalJourney.Weapon.Abstract.State;
+using EternalJourney.WeaponTrait;
 using Godot;
 
 /// <summary>
@@ -77,6 +78,18 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// </summary>
     [Export]
     public float BulletScale { get; set; } = 1.0f;
+
+    /// <summary>
+    /// 武器特性（リロード・オーバーヒート・チャージ・バッテリー。未設定は特性なし）
+    /// </summary>
+    [Export]
+    public WeaponTraitConfig? TraitConfig { get; set; }
+
+    /// <summary>
+    /// 敵が使うときの特性ゲージ容量の倍率（チャージは対象外）
+    /// </summary>
+    [Export]
+    public float EnemyTraitCapacityScale { get; set; } = 0.5f;
     #endregion Exports
 
     #region Nodes
@@ -103,6 +116,12 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     /// </summary>
     [Node]
     public IRadar Radar { get; set; } = default!;
+
+    /// <summary>
+    /// 武器特性
+    /// </summary>
+    [Node]
+    public IWeaponTrait WeaponTrait { get; set; } = default!;
     #endregion Nodes
 
     #region Dependencies
@@ -179,6 +198,11 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
         BattleRepo.EnemyDebuffChanged += UpdateWaitTime;
         _resolved = true;
         UpdateWaitTime();
+
+        // 武器特性: 捕捉中かどうかを渡し、実際に撃ったら通知する（敵味方とも同じ特性が働く）
+        WeaponTrait.EngagedProvider = () => StandardWeaponLogic.State is StandardWeaponState.Attack;
+        ConfigureTrait();
+        StandardBulletFactory.Fired += WeaponTrait.NotifyFired;
     }
 
     /// <summary>
@@ -200,6 +224,12 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
             // LerpAngleで最短経路を補間（微振動なし）
             GlobalRotation = Mathf.LerpAngle(GlobalRotation, TargetDirection.Angle(), RotationSpeed);
         }
+        // 武器特性で撃てない間（リロード・オーバーヒート・チャージ・充電中）は撃たない
+        if (!WeaponTrait.CanFire)
+        {
+            return;
+        }
+        StandardBulletFactory.DamageMultiplier = WeaponTrait.DamageMultiplier;
         // 射撃を行う
         Attack();
     }
@@ -226,12 +256,19 @@ public partial class StandardWeapon : BaseWeapon, IStandardWeapon
     {
         IsPlayerOwned = isPlayer;
         StandardBulletFactory.IsPlayerBullet = isPlayer;
-        // 所有者が DI 解決後に変わった場合も、所有者に応じた発射間隔へ更新する
+        // 所有者が DI 解決後に変わった場合も、所有者に応じた発射間隔・特性へ更新する
         if (_resolved)
         {
             UpdateWaitTime();
+            ConfigureTrait();
         }
     }
+
+    /// <summary>
+    /// 所有者に応じて武器特性を設定する（敵はゲージ容量を小さくする）
+    /// </summary>
+    private void ConfigureTrait() =>
+        WeaponTrait.Configure(TraitConfig, IsPlayerOwned ? 1f : EnemyTraitCapacityScale);
 
     /// <summary>
     /// DI 解決済みか（BattleRepo を参照できるか）

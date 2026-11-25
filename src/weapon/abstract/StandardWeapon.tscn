@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://dd0kb5g3fa2xx"]
+[gd_scene load_steps=9 format=3 uid="uid://dd0kb5g3fa2xx"]
 
 [ext_resource type="PackedScene" uid="uid://c5fmt1vkl8j58" path="res://src/weapon/abstract/base/BaseWeapon.tscn" id="1_vl25n"]
 [ext_resource type="Script" path="res://src/weapon/abstract/StandardWeapon.cs" id="2_nbie7"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dywjjflkf7066" path="res://src/bullet_factory/01_NormalBulletFactory.tscn" id="4_w2wdh"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="5_ivs8m"]
 [ext_resource type="Texture2D" uid="uid://du6ow5ef3daiv" path="res://assets/weapons/gun00.png" id="5_oj024"]
+[ext_resource type="PackedScene" path="res://src/weapon_trait/WeaponTrait.tscn" id="6_trait"]
 
 [sub_resource type="Resource" id="Resource_h210x"]
 script = ExtResource("5_ivs8m")
@@ -40,3 +41,6 @@ texture = ExtResource("5_oj024")
 [node name="StandardBulletFactory" parent="." index="4" instance=ExtResource("4_w2wdh")]
 unique_name_in_owner = true
 position = Vector2(11, 0)
+
+[node name="WeaponTrait" parent="." index="5" instance=ExtResource("6_trait")]
+unique_name_in_owner = true

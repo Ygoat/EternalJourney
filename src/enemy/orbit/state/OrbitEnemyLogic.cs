@@ -126,7 +126,7 @@ public abstract partial record OrbitEnemyState : LogicBlockState
             IOrbitEnemy enemy = Get<IOrbitEnemy>();
             float currentDur = Get<IBattleRepo>().ReduceEnemyDurability(
                 enemy.Status.CurrentDur,
-                input.BaseBullet.Status.Atk,
+                input.BaseBullet.Status.Atk * input.BaseBullet.DamageMultiplier,
                 input.BaseBullet.Status.Def,
                 enemy.Status.Def);
             Output(new OrbitEnemyLogic.Output.CurrentDurChange(currentDur));

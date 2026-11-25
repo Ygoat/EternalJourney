@@ -17,6 +17,11 @@ using Godot;
 public interface IBaseBullet : IBaseEntity
 {
     /// <summary>
+    /// 威力倍率（武器特性のチャージ等。射出時に設定され、取得時に 1 へ戻る）
+    /// </summary>
+    public float DamageMultiplier { get; set; }
+
+    /// <summary>
     /// ヒットシグナル
     /// </summary>
     public event BaseBullet.HitEventHandler Hit;
@@ -165,10 +170,17 @@ public partial class BaseBullet : BaseEntity, IBaseBullet, IPoolable
     }
 
     /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public float DamageMultiplier { get; set; } = 1f;
+
+    /// <summary>
     /// プールから取得された時のコールバック（IPoolable実装）
     /// </summary>
     public virtual void OnAcquired()
     {
+        // 威力倍率を初期化
+        DamageMultiplier = 1f;
         // 耐久値を最大値にリセット
         if (Status != null)
         {

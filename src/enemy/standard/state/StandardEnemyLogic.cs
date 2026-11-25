@@ -164,7 +164,7 @@ public abstract partial record StandardEnemyState : LogicBlockState
             IStandardEnemy standardEnemy = Get<IStandardEnemy>();
             float currentDur = battleRepo.ReduceEnemyDurability(
                 standardEnemy.Status.CurrentDur,
-                input.BaseBullet.Status.Atk,
+                input.BaseBullet.Status.Atk * input.BaseBullet.DamageMultiplier,
                 input.BaseBullet.Status.Def,
                 standardEnemy.Status.Def
             );

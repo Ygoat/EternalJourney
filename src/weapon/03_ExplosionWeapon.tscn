@@ -1,9 +1,19 @@
-[gd_scene load_steps=3 format=3 uid="uid://ckea0f5qnrrrv"]
+[gd_scene load_steps=5 format=3 uid="uid://ckea0f5qnrrrv"]
 
 [ext_resource type="PackedScene" uid="uid://dd0kb5g3fa2xx" path="res://src/weapon/abstract/StandardWeapon.tscn" id="1_fcx7l"]
 [ext_resource type="PackedScene" uid="uid://gyffxcgk8skr" path="res://src/bullet/03_ExplosionBullet.tscn" id="2_f3gwh"]
+[ext_resource type="Script" path="res://src/weapon_trait/WeaponTraitConfig.cs" id="9_traitcfg"]
+
+[sub_resource type="Resource" id="Resource_trait"]
+script = ExtResource("9_traitcfg")
+Type = 3
+Capacity = 1.0
+CostPerShot = 1.0
+LockTime = 0.75
+DamageMultiplier = 3.0
 
 [node name="03_ExplosionWeapon" instance=ExtResource("1_fcx7l")]
+TraitConfig = SubResource("Resource_trait")
 RotationSpeed = 0.03
 BulletScale = 1.0
 

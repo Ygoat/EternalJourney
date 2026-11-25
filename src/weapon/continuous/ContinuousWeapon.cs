@@ -10,6 +10,7 @@ using EternalJourney.Battle.Domain;
 using EternalJourney.Radar;
 using EternalJourney.Weapon.Abstract.Base;
 using EternalJourney.Weapon.Continuous.State;
+using EternalJourney.WeaponTrait;
 using Godot;
 
 /// <summary>
@@ -86,6 +87,12 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
     /// </summary>
     [Export]
     public bool StunEnabled { get; set; }
+
+    /// <summary>
+    /// 武器特性（リロード・オーバーヒート・チャージ・バッテリー。未設定は特性なし）
+    /// </summary>
+    [Export]
+    public WeaponTraitConfig? TraitConfig { get; set; }
     #endregion Exports
 
     #region Nodes
@@ -112,6 +119,12 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
     /// </summary>
     [Node]
     public ContinuousDamageArea DamageArea { get; set; } = default!;
+
+    /// <summary>
+    /// 武器特性
+    /// </summary>
+    [Node]
+    public IWeaponTrait WeaponTrait { get; set; } = default!;
     #endregion Nodes
 
     #region Dependencies
@@ -159,8 +172,20 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
             })
             .OnOutput((in ContinuousWeaponLogic.Output.DamageTick _) =>
             {
-                DamageArea.DealDamage();
+                // 武器特性で撃てなくなったら照射を止める（撃てるようになったら Released で再開）
+                if (!WeaponTrait.CanFire)
+                {
+                    ContinuousWeaponLogic.Input(new ContinuousWeaponLogic.Input.StopChannel());
+                    return;
+                }
+                DamageArea.DealDamage(WeaponTrait.DamageMultiplier);
+                WeaponTrait.NotifyFired();
             });
+
+        // 武器特性: 敵を捕捉しているかを渡し、撃てるようになったら照射を再開する
+        WeaponTrait.EngagedProvider = HasTarget;
+        WeaponTrait.Released += OnTraitReleased;
+        WeaponTrait.Configure(TraitConfig);
 
         // 敵発見・未発見イベント
         Radar.Searched += OnSearched;
@@ -208,7 +233,28 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
     /// </summary>
     public void OnSearched()
     {
+        // 武器特性で撃てない間は照射を始めない
+        if (!WeaponTrait.CanFire)
+        {
+            return;
+        }
         ContinuousWeaponLogic.Input(new ContinuousWeaponLogic.Input.StartChannel());
+    }
+
+    /// <summary>
+    /// 敵を捕捉しているか
+    /// </summary>
+    private bool HasTarget() => Radar.OnAreaEnemies.Count > 0;
+
+    /// <summary>
+    /// 武器特性が撃てる状態に戻った時、敵がいれば照射を再開する
+    /// </summary>
+    private void OnTraitReleased()
+    {
+        if (HasTarget())
+        {
+            ContinuousWeaponLogic.Input(new ContinuousWeaponLogic.Input.StartChannel());
+        }
     }
 
     /// <summary>
@@ -221,6 +267,7 @@ public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
 
     public void OnExitTree()
     {
+        WeaponTrait.Released -= OnTraitReleased;
         ContinuousWeaponBinding.Dispose();
         ((IDisposable)ContinuousWeaponLogic).Dispose();
     }

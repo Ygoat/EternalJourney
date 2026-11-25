@@ -52,13 +52,18 @@ public partial class EnemyFactory : BaseFactory<BaseEnemy>, IEnemyFactory
     }
 
     /// <summary>
+    /// エネミーの出現間隔（秒、ファクトリごと）
+    /// </summary>
+    public const float SPAWN_INTERVAL = 3.2f;
+
+    /// <summary>
     /// セットアップ処理のオーバーライド
     /// </summary>
     public override void Setup()
     {
         // プールサイズの設定（エネミーは200個）
         PoolSize = 200;
-        WaitTime = 1.6f;
+        WaitTime = SPAWN_INTERVAL;
         // 基底クラスの初期化を呼び出す
         base.Initialize();
 
