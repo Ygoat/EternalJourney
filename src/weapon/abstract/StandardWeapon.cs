@@ -42,7 +42,7 @@ public interface IStandardWeapon : IBaseWeapon
 /// スタンダード武器クラス
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class StandardWeapon : BaseWeapon, IStandardWeapon
+public partial class StandardWeapon : BaseWeapon, IStandardWeapon, IStationWeapon
 {
     public override void _Notification(int what) => this.Notify(what);
 

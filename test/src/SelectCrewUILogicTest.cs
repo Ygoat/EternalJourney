@@ -1,6 +1,7 @@
 namespace EternalJourney.SelectUI.State;
 
 using System;
+using System.Linq;
 using Chickensoft.GoDotTest;
 using EternalJourney.Cores.Models.Crews;
 using EternalJourney.Game.Domain;
@@ -15,6 +16,7 @@ public class SelectCrewUILogicTest : TestClass
     {
         var logic = new SelectCrewUILogic();
         logic.Set<IGameRepo>(repo);
+        logic.Set(new Random(3));
         SelectCrewUILogic.Output.SelectionChanged latest = default;
         var binding = logic.Bind();
         binding.OnOutput((in SelectCrewUILogic.Output.SelectionChanged o) => latest = o);
@@ -32,6 +34,20 @@ public class SelectCrewUILogicTest : TestClass
         logic.Input(new SelectCrewUILogic.Input.CommanderToggled(0, true));
         logic.Input(new SelectCrewUILogic.Input.CommanderToggled(2, true));
         last().CommanderIndex.ShouldBe(2);
+        logic.Dispose();
+    }
+
+    [Test]
+    public void RandomSelectsCommanderAndFourWorkers()
+    {
+        using var repo = new GameRepo();
+        var logic = Create(repo, out var last);
+
+        logic.Input(new SelectCrewUILogic.Input.RandomPressed());
+
+        last().CommanderIndex.ShouldBeInRange(0, CrewCatalog.Commanders.Count - 1);
+        last().WorkerSelected.Count(s => s).ShouldBe(CrewCatalog.WORKER_COUNT);
+        last().CanConfirm.ShouldBeTrue();
         logic.Dispose();
     }
 

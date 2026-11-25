@@ -135,7 +135,7 @@ public partial class ResearchUI : CanvasLayer, IResearchUI
             })
             .OnOutput((in ResearchUILogic.Output.CardsShown output) =>
             {
-                SetProcess(false);
+                // Auto モードの自動選択のため、カード選択中も時間経過を送り続ける
                 TitleLabel.Text = output.Title;
                 Spinner.Visible = false;
                 ProgressBar.Visible = false;

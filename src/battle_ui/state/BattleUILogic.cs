@@ -49,6 +49,11 @@ public partial class BattleUILogic : LogicBlock, IBattleUILogic
         /// SPボタン押下
         /// </summary>
         public readonly record struct SPButtonPressed;
+
+        /// <summary>
+        /// Auto トグルの切り替え
+        /// </summary>
+        public readonly record struct AutoToggled(bool Enabled);
     }
 
     /// <summary>
@@ -100,6 +105,11 @@ public partial class BattleUILogic : LogicBlock, IBattleUILogic
         /// 選択中のSPスキル名（SPボタンに表示する）
         /// </summary>
         public readonly record struct SpSkillNameChanged(string Name);
+
+        /// <summary>
+        /// スキルを自動で発動する（Auto モード）
+        /// </summary>
+        public readonly record struct ActivateSkill(int Index);
 
         /// <summary>
         /// 取得済み研究カードの変化
@@ -158,10 +168,13 @@ public abstract partial record BattleUIState : LogicBlockState
             for (int i = 0; i < slots.Length && i < skills.Count; i++)
             {
                 slots[i].SetLabel(SkillInfo.GetName(skills[i]));
+                slots[i].SetBaseCooldown(SkillInfo.GetCooldown(skills[i]));
                 slots[i].Activated += battleUI.GetSkill(skills[i]).Activate;
             }
             Output(new BattleUILogic.Output.SpSkillNameChanged(SpSkillCatalog.Get(Get<IGameRepo>().SelectedSpSkill).Name));
             Output(new BattleUILogic.Output.ActivateBattleUI());
+            // Auto モードで自動発動の対象にするのは、スキルを割り当てたスロットだけ
+            Get<Active>().AssignedSkillCount = Math.Min(slots.Length, skills.Count);
             return To<Active>();
         }
     }
@@ -169,8 +182,21 @@ public abstract partial record BattleUIState : LogicBlockState
     /// <summary>
     /// アクティブ（バトル中）
     /// </summary>
-    public record Active : BattleUIState, IGet<BattleUILogic.Input.PhysicsProcess>, IGet<BattleUILogic.Input.SPButtonPressed>
+    public record Active : BattleUIState,
+        IGet<BattleUILogic.Input.PhysicsProcess>,
+        IGet<BattleUILogic.Input.SPButtonPressed>,
+        IGet<BattleUILogic.Input.AutoToggled>
     {
+        /// <summary>
+        /// スキルを割り当てたスロット数（遷移前に設定される）
+        /// </summary>
+        public int AssignedSkillCount { get; set; }
+
+        /// <summary>
+        /// Auto モード購読用バインディング
+        /// </summary>
+        private AutoValue<bool>.Binding? _autoBinding;
+
         /// <summary>
         /// スコア購読用バインディング
         /// </summary>
@@ -205,6 +231,8 @@ public abstract partial record BattleUIState : LogicBlockState
                 _researchBinding.OnValue(OnResearchChanged);
                 _acquiredBinding = battleRepo.AcquiredCards.Bind();
                 _acquiredBinding.OnValue(OnAcquiredCardsChanged);
+                _autoBinding = battleRepo.AutoMode.Bind();
+                _autoBinding.OnValue(OnAutoModeChanged);
                 battleRepo.ShipHpChanged += OnShipHpChanged;
                 battleRepo.GameOverOccurred += OnGameOver;
                 battleRepo.SpPercentChanged += OnSpPercentChanged;
@@ -220,6 +248,8 @@ public abstract partial record BattleUIState : LogicBlockState
                 _researchBinding = null;
                 _acquiredBinding?.Dispose();
                 _acquiredBinding = null;
+                _autoBinding?.Dispose();
+                _autoBinding = null;
                 battleRepo.ShipHpChanged -= OnShipHpChanged;
                 battleRepo.GameOverOccurred -= OnGameOver;
                 battleRepo.SpPercentChanged -= OnSpPercentChanged;
@@ -252,6 +282,19 @@ public abstract partial record BattleUIState : LogicBlockState
         public Type On(in BattleUILogic.Input.PhysicsProcess input)
         {
             Output(new BattleUILogic.Output.TikCount());
+            if (Get<IBattleRepo>().AutoMode.Value)
+            {
+                // Auto モード: クールダウンが明けたスキルをすぐ発動する
+                IBattleUI battleUI = Get<IBattleUI>();
+                ISkillButton[] slots = { battleUI.SkillButton1, battleUI.SkillButton2, battleUI.SkillButton3, battleUI.SkillButton4 };
+                for (int i = 0; i < AssignedSkillCount && i < slots.Length; i++)
+                {
+                    if (slots[i].IsReady)
+                    {
+                        Output(new BattleUILogic.Output.ActivateSkill(i));
+                    }
+                }
+            }
             return ToSelf();
         }
 
@@ -261,8 +304,37 @@ public abstract partial record BattleUIState : LogicBlockState
             return ToSelf();
         }
 
-        public void OnSpPercentChanged(float spPercent) =>
+        public Type On(in BattleUILogic.Input.AutoToggled input)
+        {
+            Get<IBattleRepo>().SetAutoMode(input.Enabled);
+            return ToSelf();
+        }
+
+        public void OnSpPercentChanged(float spPercent)
+        {
             Output(new BattleUILogic.Output.SpPercentChanged(spPercent / 100f));
+            TryAutoSp();
+        }
+
+        private void OnAutoModeChanged(bool enabled)
+        {
+            if (enabled)
+            {
+                TryAutoSp();
+            }
+        }
+
+        /// <summary>
+        /// Auto モードで SP が満タンなら発動する
+        /// </summary>
+        private void TryAutoSp()
+        {
+            IBattleRepo battleRepo = Get<IBattleRepo>();
+            if (battleRepo.AutoMode.Value && battleRepo.SpPercent >= 100f)
+            {
+                battleRepo.ActivateSP();
+            }
+        }
 
         public float CalcHpGaugeRatio(float currentHp, float maxHp)
         {

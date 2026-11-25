@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/weapon_mount/WeaponMount.cs" id="1_mount"]
+
+[node name="WeaponMount" type="Node2D"]
+script = ExtResource("1_mount")
+
+[node name="Slot0" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(-90, -154)
+
+[node name="Slot1" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(-90, 154)
+
+[node name="Slot2" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(91, -154)
+
+[node name="Slot3" type="Marker2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(90, 154)

@@ -46,6 +46,9 @@ public partial class SelectSpSkillUI : Control, ISelectSpSkillUI
     public IButton ConfirmButton { get; set; } = default!;
 
     [Node]
+    public IButton RandomButton { get; set; } = default!;
+
+    [Node]
     public IRichTextLabel SpSkillDescription { get; set; } = default!;
     #endregion Nodes
 
@@ -70,6 +73,7 @@ public partial class SelectSpSkillUI : Control, ISelectSpSkillUI
     public void OnResolved()
     {
         Logic.Set(GameRepo);
+        Logic.Set(new Random());
 
         Binding
             .OnOutput((in SelectSpSkillUILogic.Output.Initialized output) =>
@@ -102,11 +106,14 @@ public partial class SelectSpSkillUI : Control, ISelectSpSkillUI
             targets[i].Toggled += _toggleHandlers[i];
         }
         ConfirmButton.Pressed += OnConfirmPressed;
+        RandomButton.Pressed += OnRandomPressed;
 
         Logic.Start<SelectSpSkillUIState.Idle>();
     }
 
     private void OnConfirmPressed() => Logic.Input(new SelectSpSkillUILogic.Input.ConfirmPressed());
+
+    private void OnRandomPressed() => Logic.Input(new SelectSpSkillUILogic.Input.RandomPressed());
 
     public void OnExitTree()
     {
@@ -116,6 +123,7 @@ public partial class SelectSpSkillUI : Control, ISelectSpSkillUI
             targets[i].Toggled -= _toggleHandlers[i];
         }
         ConfirmButton.Pressed -= OnConfirmPressed;
+        RandomButton.Pressed -= OnRandomPressed;
         Binding.Dispose();
         ((IDisposable)Logic).Dispose();
     }

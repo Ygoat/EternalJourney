@@ -26,7 +26,7 @@ public interface IContinuousWeapon : IBaseWeapon;
 /// 距離の単位は武器ローカル座標（Ship上では武器の拡大率が掛かって表示される）
 /// </summary>
 [Meta(typeof(IAutoNode))]
-public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon
+public partial class ContinuousWeapon : BaseWeapon, IContinuousWeapon, IStationWeapon
 {
     public override void _Notification(int what) => this.Notify(what);
 

@@ -21,6 +21,7 @@ public partial class GameLogic : LogicBlock, IGameLogic
         // ステートを事前確保
         Set(new GameState.SelectSkillPhase());
         Set(new GameState.SelectSpSkillPhase());
+        Set(new GameState.SelectWeaponPhase());
         Set(new GameState.SelectCrewPhase());
         Set(new GameState.BattleInitPhase());
         Set(new GameState.BattleRunningPhase());
@@ -40,6 +41,11 @@ public partial class GameLogic : LogicBlock, IGameLogic
         /// SPスキル選択完了
         /// </summary>
         public readonly record struct SpSkillSelected;
+
+        /// <summary>
+        /// 武器選択完了
+        /// </summary>
+        public readonly record struct WeaponSelected;
 
         /// <summary>
         /// クルー選択完了
@@ -73,6 +79,11 @@ public partial class GameLogic : LogicBlock, IGameLogic
         /// SPスキル選択画面表示
         /// </summary>
         public readonly record struct ShowSelectSpSkill;
+
+        /// <summary>
+        /// 武器選択画面表示
+        /// </summary>
+        public readonly record struct ShowSelectWeapon;
 
         /// <summary>
         /// クルー選択画面表示
@@ -136,7 +147,24 @@ public abstract partial record GameState : LogicBlockState
 
         private void OnSpSkillSelected() => Input(new GameLogic.Input.SpSkillSelected());
 
-        public Type On(in GameLogic.Input.SpSkillSelected input) => To<SelectCrewPhase>();
+        public Type On(in GameLogic.Input.SpSkillSelected input) => To<SelectWeaponPhase>();
+    }
+
+    /// <summary>
+    /// 武器選択フェーズ
+    /// </summary>
+    public record SelectWeaponPhase : GameState, IGet<GameLogic.Input.WeaponSelected>
+    {
+        public SelectWeaponPhase()
+        {
+            this.OnEnter(() => Get<IGameRepo>().WeaponSelected += OnWeaponSelected);
+            this.OnEnter(() => Output(new GameLogic.Output.ShowSelectWeapon()));
+            this.OnExit(() => Get<IGameRepo>().WeaponSelected -= OnWeaponSelected);
+        }
+
+        private void OnWeaponSelected() => Input(new GameLogic.Input.WeaponSelected());
+
+        public Type On(in GameLogic.Input.WeaponSelected input) => To<SelectCrewPhase>();
     }
 
     /// <summary>

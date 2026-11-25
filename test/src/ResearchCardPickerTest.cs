@@ -41,6 +41,20 @@ public class ResearchCardPickerTest : TestClass
     }
 
     [Test]
+    public void BestIndexPicksLeftmostHighestRarity()
+    {
+        var cards = new[]
+        {
+            new ResearchCard(ResearchCardType.AtkUp, ResearchRarity.Rare),
+            new ResearchCard(ResearchCardType.PierceUp, ResearchRarity.Epic),
+            new ResearchCard(ResearchCardType.HealUp, ResearchRarity.Common),
+            new ResearchCard(ResearchCardType.ReachUp, ResearchRarity.Epic),
+        };
+        ResearchCardPicker.BestIndex(cards).ShouldBe(1);
+        ResearchCardPicker.BestIndex(System.Array.Empty<ResearchCard>()).ShouldBe(-1);
+    }
+
+    [Test]
     public void RarityDistributionFollowsWeights()
     {
         var rng = new Random(4);

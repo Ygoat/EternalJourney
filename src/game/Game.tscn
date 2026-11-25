@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cywpu6lxdjhuu"]
+[gd_scene load_steps=9 format=3 uid="uid://cywpu6lxdjhuu"]
 
 [ext_resource type="Script" path="res://src/game/Game.cs" id="1_u8fpt"]
 [ext_resource type="PackedScene" uid="uid://12oabl20kkm1" path="res://src/select/SelectSkill.tscn" id="2_pkk6q"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://src/result/Result.cs" id="4_result"]
 [ext_resource type="PackedScene" path="res://src/select_ui/SelectSpSkillUI.tscn" id="5_spsel"]
 [ext_resource type="PackedScene" path="res://src/select_ui/SelectCrewUI.tscn" id="6_crewsel"]
+[ext_resource type="PackedScene" path="res://src/select_ui/SelectWeaponUI.tscn" id="7_weaponsel"]
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_u8fpt")
@@ -16,6 +17,10 @@ unique_name_in_owner = true
 visible = false
 
 [node name="SelectSpSkill" parent="." instance=ExtResource("5_spsel")]
+unique_name_in_owner = true
+visible = false
+
+[node name="SelectWeapon" parent="." instance=ExtResource("7_weaponsel")]
 unique_name_in_owner = true
 visible = false
 

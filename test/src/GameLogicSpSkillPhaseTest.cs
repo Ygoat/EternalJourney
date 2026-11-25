@@ -25,6 +25,9 @@ public class GameLogicSpSkillPhaseTest : TestClass
         spScreenShown.ShouldBe(1);
 
         repo.NotifySpSkillSelected();
+        logic.State.ShouldBeOfType<GameState.SelectWeaponPhase>();
+
+        repo.NotifyWeaponSelected();
         logic.State.ShouldBeOfType<GameState.SelectCrewPhase>();
 
         repo.NotifyCrewSelected();

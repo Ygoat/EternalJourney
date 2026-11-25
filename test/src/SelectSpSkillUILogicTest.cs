@@ -15,6 +15,7 @@ public class SelectSpSkillUILogicTest : TestClass
         var repo = new GameRepo();
         var logic = new SelectSpSkillUILogic();
         logic.Set<IGameRepo>(repo);
+        logic.Set(new System.Random(7));
         SelectSpSkillUILogic.Output.SelectionChanged latest = default;
         var binding = logic.Bind();
         binding.OnOutput((in SelectSpSkillUILogic.Output.SelectionChanged o) => latest = o);
@@ -54,6 +55,18 @@ public class SelectSpSkillUILogicTest : TestClass
         // 選択中のものを押し直すと未選択に戻る
         logic.Input(new SelectSpSkillUILogic.Input.SpSkillToggled(2, false));
         last().SelectedIndex.ShouldBe(SelectSpSkillUILogic.NO_SELECTION);
+        logic.Dispose();
+    }
+
+    [Test]
+    public void RandomSelectsOneAndAllowsConfirm()
+    {
+        var (logic, _) = Create(out var last);
+
+        logic.Input(new SelectSpSkillUILogic.Input.RandomPressed());
+
+        last().SelectedIndex.ShouldBeInRange(0, SpSkillCatalog.All.Count - 1);
+        last().CanConfirm.ShouldBeTrue();
         logic.Dispose();
     }
 

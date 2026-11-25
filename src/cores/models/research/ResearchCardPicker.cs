@@ -55,4 +55,20 @@ public static class ResearchCardPicker
         }
         return result;
     }
+
+    /// <summary>
+    /// 一番レアリティの高いカードの番号を返す（同じレアリティなら左のもの。空なら -1）
+    /// </summary>
+    public static int BestIndex(IReadOnlyList<ResearchCard> cards)
+    {
+        int best = -1;
+        for (int i = 0; i < cards.Count; i++)
+        {
+            if (best < 0 || cards[i].Rarity > cards[best].Rarity)
+            {
+                best = i;
+            }
+        }
+        return best;
+    }
 }

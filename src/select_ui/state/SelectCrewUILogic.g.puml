@@ -5,6 +5,7 @@ state "SelectCrewUIState" as EternalJourney_SelectUI_State_SelectCrewUIState {
 
 EternalJourney_SelectUI_State_SelectCrewUIState_Idle --> EternalJourney_SelectUI_State_SelectCrewUIState_Idle : CommanderToggled
 EternalJourney_SelectUI_State_SelectCrewUIState_Idle --> EternalJourney_SelectUI_State_SelectCrewUIState_Idle : ConfirmPressed
+EternalJourney_SelectUI_State_SelectCrewUIState_Idle --> EternalJourney_SelectUI_State_SelectCrewUIState_Idle : RandomPressed
 EternalJourney_SelectUI_State_SelectCrewUIState_Idle --> EternalJourney_SelectUI_State_SelectCrewUIState_Idle : WorkerToggled
 
 EternalJourney_SelectUI_State_SelectCrewUIState_Idle : NotifySelection() → SelectionChanged

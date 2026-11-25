@@ -4,13 +4,14 @@ state "BattleUIState" as EternalJourney_BattleUI_State_BattleUIState {
   state "InActive" as EternalJourney_BattleUI_State_BattleUIState_InActive
 }
 
+EternalJourney_BattleUI_State_BattleUIState_Active --> EternalJourney_BattleUI_State_BattleUIState_Active : AutoToggled
 EternalJourney_BattleUI_State_BattleUIState_Active --> EternalJourney_BattleUI_State_BattleUIState_Active : PhysicsProcess
 EternalJourney_BattleUI_State_BattleUIState_Active --> EternalJourney_BattleUI_State_BattleUIState_Active : SPButtonPressed
 EternalJourney_BattleUI_State_BattleUIState_InActive --> EternalJourney_BattleUI_State_BattleUIState_Active : BattleStarted
 
 EternalJourney_BattleUI_State_BattleUIState_Active : OnAcquiredCardsChanged() → AcquiredCardsChanged
 EternalJourney_BattleUI_State_BattleUIState_Active : OnGameOver() → GameOver
-EternalJourney_BattleUI_State_BattleUIState_Active : OnPhysicsProcess → TikCount
+EternalJourney_BattleUI_State_BattleUIState_Active : OnPhysicsProcess → ActivateSkill, TikCount
 EternalJourney_BattleUI_State_BattleUIState_Active : OnResearchChanged() → SkillCooldownChanged
 EternalJourney_BattleUI_State_BattleUIState_Active : OnScoreCountUp() → ScoreChanged
 EternalJourney_BattleUI_State_BattleUIState_Active : OnScrapCountUp() → ScrapChanged

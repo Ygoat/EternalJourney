@@ -32,7 +32,8 @@ public partial class ResearchUILogic : LogicBlock, IResearchUILogic
     /// </summary>
     /// <param name="Duration">演出の長さ（秒）</param>
     /// <param name="CardCount">提示するカード枚数</param>
-    public record Settings(float Duration, int CardCount);
+    /// <param name="AutoPickDelay">Auto モードでカードを見せてから選ぶまでの秒数</param>
+    public record Settings(float Duration, int CardCount, float AutoPickDelay = 0.8f);
 
     /// <summary>
     /// 演出中のタイトル
@@ -130,6 +131,8 @@ public abstract partial record ResearchUIState : LogicBlockState
             {
                 Get<IBattleRepo>().ResearchStarted += OnResearchStarted;
                 Output(new ResearchUILogic.Output.Closed());
+                // 次の研究を受け付けられるようになったことを伝える（Auto モードの研究室が再判定する）
+                Get<IBattleRepo>().NotifyResearchFinished();
             });
             this.OnExit(() => Get<IBattleRepo>().ResearchStarted -= OnResearchStarted);
         }
@@ -177,8 +180,15 @@ public abstract partial record ResearchUIState : LogicBlockState
     /// <summary>
     /// カード選択中
     /// </summary>
-    public record Choosing : ResearchUIState, IGet<ResearchUILogic.Input.CardSelected>
+    public record Choosing : ResearchUIState,
+        IGet<ResearchUILogic.Input.CardSelected>,
+        IGet<ResearchUILogic.Input.Process>
     {
+        /// <summary>
+        /// カードを見せてからの経過時間（OnEnterで初期化する）
+        /// </summary>
+        private float _elapsed;
+
         /// <summary>
         /// 提示中のカード（遷移前に設定される）
         /// </summary>
@@ -186,8 +196,27 @@ public abstract partial record ResearchUIState : LogicBlockState
 
         public Choosing()
         {
-            this.OnEnter(() => Output(new ResearchUILogic.Output.CardsShown(
-                ResearchUILogic.CHOOSING_TITLE, ResearchUILogic.ToViews(Cards))));
+            this.OnEnter(() =>
+            {
+                _elapsed = 0f;
+                Output(new ResearchUILogic.Output.CardsShown(
+                    ResearchUILogic.CHOOSING_TITLE, ResearchUILogic.ToViews(Cards)));
+            });
+        }
+
+        public Type On(in ResearchUILogic.Input.Process input)
+        {
+            // Auto モードでは少し見せてから一番レアリティの高いカードを選ぶ
+            if (!Get<IBattleRepo>().AutoMode.Value)
+            {
+                return ToSelf();
+            }
+            _elapsed += (float)input.Delta;
+            if (_elapsed < Get<ResearchUILogic.Settings>().AutoPickDelay)
+            {
+                return ToSelf();
+            }
+            return On(new ResearchUILogic.Input.CardSelected(ResearchCardPicker.BestIndex(Cards)));
         }
 
         public Type On(in ResearchUILogic.Input.CardSelected input)

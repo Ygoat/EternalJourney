@@ -137,6 +137,13 @@ layout_mode = 2
 theme_override_constants/separation = 150
 alignment = 1
 
+[node name="RandomButton" type="Button" parent="MarginContainer/GridContainer/VBoxContainer2/HBoxContainer3"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Random"
+
 [node name="SelectButton" type="Button" parent="MarginContainer/GridContainer/VBoxContainer2/HBoxContainer3"]
 unique_name_in_owner = true
 custom_minimum_size = Vector2(200, 50)

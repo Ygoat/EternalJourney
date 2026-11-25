@@ -18,6 +18,21 @@ public interface ISkillButton : IControl
     /// クールダウンの倍率を設定する（次回の発動から反映）
     /// </summary>
     void SetCooldownMultiplier(float multiplier);
+
+    /// <summary>
+    /// 割り当てたスキルの基本クールタイムを設定する（次回の発動から反映）
+    /// </summary>
+    void SetBaseCooldown(float seconds);
+
+    /// <summary>
+    /// クールダウンが明けて押せる状態か
+    /// </summary>
+    bool IsReady { get; }
+
+    /// <summary>
+    /// ボタンを押したのと同じように発動する（Auto モード用）
+    /// </summary>
+    void Press();
 }
 
 [Meta(typeof(IAutoNode))]
@@ -35,7 +50,7 @@ public partial class SkillButton : Control, ISkillButton
     /// 基本クールダウン（秒）
     /// </summary>
     [Export]
-    public float BaseCooldown { get; set; } = 5f;
+    public float BaseCooldown { get; set; } = 20f;
 
     [Node]
     public ITimer Timer { get; set; } = default!;
@@ -98,11 +113,27 @@ public partial class SkillButton : Control, ISkillButton
 
     public void SetLabel(string text) => ButtonLabel.Text = text;
 
+    public bool IsReady => !Button.Disabled;
+
+    public void Press() => OnPressed();
+
     public void SetCooldownMultiplier(float multiplier)
     {
         // クールダウン中に変えると残り時間表示の比率が崩れるため、次回の発動時に反映する
-        _cooldown = BaseCooldown * multiplier;
+        _cooldownMultiplier = multiplier;
+        _cooldown = BaseCooldown * _cooldownMultiplier;
     }
+
+    public void SetBaseCooldown(float seconds)
+    {
+        BaseCooldown = seconds;
+        _cooldown = BaseCooldown * _cooldownMultiplier;
+    }
+
+    /// <summary>
+    /// クールダウンの倍率（研究効果）
+    /// </summary>
+    private float _cooldownMultiplier = 1f;
 
     /// <summary>
     /// 次回の発動で使うクールダウン（秒）

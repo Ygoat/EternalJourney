@@ -55,6 +55,9 @@ public partial class SelectCrewUI : Control, ISelectCrewUI
     public IButton ConfirmButton { get; set; } = default!;
 
     [Node]
+    public IButton RandomButton { get; set; } = default!;
+
+    [Node]
     public IRichTextLabel CrewDescription { get; set; } = default!;
     #endregion Nodes
 
@@ -75,6 +78,7 @@ public partial class SelectCrewUI : Control, ISelectCrewUI
     public void OnResolved()
     {
         Logic.Set(GameRepo);
+        Logic.Set(new Random());
 
         Binding
             .OnOutput((in SelectCrewUILogic.Output.Initialized output) =>
@@ -99,6 +103,7 @@ public partial class SelectCrewUI : Control, ISelectCrewUI
             });
 
         ConfirmButton.Pressed += OnConfirmPressed;
+        RandomButton.Pressed += OnRandomPressed;
         Logic.Start<SelectCrewUIState.Idle>();
     }
 
@@ -124,9 +129,12 @@ public partial class SelectCrewUI : Control, ISelectCrewUI
 
     private void OnConfirmPressed() => Logic.Input(new SelectCrewUILogic.Input.ConfirmPressed());
 
+    private void OnRandomPressed() => Logic.Input(new SelectCrewUILogic.Input.RandomPressed());
+
     public void OnExitTree()
     {
         ConfirmButton.Pressed -= OnConfirmPressed;
+        RandomButton.Pressed -= OnRandomPressed;
         Binding.Dispose();
         ((IDisposable)Logic).Dispose();
     }

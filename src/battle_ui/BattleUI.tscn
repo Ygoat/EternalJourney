@@ -41,10 +41,19 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 20
 text = "Time: 000000000000000"
 
+[node name="AutoToggle" type="CheckButton" parent="MarginContainer2/HBoxContainer/HBoxContainer2/VBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_font_sizes/font_size = 24
+text = "AUTO"
+
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer2"]
+mouse_filter = 2
 layout_mode = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer2/HBoxContainer2"]
+mouse_filter = 2
 layout_mode = 2
 
 [node name="ScoreLabel" type="Label" parent="MarginContainer2/HBoxContainer2/VBoxContainer"]
@@ -66,6 +75,7 @@ mouse_filter = 2
 theme_override_constants/separation = 0
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
+mouse_filter = 2
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -78,6 +88,7 @@ theme_override_constants/margin_right = 40
 theme_override_constants/margin_bottom = 40
 
 [node name="VBoxContainer5" type="VBoxContainer" parent="MarginContainer"]
+mouse_filter = 2
 layout_mode = 2
 alignment = 2
 

@@ -55,6 +55,16 @@ public interface IBattleRepo : IDisposable
     public IAutoValue<int> ResearchCost { get; }
 
     /// <summary>
+    /// Auto モードか（スキル・SP・研究を自動で使う）
+    /// </summary>
+    public IAutoValue<bool> AutoMode { get; }
+
+    /// <summary>
+    /// Auto モードを切り替える
+    /// </summary>
+    public void SetAutoMode(bool enabled);
+
+    /// <summary>
     /// 研究による累計強化値
     /// </summary>
     public IAutoValue<ResearchBonus> Research { get; }
@@ -79,6 +89,16 @@ public interface IBattleRepo : IDisposable
     /// </summary>
     /// <returns>開始できたか</returns>
     public bool TryStartResearch();
+
+    /// <summary>
+    /// 研究 UI が閉じ、次の研究を受け付けられるようになったイベント
+    /// </summary>
+    public event Action? ResearchFinished;
+
+    /// <summary>
+    /// 研究 UI が閉じたことを通知する
+    /// </summary>
+    public void NotifyResearchFinished();
 
     /// <summary>
     /// 選択した研究カードの効果を適用する
@@ -313,7 +333,7 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// 撃破1体あたりの基本SP獲得量（%）
     /// </summary>
-    public const float BASE_SP_GAIN = 5f;
+    public const float BASE_SP_GAIN = 5f / 3f;
 
     /// <summary>
     /// 敵の弾が船に与えるダメージの基本倍率（バランス調整用。SPスキルのデバフとは別に掛かる）
@@ -326,6 +346,18 @@ public class BattleRepo : IBattleRepo
     public IAutoValue<int> ResearchCost => _researchCost;
 
     private readonly AutoValue<int> _researchCost = new(INITIAL_RESEARCH_COST);
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public IAutoValue<bool> AutoMode => _autoMode;
+
+    private readonly AutoValue<bool> _autoMode = new(false);
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void SetAutoMode(bool enabled) => _autoMode.Value = enabled;
 
     /// <summary>
     /// <inheritdoc/>
@@ -448,13 +480,33 @@ public class BattleRepo : IBattleRepo
     /// <summary>
     /// <inheritdoc/>
     /// </summary>
+    /// <summary>
+    /// 研究中か（研究開始からカード選択まで）
+    /// </summary>
+    private bool _researchInProgress;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? ResearchFinished;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyResearchFinished() => ResearchFinished?.Invoke();
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
     public bool TryStartResearch()
     {
         int cost = _researchCost.Value;
-        if (_scrap.Value < cost)
+        // 研究は同時に1つまで（カードを選ぶまで次の研究は始めない）
+        if (_researchInProgress || _scrap.Value < cost)
         {
             return false;
         }
+        _researchInProgress = true;
         _scrap.Value = _scrap.Value - cost;
         _researchCost.Value = cost + RESEARCH_COST_STEP;
         ResearchStarted?.Invoke();
@@ -466,6 +518,7 @@ public class BattleRepo : IBattleRepo
     /// </summary>
     public void ApplyResearchCard(ResearchCard card)
     {
+        _researchInProgress = false;
         // 同じ種類・レアリティは回数を加算し、新しいリストとして公開する（AutoValue の変化検知のため）
         List<AcquiredCard> list = _acquiredCards.Value.ToList();
         int index = list.FindIndex(c => c.Type == card.Type && c.Rarity == card.Rarity);
@@ -611,6 +664,7 @@ public class BattleRepo : IBattleRepo
                 _numEnemyDestroyed.Dispose();
                 _scrap.Dispose();
                 _researchCost.Dispose();
+                _autoMode.Dispose();
                 _research.Dispose();
                 _acquiredCards.Dispose();
             }

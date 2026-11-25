@@ -3,6 +3,10 @@ state "SelectSkillUIState" as EternalJourney_SelectUI_State_SelectSkillUIState {
   state "Idle" as EternalJourney_SelectUI_State_SelectSkillUIState_Idle
 }
 
+EternalJourney_SelectUI_State_SelectSkillUIState_Idle --> EternalJourney_SelectUI_State_SelectSkillUIState_Idle : RandomPressed
 EternalJourney_SelectUI_State_SelectSkillUIState_Idle --> EternalJourney_SelectUI_State_SelectSkillUIState_Idle : SelectButtonPressed
 EternalJourney_SelectUI_State_SelectSkillUIState_Idle --> EternalJourney_SelectUI_State_SelectSkillUIState_Idle : SkillToggled
+
+EternalJourney_SelectUI_State_SelectSkillUIState_Idle : NotifySelection() → SelectionChanged
+EternalJourney_SelectUI_State_SelectSkillUIState_Idle : OnEnter → Initialized
 @enduml

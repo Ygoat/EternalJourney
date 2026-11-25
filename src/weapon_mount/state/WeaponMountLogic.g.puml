@@ -1,0 +1,10 @@
+@startuml WeaponMountState
+state "WeaponMountState" as EternalJourney_WeaponMount_State_WeaponMountState {
+  state "Mounted" as EternalJourney_WeaponMount_State_WeaponMountState_Mounted
+  state "Waiting" as EternalJourney_WeaponMount_State_WeaponMountState_Waiting
+}
+
+EternalJourney_WeaponMount_State_WeaponMountState_Waiting --> EternalJourney_WeaponMount_State_WeaponMountState_Mounted : BattleStarted
+
+EternalJourney_WeaponMount_State_WeaponMountState_Mounted : OnEnter → Mount
+@enduml

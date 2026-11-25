@@ -86,6 +86,12 @@ public partial class BattleUI : Control, IBattleUI
     [Node]
     public IButton SPButton { get; set; } = default!;
 
+    /// <summary>
+    /// Auto / Manual 切り替えトグル
+    /// </summary>
+    [Node]
+    public ICheckButton AutoToggle { get; set; } = default!;
+
     /// <summary>バトルUIロジック</summary>
     public IBattleUILogic BattleUILogic { get; set; } = default!;
 
@@ -157,6 +163,11 @@ public partial class BattleUI : Control, IBattleUI
                 Count = 0;
                 SetPhysicsProcess(true);
             })
+            .OnOutput((in BattleUILogic.Output.ActivateSkill output) =>
+            {
+                ISkillButton[] slots = { SkillButton1, SkillButton2, SkillButton3, SkillButton4 };
+                slots[output.Index].Press();
+            })
             .OnOutput((in BattleUILogic.Output.SpSkillNameChanged output) =>
             {
                 SPButton.Text = output.Name;
@@ -183,6 +194,7 @@ public partial class BattleUI : Control, IBattleUI
                 SetAcquiredCards(output.Rows);
             });
         SPButton.Pressed += OnSPButtonPressed;
+        AutoToggle.Toggled += OnAutoToggled;
         SPButton.Disabled = true;
         BattleUILogic.Start<BattleUIState.InActive>();
     }
@@ -228,6 +240,9 @@ public partial class BattleUI : Control, IBattleUI
     private void OnSPButtonPressed() =>
         BattleUILogic.Input(new BattleUILogic.Input.SPButtonPressed());
 
+    private void OnAutoToggled(bool enabled) =>
+        BattleUILogic.Input(new BattleUILogic.Input.AutoToggled(enabled));
+
     private void OnGameOver()
     {
         SetPhysicsProcess(false);
@@ -235,6 +250,7 @@ public partial class BattleUI : Control, IBattleUI
 
     public void OnExitTree()
     {
+        AutoToggle.Toggled -= OnAutoToggled;
         BattleUIBinding.Dispose();
         ((System.IDisposable)BattleUILogic).Dispose();
     }

@@ -6,6 +6,7 @@ using System.Linq;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Cores.Models.Crews;
+using EternalJourney.Cores.Utils;
 using EternalJourney.Game.Domain;
 
 /// <summary>
@@ -54,6 +55,11 @@ public partial class SelectCrewUILogic : LogicBlock, ISelectCrewUILogic
         /// 決定ボタン押下
         /// </summary>
         public readonly record struct ConfirmPressed;
+
+        /// <summary>
+        /// ランダムボタン押下
+        /// </summary>
+        public readonly record struct RandomPressed;
     }
 
     /// <summary>
@@ -99,7 +105,8 @@ public abstract partial record SelectCrewUIState : LogicBlockState
     public record Idle : SelectCrewUIState,
         IGet<SelectCrewUILogic.Input.CommanderToggled>,
         IGet<SelectCrewUILogic.Input.WorkerToggled>,
-        IGet<SelectCrewUILogic.Input.ConfirmPressed>
+        IGet<SelectCrewUILogic.Input.ConfirmPressed>,
+        IGet<SelectCrewUILogic.Input.RandomPressed>
     {
         // 選択状態（OnEnterで初期化する）
         private int _commander = SelectCrewUILogic.NO_SELECTION;
@@ -156,6 +163,19 @@ public abstract partial record SelectCrewUIState : LogicBlockState
                 _workers.Remove(input.Index);
             }
             // 5人目は選択状態に戻さない（NotifySelection で押下が解除される）
+            NotifySelection();
+            return ToSelf();
+        }
+
+        public Type On(in SelectCrewUILogic.Input.RandomPressed input)
+        {
+            Random rng = Get<Random>();
+            _commander = rng.Next(CrewCatalog.Commanders.Count);
+            _workers.Clear();
+            _workers.AddRange(RandomPick.Distinct(rng, CrewCatalog.Workers.Count, CrewCatalog.WORKER_COUNT));
+            _description = string.Join("\n",
+                new[] { CrewCatalog.Commanders[_commander] }.Concat(_workers.Select(i => CrewCatalog.Workers[i]))
+                    .Select(c => $"{c.Name}（{CrewCatalog.PersonalityName(c.Personality)}）{CrewCatalog.PassiveText(c.Passive)}"));
             NotifySelection();
             return ToSelf();
         }

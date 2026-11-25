@@ -49,6 +49,11 @@ public partial class SelectSpSkillUILogic : LogicBlock, ISelectSpSkillUILogic
         /// 決定ボタン押下
         /// </summary>
         public readonly record struct ConfirmPressed;
+
+        /// <summary>
+        /// ランダムボタン押下
+        /// </summary>
+        public readonly record struct RandomPressed;
     }
 
     /// <summary>
@@ -82,7 +87,8 @@ public abstract partial record SelectSpSkillUIState : LogicBlockState
     /// </summary>
     public record Idle : SelectSpSkillUIState,
         IGet<SelectSpSkillUILogic.Input.SpSkillToggled>,
-        IGet<SelectSpSkillUILogic.Input.ConfirmPressed>
+        IGet<SelectSpSkillUILogic.Input.ConfirmPressed>,
+        IGet<SelectSpSkillUILogic.Input.RandomPressed>
     {
         /// <summary>
         /// 選択中のインデックス（OnEnterで初期化する）
@@ -114,6 +120,13 @@ public abstract partial record SelectSpSkillUIState : LogicBlockState
             {
                 _selected = SelectSpSkillUILogic.NO_SELECTION;
             }
+            NotifySelection();
+            return ToSelf();
+        }
+
+        public Type On(in SelectSpSkillUILogic.Input.RandomPressed input)
+        {
+            _selected = Get<Random>().Next(SpSkillCatalog.All.Count);
             NotifySelection();
             return ToSelf();
         }

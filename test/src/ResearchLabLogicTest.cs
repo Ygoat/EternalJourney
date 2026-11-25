@@ -29,4 +29,29 @@ public class ResearchLabLogicTest : TestClass
         last.CanResearch.ShouldBeTrue();
         logic.Dispose();
     }
+
+    [Test]
+    public void AutoModeStartsResearchOnceUntilFinished()
+    {
+        using var repo = new BattleRepo();
+        int started = 0;
+        repo.ResearchStarted += () => started++;
+        var logic = new ResearchLabLogic();
+        logic.Set<IBattleRepo>(repo);
+        logic.Start<ResearchLabState.Watching>();
+
+        repo.SetAutoMode(true);
+        // コストの3倍あっても、研究中は次の研究を始めない
+        repo.AddScrap(BattleRepo.INITIAL_RESEARCH_COST * 3);
+        started.ShouldBe(1);
+        repo.Scrap.Value.ShouldBe(BattleRepo.INITIAL_RESEARCH_COST * 2);
+
+        // カードを選んで研究 UI が閉じたら、次の研究が自動で始まる
+        repo.ApplyResearchCard(new EternalJourney.Cores.Models.Research.ResearchCard(
+            EternalJourney.Cores.Models.Research.ResearchCardType.AtkUp,
+            EternalJourney.Cores.Models.Research.ResearchRarity.Common));
+        repo.NotifyResearchFinished();
+        started.ShouldBe(2);
+        logic.Dispose();
+    }
 }

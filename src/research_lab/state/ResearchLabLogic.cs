@@ -62,6 +62,7 @@ public abstract partial record ResearchLabState : LogicBlockState
     {
         private AutoValue<int>.Binding? _scrapBinding;
         private AutoValue<int>.Binding? _costBinding;
+        private AutoValue<bool>.Binding? _autoBinding;
 
         /// <summary>
         /// 最新のスクラップ数（OnEnterで初期化する）
@@ -85,6 +86,9 @@ public abstract partial record ResearchLabState : LogicBlockState
                 _scrapBinding.OnValue(v => { _scrap = v; Notify(); });
                 _costBinding = battleRepo.ResearchCost.Bind();
                 _costBinding.OnValue(v => { _cost = v; Notify(); });
+                _autoBinding = battleRepo.AutoMode.Bind();
+                _autoBinding.OnValue(_ => Notify());
+                battleRepo.ResearchFinished += Notify;
             });
             this.OnExit(() =>
             {
@@ -92,11 +96,22 @@ public abstract partial record ResearchLabState : LogicBlockState
                 _scrapBinding = null;
                 _costBinding?.Dispose();
                 _costBinding = null;
+                _autoBinding?.Dispose();
+                _autoBinding = null;
+                Get<IBattleRepo>().ResearchFinished -= Notify;
             });
         }
 
-        private void Notify() =>
-            Output(new ResearchLabLogic.Output.AvailabilityChanged(_scrap >= _cost, $"LAB {_cost}"));
+        private void Notify()
+        {
+            bool canResearch = _scrap >= _cost;
+            Output(new ResearchLabLogic.Output.AvailabilityChanged(canResearch, $"LAB {_cost}"));
+            // Auto モードでは、スクラップが足りたらすぐに研究を始める
+            if (canResearch && Get<IBattleRepo>().AutoMode.Value)
+            {
+                Get<IBattleRepo>().TryStartResearch();
+            }
+        }
 
         public Type On(in ResearchLabLogic.Input.Pressed input)
         {

@@ -1,5 +1,6 @@
 namespace EternalJourney.SpSkillEffectArea.State;
 
+using System;
 using Chickensoft.GoDotTest;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Skill;
@@ -30,7 +31,8 @@ public class SpSkillLogicTest : TestClass
 
     private static void FillAndActivate(BattleRepo repo)
     {
-        for (int i = 0; i < 20; i++)
+        int kills = (int)Math.Ceiling(100f / BattleRepo.BASE_SP_GAIN) + 1;
+        for (int i = 0; i < kills; i++)
         {
             repo.OnEnemyDestroyed(null!);
         }

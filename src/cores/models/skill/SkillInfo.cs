@@ -17,6 +17,24 @@ public static class SkillInfo
         _                     => "",
     };
 
+    /// <summary>
+    /// スキルのクールタイム（秒）。強力なものほど長い
+    /// </summary>
+    public static float GetCooldown(SkillType type) => type switch
+    {
+        SkillType.BulletSpdUp => 10f,
+        SkillType.ShipSpdUp   => 12f,
+        SkillType.BulletDefUp => 12f,
+        SkillType.ShipAtkUp   => 15f,
+        SkillType.WeaponSpdUp => 15f,
+        SkillType.ShipDefUp   => 18f,
+        SkillType.BulletAtkUp => 18f,
+        SkillType.WeaponAtkUp => 20f,
+        SkillType.Heal        => 22f,
+        SkillType.Regen       => 25f,
+        _                     => 20f,
+    };
+
     public static string GetDescription(SkillType type) => type switch
     {
         SkillType.ShipAtkUp   => "自機の攻撃補正を強化する。\nスタックごとに攻撃力+30%。最大4スタック。持続10秒。",

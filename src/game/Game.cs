@@ -63,6 +63,12 @@ public partial class Game : Node2D, IGame
     public ISelectSpSkillUI SelectSpSkill { get; set; } = default!;
 
     /// <summary>
+    /// 武器選択
+    /// </summary>
+    [Node]
+    public ISelectWeaponUI SelectWeapon { get; set; } = default!;
+
+    /// <summary>
     /// クルー選択
     /// </summary>
     [Node]
@@ -112,6 +118,7 @@ public partial class Game : Node2D, IGame
                 Battle.ProcessMode = ProcessModeEnum.Disabled;
                 SelectSkill.Show();
                 SelectSpSkill.Hide();
+                SelectWeapon.Hide();
                 SelectCrew.Hide();
                 Battle.Hide();
             })
@@ -120,9 +127,14 @@ public partial class Game : Node2D, IGame
                 SelectSkill.Hide();
                 SelectSpSkill.Show();
             })
-            .OnOutput((in GameLogic.Output.ShowSelectCrew _) =>
+            .OnOutput((in GameLogic.Output.ShowSelectWeapon _) =>
             {
                 SelectSpSkill.Hide();
+                SelectWeapon.Show();
+            })
+            .OnOutput((in GameLogic.Output.ShowSelectCrew _) =>
+            {
+                SelectWeapon.Hide();
                 SelectCrew.Show();
             })
             .OnOutput((in GameLogic.Output.InitializeBattle _) =>
@@ -135,6 +147,7 @@ public partial class Game : Node2D, IGame
                 Battle.ProcessMode = ProcessModeEnum.Inherit;
                 SelectSkill.Hide();
                 SelectSpSkill.Hide();
+                SelectWeapon.Hide();
                 SelectCrew.Hide();
                 Battle.Show();
                 Battle.StartBattle();

@@ -7,6 +7,7 @@ state "GameState" as EternalJourney_Game_State_GameState {
   state "SelectCrewPhase" as EternalJourney_Game_State_GameState_SelectCrewPhase
   state "SelectSkillPhase" as EternalJourney_Game_State_GameState_SelectSkillPhase
   state "SelectSpSkillPhase" as EternalJourney_Game_State_GameState_SelectSpSkillPhase
+  state "SelectWeaponPhase" as EternalJourney_Game_State_GameState_SelectWeaponPhase
 }
 
 EternalJourney_Game_State_GameState_BattleEndingPhase --> EternalJourney_Game_State_GameState_ResultPhase : BattleEnded
@@ -14,7 +15,8 @@ EternalJourney_Game_State_GameState_BattleInitPhase --> EternalJourney_Game_Stat
 EternalJourney_Game_State_GameState_BattleRunningPhase --> EternalJourney_Game_State_GameState_BattleEndingPhase : GameOver
 EternalJourney_Game_State_GameState_SelectCrewPhase --> EternalJourney_Game_State_GameState_BattleInitPhase : CrewSelected
 EternalJourney_Game_State_GameState_SelectSkillPhase --> EternalJourney_Game_State_GameState_SelectSpSkillPhase : SkillSelected
-EternalJourney_Game_State_GameState_SelectSpSkillPhase --> EternalJourney_Game_State_GameState_SelectCrewPhase : SpSkillSelected
+EternalJourney_Game_State_GameState_SelectSpSkillPhase --> EternalJourney_Game_State_GameState_SelectWeaponPhase : SpSkillSelected
+EternalJourney_Game_State_GameState_SelectWeaponPhase --> EternalJourney_Game_State_GameState_SelectCrewPhase : WeaponSelected
 
 EternalJourney_Game_State_GameState_BattleEndingPhase : OnEnter → EndBattle
 EternalJourney_Game_State_GameState_BattleInitPhase : OnEnter → InitializeBattle
@@ -23,4 +25,5 @@ EternalJourney_Game_State_GameState_ResultPhase : OnEnter → ShowResult
 EternalJourney_Game_State_GameState_SelectCrewPhase : OnEnter → ShowSelectCrew
 EternalJourney_Game_State_GameState_SelectSkillPhase : OnEnter → ShowSelectSkill
 EternalJourney_Game_State_GameState_SelectSpSkillPhase : OnEnter → ShowSelectSpSkill
+EternalJourney_Game_State_GameState_SelectWeaponPhase : OnEnter → ShowSelectWeapon
 @enduml

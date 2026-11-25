@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using EternalJourney.Cores.Models.Crews;
 using EternalJourney.Cores.Models.Skill;
+using EternalJourney.Cores.Models.Weapon;
 
 /// <summary>
 /// ゲームリポジトリインターフェース
@@ -40,6 +41,26 @@ public interface IGameRepo : IDisposable
     /// SPスキル選択完了を通知する
     /// </summary>
     void NotifySpSkillSelected();
+
+    /// <summary>
+    /// 選択済みの武器（銃座 0〜3 の順）
+    /// </summary>
+    IReadOnlyList<WeaponType> SelectedWeapons { get; }
+
+    /// <summary>
+    /// 選択した武器を保存する
+    /// </summary>
+    void SetSelectedWeapons(IReadOnlyList<WeaponType> weapons);
+
+    /// <summary>
+    /// 武器選択完了イベント
+    /// </summary>
+    event Action? WeaponSelected;
+
+    /// <summary>
+    /// 武器選択完了を通知する
+    /// </summary>
+    void NotifyWeaponSelected();
 
     /// <summary>
     /// 選択済みの指揮官
@@ -156,6 +177,26 @@ public class GameRepo : IGameRepo
     /// <inheritdoc/>
     /// </summary>
     public void NotifySpSkillSelected() => SpSkillSelected?.Invoke();
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public IReadOnlyList<WeaponType> SelectedWeapons { get; private set; } = WeaponCatalog.DefaultLoadout;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void SetSelectedWeapons(IReadOnlyList<WeaponType> weapons) => SelectedWeapons = weapons;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public event Action? WeaponSelected;
+
+    /// <summary>
+    /// <inheritdoc/>
+    /// </summary>
+    public void NotifyWeaponSelected() => WeaponSelected?.Invoke();
 
     /// <summary>
     /// <inheritdoc/>

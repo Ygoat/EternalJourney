@@ -1,0 +1,12 @@
+@startuml SelectWeaponUIState
+state "SelectWeaponUIState" as EternalJourney_SelectUI_State_SelectWeaponUIState {
+  state "Idle" as EternalJourney_SelectUI_State_SelectWeaponUIState_Idle
+}
+
+EternalJourney_SelectUI_State_SelectWeaponUIState_Idle --> EternalJourney_SelectUI_State_SelectWeaponUIState_Idle : ConfirmPressed
+EternalJourney_SelectUI_State_SelectWeaponUIState_Idle --> EternalJourney_SelectUI_State_SelectWeaponUIState_Idle : RandomPressed
+EternalJourney_SelectUI_State_SelectWeaponUIState_Idle --> EternalJourney_SelectUI_State_SelectWeaponUIState_Idle : WeaponChosen
+
+EternalJourney_SelectUI_State_SelectWeaponUIState_Idle : NotifySelection() → SelectionChanged
+EternalJourney_SelectUI_State_SelectWeaponUIState_Idle : OnEnter → Initialized
+@enduml
