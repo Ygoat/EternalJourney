@@ -338,7 +338,7 @@ public partial class Foo : Node2D, IFoo
 
 `src/` 配下の各エンティティフォルダは次の規則に従います: `src/{entity}/state/{Name}Logic.cs`
 
-抽象基底クラスを持つエンティティ（weapon / bullet / bullet_factory）のみ `src/{entity}/abstract/state/{Name}Logic.cs` に配置します。
+基底クラスと派生型を持つエンティティ（weapon / bullet / bullet_factory / enemy）は、型ごとにフォルダを分けます: 基底は `src/{entity}/base/`、派生型は `src/{entity}/{型}/`（例: `standard/`・`continuous/`・`orbit/`）。ステートマシンはその型のフォルダの `state/{Name}Logic.cs` に置きます。`abstract/` のような抽象度でまとめるフォルダは作りません。
 
 ### コーディング規約
 

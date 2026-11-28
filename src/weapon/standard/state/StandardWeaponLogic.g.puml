@@ -1,0 +1,12 @@
+@startuml StandardWeaponState
+state "StandardWeaponState" as EternalJourney_Weapon_Standard_State_StandardWeaponState {
+  state "Attack" as EternalJourney_Weapon_Standard_State_StandardWeaponState_Attack
+  state "Idle" as EternalJourney_Weapon_Standard_State_StandardWeaponState_Idle
+}
+
+EternalJourney_Weapon_Standard_State_StandardWeaponState_Attack --> EternalJourney_Weapon_Standard_State_StandardWeaponState_Idle : StartIdle
+EternalJourney_Weapon_Standard_State_StandardWeaponState_Idle --> EternalJourney_Weapon_Standard_State_StandardWeaponState_Attack : StartAttack
+
+EternalJourney_Weapon_Standard_State_StandardWeaponState_Attack : OnEnter → Attacking
+EternalJourney_Weapon_Standard_State_StandardWeaponState_Idle : OnEnter → Idling
+@enduml

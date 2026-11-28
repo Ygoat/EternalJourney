@@ -1,4 +1,4 @@
-namespace EternalJourney.Weapon.Abstract.State;
+namespace EternalJourney.Weapon.Standard.State;
 
 using System;
 using Chickensoft.Introspection;

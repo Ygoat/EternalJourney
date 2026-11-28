@@ -279,9 +279,9 @@ BulletCollisionStrategyFactory ..> IBulletCollisionStrategy : 生成
 ### 弾丸本体
 | ファイル | パス | 説明 |
 |----------|------|------|
-| `BaseBullet.cs` | `src/bullet/abstract/base/` | 弾丸基底クラス |
-| `StandardBullet.cs` | `src/bullet/abstract/` | 統一弾丸クラス（全タイプ対応） |
-| `BulletLogic.cs` | `src/bullet/abstract/state/` | 統一状態管理ロジック |
+| `BaseBullet.cs` | `src/bullet/base/` | 弾丸基底クラス |
+| `StandardBullet.cs` | `src/bullet/standard/` | 統一弾丸クラス（全タイプ対応） |
+| `BulletLogic.cs` | `src/bullet/standard/state/` | 統一状態管理ロジック |
 
 ### 移動戦略
 | ファイル | パス | 説明 |
@@ -301,7 +301,7 @@ BulletCollisionStrategyFactory ..> IBulletCollisionStrategy : 生成
 ### ファクトリ
 | ファイル | パス | 説明 |
 |----------|------|------|
-| `StandardBulletFactory.cs` | `src/bullet_factory/abstract/` | 弾丸生成・プール管理 |
+| `StandardBulletFactory.cs` | `src/bullet_factory/standard/` | 弾丸生成・プール管理 |
 
 ### データファイル
 | ファイル | パス | 説明 |
@@ -311,9 +311,9 @@ BulletCollisionStrategyFactory ..> IBulletCollisionStrategy : 生成
 ### シーンファイル
 | ファイル | パス | 説明 |
 |----------|------|------|
-| `BaseBullet.tscn` | `src/bullet/abstract/base/` | 弾丸基底シーン |
-| `StandardBullet.tscn` | `src/bullet/abstract/` | 通常弾シーン（爆風ノードなし） |
-| `ExplosionBullet.tscn` | `src/bullet/abstract/` | 爆発弾シーン（爆風ノードあり、スクリプトはStandardBullet.cs） |
+| `BaseBullet.tscn` | `src/bullet/base/` | 弾丸基底シーン |
+| `StandardBullet.tscn` | `src/bullet/standard/` | 通常弾シーン（爆風ノードなし） |
+| `ExplosionBullet.tscn` | `src/bullet/standard/` | 爆発弾シーン（爆風ノードあり、スクリプトはStandardBullet.cs） |
 | `01_NormalBullet.tscn` | `src/bullet/` | NormalBullet実体シーン |
 | `02_PenetrateBullet.tscn` | `src/bullet/` | PenetrateBullet実体シーン |
 | `03_ExplosionBullet.tscn` | `src/bullet/` | ExplosionBullet実体シーン |

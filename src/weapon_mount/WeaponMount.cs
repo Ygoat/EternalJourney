@@ -8,7 +8,7 @@ using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Utils;
 using EternalJourney.Game.Domain;
-using EternalJourney.Weapon.Abstract.Base;
+using EternalJourney.Weapon.Base;
 using EternalJourney.WeaponMount.State;
 using Godot;
 

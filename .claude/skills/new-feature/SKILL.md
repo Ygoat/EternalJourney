@@ -12,7 +12,7 @@ EternalJourney の規約に沿って新機能一式を作成する手順。詳�
 
 1. **配置を決める**: `src/{feature}/`（フォルダ名は snake_case）を作成する。
    - View: `src/{feature}/{Feature}.cs` + `{Feature}.tscn`
-   - LogicBlock: `src/{feature}/state/{Feature}Logic.cs`（本プロジェクトは全状態を単一ファイルに定義。抽象基底を持つ場合のみ `abstract/state/`）
+   - LogicBlock: `src/{feature}/state/{Feature}Logic.cs`（本プロジェクトは全状態を単一ファイルに定義。基底と派生型を持つ場合は `base/` と型ごとのフォルダ `{型}/state/` に分ける。`abstract/` フォルダは作らない）
    - ドメイン横断ルールがあるなら: `src/{feature}/domain/{Feature}Repo.cs`
 
 2. **View を作る**: `docs/ScriptTemplate.md` のテンプレートに従う。必須事項:
@@ -51,6 +51,6 @@ EternalJourney の規約に沿って新機能一式を作成する手順。詳�
 - View + Logic の分離: `src/ship/Ship.cs` + `src/ship/state/ShipLogic.cs`
 - AutoValue 購読（OnEnter/OnExit）: `src/battle_ui/state/BattleUILogic.cs` の `Active` ステート
 - 表示用データへの変換: `BattleUILogic.ToRows`（取得カード → `AcquiredCardRow`）と `BattleUI.SetAcquiredCards`
-- 遷移前にステートへ値を渡す: `src/bullet/abstract/state/BulletLogic.cs`（EmitWait → InFlight）
+- 遷移前にステートへ値を渡す: `src/bullet/standard/state/BulletLogic.cs`（EmitWait → InFlight）
 - Repo イベント連携: `src/battle/domain/BattleRepo.cs` と `src/game/state/GameLogic.cs`
 - ストラテジー切替: `src/bullet/strategies/` + `data/masters/BulletConfig.json`

@@ -1,13 +1,12 @@
-namespace EternalJourney.Bullet.Abstract.State;
+namespace EternalJourney.Bullet.Standard.State;
 
 using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
-using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Bullet.Base;
 using EternalJourney.Bullet.Strategies.Collision;
 using EternalJourney.Bullet.Strategies.Movement;
-using EternalJourney.Cores.Models.Skill;
 using EternalJourney.Enemy.Base;
 using Godot;
 

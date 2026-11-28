@@ -131,8 +131,8 @@ EternalJourney/
 │   │       ├── AppLogic.cs        # Logic + Input/Output + 全ステート
 │   │       └── AppLogic.g.puml    # [StateDiagram] による自動生成
 │   ├── game/ battle/ ...          # 機能ごとに同じ構成
-│   ├── <entity>/abstract/         # 抽象基底を持つ entity(bullet / weapon / bullet_factory)
-│   │   ├── base/                  # 基底クラス
+│   ├── <entity>/base/             # 派生型を持つ entity(bullet / weapon / bullet_factory / enemy)の基底クラス
+│   ├── <entity>/<型>/             # 派生型ごとのフォルダ(standard / continuous / orbit など)
 │   │   └── state/{Name}Logic.cs
 │   ├── <entity>/strategies/       # JSON 設定で切り替える挙動(movement / collision 等)
 │   ├── common/                    # 共通基底・トレイト・状態異常・耐久値モジュール
@@ -409,7 +409,7 @@ public abstract partial record MyFeatureState : LogicBlockState
 
 - LogicBlock のコンストラクタで、全ステートを `Set(new XState.A())` で事前確保する(実行中の GC を避けるため)。
   - **Set していないステートへ遷移すると `KeyNotFoundException`**(`Data of type ... not found in the blackboard`)になる。ステートを追加したら ctor への追加を忘れない。
-  - 遷移前にステートへ値を渡すときは、`Get<NextState>()` で取り出してプロパティを設定してから `To<NextState>()` する(実例: `src/bullet/abstract/state/BulletLogic.cs` の EmitWait → InFlight)。
+  - 遷移前にステートへ値を渡すときは、`Get<NextState>()` で取り出してプロパティを設定してから `To<NextState>()` する(実例: `src/bullet/standard/state/BulletLogic.cs` の EmitWait → InFlight)。
 - `Input` / `Output` は `readonly record struct` にし、ハンドラは `in` 引数で受ける(ボックス化・コピー回避)。
 - ホットパスの小さな述語には `[MethodImpl(MethodImplOptions.AggressiveInlining)]` を検討する。
 

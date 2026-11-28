@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Chickensoft.Sync.Primitives;
-using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Bullet.Base;
 using EternalJourney.Cores.Models.Research;
 using EternalJourney.Enemy.Base;
 

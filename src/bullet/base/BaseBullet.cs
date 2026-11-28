@@ -1,4 +1,4 @@
-namespace EternalJourney.Bullet.Abstract.Base;
+namespace EternalJourney.Bullet.Base;
 
 using System;
 using Chickensoft.AutoInject;

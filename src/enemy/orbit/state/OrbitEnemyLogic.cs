@@ -4,7 +4,7 @@ using System;
 using Chickensoft.Introspection;
 using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
-using EternalJourney.Bullet.Abstract.Base;
+using EternalJourney.Bullet.Base;
 using EternalJourney.Ship;
 using Godot;
 

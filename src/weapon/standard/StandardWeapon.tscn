@@ -1,7 +1,7 @@
 [gd_scene load_steps=9 format=3 uid="uid://dd0kb5g3fa2xx"]
 
-[ext_resource type="PackedScene" uid="uid://c5fmt1vkl8j58" path="res://src/weapon/abstract/base/BaseWeapon.tscn" id="1_vl25n"]
-[ext_resource type="Script" path="res://src/weapon/abstract/StandardWeapon.cs" id="2_nbie7"]
+[ext_resource type="PackedScene" uid="uid://c5fmt1vkl8j58" path="res://src/weapon/base/BaseWeapon.tscn" id="1_vl25n"]
+[ext_resource type="Script" path="res://src/weapon/standard/StandardWeapon.cs" id="2_nbie7"]
 [ext_resource type="PackedScene" uid="uid://cbcshx5jiliyh" path="res://src/radar/Radar.tscn" id="3_ufefi"]
 [ext_resource type="PackedScene" uid="uid://dywjjflkf7066" path="res://src/bullet_factory/01_NormalBulletFactory.tscn" id="4_w2wdh"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="5_ivs8m"]

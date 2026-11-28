@@ -1,4 +1,4 @@
-namespace EternalJourney.Weapon.Abstract.Base;
+namespace EternalJourney.Weapon.Base;
 
 using System;
 using Chickensoft.AutoInject;

@@ -239,9 +239,9 @@ MovementStrategyFactory ..> IMovementStrategy : 生成
 ### エネミー本体
 | ファイル | パス | 説明 |
 |----------|------|------|
-| `BaseEnemy.cs` | `src/enemy/abstract/base/` | エネミー基底クラス |
-| `StandardEnemy.cs` | `src/enemy/abstract/` | 標準エネミー実装 |
-| `StandardEnemyLogic.cs` | `src/enemy/abstract/state/` | 状態管理ロジック |
+| `BaseEnemy.cs` | `src/enemy/base/` | エネミー基底クラス |
+| `StandardEnemy.cs` | `src/enemy/standard/` | 標準エネミー実装 |
+| `StandardEnemyLogic.cs` | `src/enemy/standard/state/` | 状態管理ロジック |
 
 ### 移動戦略
 | ファイル | パス | 説明 |
@@ -473,7 +473,7 @@ namespace EternalJourney.Enemy;
 
 using Chickensoft.AutoInject;
 using Chickensoft.Introspection;
-using EternalJourney.Enemy.Abstract;
+using EternalJourney.Enemy.Standard;
 using Godot;
 
 [Meta(typeof(IAutoNode))]

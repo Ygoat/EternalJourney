@@ -1,4 +1,4 @@
-namespace EternalJourney.Bullet.Abstract.State;
+namespace EternalJourney.BulletFactory.Standard.State;
 
 using System;
 using Chickensoft.Introspection;

@@ -1,19 +1,19 @@
-namespace EternalJourney.Weapon.Abstract;
+namespace EternalJourney.Weapon.Standard;
 
 using System;
 using System.Linq;
 using Chickensoft.AutoInject;
-using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
-using EternalJourney.Bullet.Abstract;
+using EternalJourney.BulletFactory.Standard;
 using EternalJourney.Common.Traits;
 using EternalJourney.Cores.Models.Crews;
 using EternalJourney.Crew.Domain;
 using EternalJourney.Radar;
-using EternalJourney.Weapon.Abstract.Base;
-using EternalJourney.Weapon.Abstract.State;
+using EternalJourney.Weapon.Base;
+using EternalJourney.Weapon.Standard.State;
 using EternalJourney.WeaponTrait;
 using Godot;
 

@@ -3,18 +3,17 @@ namespace EternalJourney.Enemy.Standard;
 using System.Collections.Generic;
 using System.Linq;
 using Chickensoft.AutoInject;
-using Chickensoft.LogicBlocks;
 using Chickensoft.Collections;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
-using EternalJourney.Battle.Domain;
-using EternalJourney.Bullet.Abstract.Base;
+using Chickensoft.LogicBlocks;
+using EternalJourney.Bullet.Base;
 using EternalJourney.Cores.Consts;
 using EternalJourney.Enemy.Base;
 using EternalJourney.Enemy.Standard.State;
 using EternalJourney.Enemy.Strategies.Movement;
 using EternalJourney.Ship;
-using EternalJourney.Weapon.Abstract;
+using EternalJourney.Weapon.Standard;
 using Godot;
 
 /// <summary>

@@ -1,14 +1,13 @@
-namespace EternalJourney.Bullet.Abstract;
+namespace EternalJourney.Bullet.Standard;
 
 using Chickensoft.AutoInject;
-using Chickensoft.LogicBlocks;
 using Chickensoft.GodotNodeInterfaces;
 using Chickensoft.Introspection;
+using Chickensoft.LogicBlocks;
 using EternalJourney.Battle.Domain;
-using EternalJourney.Bullet.Abstract.Base;
-using EternalJourney.Bullet.Abstract.State;
+using EternalJourney.Bullet.Base;
+using EternalJourney.Bullet.Standard.State;
 using EternalJourney.Bullet.Strategies.Collision;
-using EternalJourney.Cores.Consts;
 using EternalJourney.Enemy.Base;
 using Godot;
 

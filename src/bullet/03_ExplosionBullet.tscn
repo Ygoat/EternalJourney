@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://gyffxcgk8skr"]
 
-[ext_resource type="PackedScene" uid="uid://2s531ojpmkia" path="res://src/bullet/abstract/StandardBullet.tscn" id="1_j4j0d"]
+[ext_resource type="PackedScene" uid="uid://2s531ojpmkia" path="res://src/bullet/standard/StandardBullet.tscn" id="1_j4j0d"]
 [ext_resource type="Script" path="res://src/common/traits/Status.cs" id="2_57gw2"]
 [ext_resource type="Script" path="res://src/bullet/strategies/movement/LinearBulletMovementStrategyResource.cs" id="3_lnmov"]
 [ext_resource type="Script" path="res://src/bullet/strategies/collision/ExplosionCollisionStrategyResource.cs" id="4_expcol"]

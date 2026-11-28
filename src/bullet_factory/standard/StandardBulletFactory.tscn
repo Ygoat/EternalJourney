@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bgqyfnvsb26i2"]
 
-[ext_resource type="PackedScene" uid="uid://bdtaqvekb7sdc" path="res://src/bullet_factory/abstract/base/BaseBulletFactory.tscn" id="1_17ipi"]
-[ext_resource type="Script" path="res://src/bullet_factory/abstract/StandardBulletFactory.cs" id="2_ftv4s"]
+[ext_resource type="PackedScene" uid="uid://bdtaqvekb7sdc" path="res://src/bullet_factory/base/BaseBulletFactory.tscn" id="1_17ipi"]
+[ext_resource type="Script" path="res://src/bullet_factory/standard/StandardBulletFactory.cs" id="2_ftv4s"]
 
 [node name="StandardBulletFactory" instance=ExtResource("1_17ipi")]
 script = ExtResource("2_ftv4s")

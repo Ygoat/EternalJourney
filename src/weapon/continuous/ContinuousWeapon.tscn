@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3]
 
-[ext_resource type="PackedScene" uid="uid://c5fmt1vkl8j58" path="res://src/weapon/abstract/base/BaseWeapon.tscn" id="1_base"]
+[ext_resource type="PackedScene" uid="uid://c5fmt1vkl8j58" path="res://src/weapon/base/BaseWeapon.tscn" id="1_base"]
 [ext_resource type="Script" path="res://src/weapon/continuous/ContinuousWeapon.cs" id="2_weapon"]
 [ext_resource type="PackedScene" uid="uid://cbcshx5jiliyh" path="res://src/radar/Radar.tscn" id="3_radar"]
 [ext_resource type="Script" path="res://src/weapon/continuous/ContinuousDamageArea.cs" id="4_damage"]

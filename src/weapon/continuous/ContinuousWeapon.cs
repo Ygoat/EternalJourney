@@ -10,7 +10,7 @@ using EternalJourney.Battle.Domain;
 using EternalJourney.Cores.Models.Crews;
 using EternalJourney.Crew.Domain;
 using EternalJourney.Radar;
-using EternalJourney.Weapon.Abstract.Base;
+using EternalJourney.Weapon.Base;
 using EternalJourney.Weapon.Continuous.State;
 using EternalJourney.WeaponTrait;
 using Godot;
